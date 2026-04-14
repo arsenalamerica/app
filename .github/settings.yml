@@ -1,0 +1,7 @@
+_extends: brianespinosa/settings:nextjs.yml
+
+repository:
+  name: app
+  description: Arsenal America branches app
+  topics: nextjs, react, typescript
+  private: false
