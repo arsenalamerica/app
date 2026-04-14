@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh issue:*)",
+      "Bash(gh pr:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(npm show:*)",
+      "Bash(npx tsc:*)",
+      "Bash(yarn build:*)",
+      "Bash(yarn check:*)",
+      "Bash(yarn dev:*)",
+      "Bash(yarn explain:*)",
+      "Bash(yarn install:*)",
+      "Bash(yarn npm:*)",
+      "Bash(yarn typecheck:*)",
+      "Bash(yarn up:*)",
+      "Skill(commit-commands:commit)",
+      "Skill(commit-commands:commit-push-pr)",
+      "Skill(pr-review-toolkit:review-pr)",
+      "WebFetch(domain:docs.slack.dev)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebSearch"
+    ]
+  }
+}
