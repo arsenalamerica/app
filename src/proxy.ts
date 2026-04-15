@@ -23,6 +23,14 @@ export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-pathname', url.pathname);
 
+  // If the path already starts with a known domain segment (e.g. /boisegooners.com/icon/32),
+  // the request is following a Next.js-generated internal URL — skip the rewrite to avoid
+  // double-prefixing (/boisegooners.com/boisegooners.com/...).
+  const firstPathSegment = url.pathname.split('/')[1];
+  if (DOMAINS.includes(firstPathSegment)) {
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
   if (isBranchSite) {
     return NextResponse.rewrite(
       new URL(`/${siteDomain}${url.pathname}`, request.url),
