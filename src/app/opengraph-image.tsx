@@ -1,21 +1,26 @@
+import { headers } from 'next/headers';
 import { ImageResponse } from 'next/og';
 
-import { branchLogo } from '@/data';
+import { branchData, branchLogo } from '@/data';
 
-// Image config exports: https://nextjs.org/docs/app/api-reference/file-conventions/metadata/opengraph-image#config-exports
+const DOMAINS = Object.keys(branchData);
+const PREVIEW_FALLBACK = DOMAINS[0];
+
 export const size = {
   width: 1200,
   height: 630,
 };
 export const contentType = 'image/png';
 
-// Image generation
-export default async function Image({
-  params,
-}: {
-  params: Promise<{ domain: string }>;
-}) {
-  const { domain } = await params;
+export default async function Image() {
+  const host = (await headers()).get('host') ?? '';
+  const isLocal = host.startsWith('localhost');
+  const domain = isLocal
+    ? 'tacomagooners.com'
+    : host in branchData
+      ? host
+      : PREVIEW_FALLBACK;
+
   const Logo = branchLogo[domain];
 
   return new ImageResponse(
@@ -35,9 +40,6 @@ export default async function Image({
         preserveAspectRatio='xMidYMid meet'
       />
     </div>,
-    // Options: https://nextjs.org/docs/app/api-reference/functions/image-response
-    {
-      ...size,
-    },
+    { ...size },
   );
 }

@@ -1,8 +1,12 @@
+import { headers } from 'next/headers';
 import { ImageResponse } from 'next/og';
 
-import { branchLogo } from '@/data';
+import { branchData, branchLogo } from '@/data';
 
-import { ICON_SIZES } from '../icon-sizes';
+import { ICON_SIZES } from './icon-sizes';
+
+const DOMAINS = Object.keys(branchData);
+const PREVIEW_FALLBACK = DOMAINS[0];
 
 export function generateImageMetadata() {
   return ICON_SIZES.map((size) => ({
@@ -12,20 +16,19 @@ export function generateImageMetadata() {
   }));
 }
 
-// Image generation
-export default async function Icon({
-  id,
-  params,
-}: {
-  id: string;
-  params: Promise<{ domain: string }>;
-}) {
-  const { domain } = await params;
+export default async function Icon({ id }: { id: string }) {
+  const host = (await headers()).get('host') ?? '';
+  const isLocal = host.startsWith('localhost');
+  const domain = isLocal
+    ? 'tacomagooners.com'
+    : host in branchData
+      ? host
+      : PREVIEW_FALLBACK;
+
   const Logo = branchLogo[domain];
-  const size = parseInt(id, 10); // Convert id to a number
+  const size = parseInt(id, 10);
 
   const isFavicon = size === 32;
-
   const logoSize = isFavicon ? size : Math.floor(size * 0.9);
   const backgroundImage = isFavicon
     ? 'none'
@@ -44,10 +47,6 @@ export default async function Icon({
     >
       <Logo width={String(logoSize)} preserveAspectRatio='xMidYMid meet' />
     </div>,
-    // Options: https://nextjs.org/docs/app/api-reference/functions/image-response
-    {
-      width: size,
-      height: size,
-    },
+    { width: size, height: size },
   );
 }
