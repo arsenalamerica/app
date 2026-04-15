@@ -30,7 +30,10 @@ export default async function Image({
         justifyContent: 'center',
       }}
     >
-      <Logo height={size.height * 0.9} preserveAspectRatio='xMidYMid meet' />
+      <Logo
+        height={String(size.height * 0.9)}
+        preserveAspectRatio='xMidYMid meet'
+      />
     </div>,
     // Options: https://nextjs.org/docs/app/api-reference/functions/image-response
     {

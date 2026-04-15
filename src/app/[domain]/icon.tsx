@@ -42,7 +42,7 @@ export default async function Icon({
         backgroundImage,
       }}
     >
-      <Logo width={logoSize} preserveAspectRatio='xMidYMid meet' />
+      <Logo width={String(logoSize)} preserveAspectRatio='xMidYMid meet' />
     </div>,
     // Options: https://nextjs.org/docs/app/api-reference/functions/image-response
     {
