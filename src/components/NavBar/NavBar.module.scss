@@ -1,0 +1,37 @@
+@use '../../styles/bork/components/button';
+
+$navbar-spacing: 0.625em;
+
+._ {
+  position: fixed;
+  z-index: 1000;
+  bottom: 0;
+  left: 50%;
+  display: flex;
+  width: 100%;
+  max-width: 60rem;
+  align-items: center;
+  justify-content: center;
+  padding: $navbar-spacing 2em calc(env(safe-area-inset-bottom) + 1em);
+  background-color: #da1f26;
+  box-shadow: 0 0 0.75em 0.75em #da1f26;
+  gap: $navbar-spacing;
+  overflow-x: auto;
+  transform: translateX(-50%);
+
+  a {
+    $active-attribute: 'data-active-item';
+    @include button.default;
+
+    flex-basis: 33%;
+    flex-grow: 1;
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 20%),
+      inset 0 -1px 0 0 rgb(0 0 0 / 10%);
+    @media screen and (width > 725px) {
+      min-width: 12rem;
+      flex-basis: initial;
+      flex-grow: initial;
+    }
+  }
+}

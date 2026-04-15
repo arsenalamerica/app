@@ -38,11 +38,18 @@
     "@vercel/python-analysis/minimatch": "^10.2.3"
   },
   "dependencies": {
+    "@ariakit/react": "0.4.20",
     "@vercel/analytics": "2.0.1",
     "@vercel/speed-insights": "2.0.0",
+    "clsx": "2.1.1",
+    "fathom-client": "3.7.2",
     "next": "16.2.3",
     "react": "19.2.5",
-    "react-dom": "19.2.5"
+    "react-dom": "19.2.5",
+    "react-ios-pwa-prompt": "2.0.6",
+    "react-textfit": "1.1.1",
+    "simple-icons": "13.9.0",
+    "wretch": "2.11.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.1",
@@ -54,6 +61,7 @@
     "@types/node": "25.6.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "@types/react-textfit": "1.1.4",
     "@vitejs/plugin-react": "5.1.4",
     "@vitest/coverage-v8": "4.0.18",
     "happy-dom": "20.9.0",

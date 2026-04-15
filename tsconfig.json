@@ -13,13 +13,17 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "types": ["vitest/globals", "next/image-types/global"],
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
+      "@/components": ["./src/components/index.ts"],
       "@/components/*": ["./src/components/*"],
+      "@/data": ["./data/src/index.ts"],
+      "@/data/*": ["./data/src/*"],
       "@/hooks/*": ["./src/hooks/*"],
       "@/lib/*": ["./src/lib/*"],
       "@/types/*": ["./src/types/*"]

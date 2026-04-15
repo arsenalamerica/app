@@ -1,0 +1,153 @@
+:root {
+  overscroll-behavior-x: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  -webkit-touch-callout: none;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background-color: #da1f26;
+  color: #fff;
+  font-family: sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  padding: 0 1em calc(env(safe-area-inset-bottom) + 5em);
+
+  &::before {
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: 0 0 0.75em 0.75em #da1f26;
+    content: ' ';
+  }
+
+  & > header,
+  & > main,
+  & > footer {
+    max-width: 60rem;
+    padding: 0 1em;
+    margin: 0 auto;
+  }
+
+  & > footer {
+    font-size: 0.875em;
+  }
+}
+
+html,
+body,
+/* stylelint-disable-next-line selector-id-pattern */
+#__next {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.loading {
+  border-radius: 5px;
+  animation: 1.5s shine linear infinite;
+  // background: #eee;
+  background: linear-gradient(
+    110deg,
+    rgb(0 0 0 / 8%) 8%,
+    rgb(0 0 0 / 2%) 18%,
+    rgb(0 0 0 / 8%) 33%
+  );
+  background-size: 200% 100%;
+  color: transparent;
+}
+
+@keyframes shine {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+.screen-reader-only:not(:focus, :active) {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+h1,
+h2,
+h3 {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  padding: 1em 0 0;
+  margin-bottom: 1em;
+  background-color: #da1f26;
+  font-family: ars-bold, sans-serif;
+  text-transform: uppercase;
+
+  &::after {
+    display: block;
+    width: 100%;
+    background-color: #fff;
+    box-shadow: 0 0 0.75em 0.75em #da1f26;
+    content: '';
+  }
+}
+
+h1 {
+  font-size: 6vmin;
+}
+
+h2 {
+  font-size: 6vmin;
+}
+
+h3 {
+  font-size: 4vmin;
+}
+
+@media screen and (width > 725px) {
+  h1 {
+    font-size: 2.5em;
+  }
+
+  h2 {
+    font-size: 1.75em;
+  }
+
+  h3 {
+    font-size: 1.25em;
+  }
+}
+
+@font-face {
+  font-family: ars-bold;
+  font-style: normal;
+  font-weight: 700;
+  src:
+    url('../../fonts/ars-bold.woff2') format('woff2'),
+    url('../../fonts/ars-bold.woff') format('woff');
+}
+
+@font-face {
+  font-family: ars-reg;
+  font-style: normal;
+  font-weight: 400;
+  src:
+    url('../../fonts/ars-reg.woff2') format('woff2'),
+    url('../../fonts/ars-reg.woff') format('woff');
+}

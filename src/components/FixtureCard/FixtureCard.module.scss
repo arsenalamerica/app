@@ -1,0 +1,112 @@
+$fixture-card-padding: 1em;
+$fixture-card-border-radius: 0.5em;
+$fixture-card-shadow: 0 0 1rem rgb(0 0 0 / 30%);
+
+._ {
+  position: relative;
+  overflow: hidden;
+
+  .Details,
+  .Metadata {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: #{2 * $fixture-card-padding};
+    text-align: center;
+  }
+
+  img {
+    &:not(:global(.loading)) {
+      filter: brightness(0) invert(1);
+    }
+
+    &:global(.loading) {
+      border-radius: 2em;
+    }
+  }
+
+  .Details {
+    margin-bottom: $fixture-card-padding;
+
+    > div {
+      width: 50%;
+    }
+
+    .Score {
+      font-family: ars-bold, sans-serif;
+      font-size: 2em;
+      text-transform: uppercase;
+    }
+  }
+
+  .Separator {
+    white-space: nowrap;
+  }
+
+  .Team {
+    position: relative;
+    z-index: 1;
+
+    .TeamLogo {
+      width: 3em;
+      height: 3em;
+    }
+
+    .TeamName {
+      display: none;
+    }
+
+    .TeamName,
+    .TeamAbbr {
+      font-family: ars-bold, sans-serif;
+      font-size: 1.25em;
+      text-transform: uppercase;
+
+      &:global(.loading) {
+        width: 50%;
+        margin: 0 auto;
+      }
+    }
+    @media screen and (width > 725px) {
+      .TeamLogo {
+        width: 4em;
+        height: 4em;
+      }
+
+      .TeamName {
+        display: block;
+      }
+
+      .TeamAbbr {
+        display: none;
+      }
+    }
+  }
+
+  .Metadata {
+    justify-content: space-between;
+    font-size: 0.9em;
+
+    > div {
+      display: flex;
+      align-items: center;
+      gap: 0.25em;
+
+      :not(svg, img) {
+        position: relative;
+        z-index: 1;
+      }
+
+      img,
+      svg {
+        position: absolute;
+        z-index: 0;
+        bottom: -5em;
+        left: -4em;
+        width: 15em;
+        height: 15em;
+        fill: rgb(0 0 0 / 7%);
+      }
+    }
+  }
+}
