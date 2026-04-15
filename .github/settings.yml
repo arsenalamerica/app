@@ -1,7 +1,99 @@
-_extends: brianespinosa/settings:nextjs.yml
-
 repository:
   name: app
-  description: Arsenal America branches app
-  topics: nextjs, react, typescript
+  description: Arsenal America branch apps
+  topics: nextjs, react, typescript, multi-tenant, pwa
   private: false
+
+  # General
+  default_branch: main
+
+  # Features
+  has_issues: true
+  has_projects: false
+  has_wiki: false
+  has_discussions: false
+
+  # Merge strategy
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: true
+  squash_merge_commit_title: PR_TITLE
+  squash_merge_commit_message: PR_BODY
+
+  # Pull request behavior
+  allow_auto_merge: true
+  allow_update_branch: true
+  delete_branch_on_merge: true
+
+  # Security
+  enable_vulnerability_alerts: true
+  enable_automated_security_fixes: true
+
+labels:
+  - name: bug
+    color: d73a4a
+    description: Something isn't working
+  - name: enhancement
+    color: a2eeef
+    description: New feature or request
+  - name: documentation
+    color: 0075ca
+    description: Improvements or additions to documentation
+  - name: dependencies
+    color: 0366d6
+    description: Pull requests that update a dependency file
+  - name: chore
+    color: e4e669
+    description: Routine maintenance or housekeeping
+
+rulesets:
+  - name: protect-default
+    target: branch
+    enforcement: active
+    conditions:
+      ref_name:
+        include:
+          - ~DEFAULT_BRANCH
+        exclude: []
+    rules:
+      - type: deletion
+      - type: non_fast_forward
+      - type: pull_request
+        parameters:
+          allowed_merge_methods:
+            - squash
+            - rebase
+
+  - name: shared-ci
+    target: branch
+    enforcement: active
+    conditions:
+      ref_name:
+        include:
+          - ~DEFAULT_BRANCH
+        exclude: []
+    rules:
+      - type: required_status_checks
+        parameters:
+          strict_required_status_checks_policy: true
+          required_status_checks:
+            - context: biome
+            - context: knip
+            - context: typecheck
+            - context: test
+            - context: build
+            - context: e2e
+
+  - name: shared-cd-preview
+    target: branch
+    enforcement: active
+    conditions:
+      ref_name:
+        include:
+          - ~DEFAULT_BRANCH
+        exclude: []
+    rules:
+      - type: required_deployments
+        parameters:
+          required_deployment_environments:
+            - Preview
