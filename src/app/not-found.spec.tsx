@@ -6,6 +6,7 @@ import NotFound from './not-found';
 
 vi.mock('next/headers');
 vi.mock('next/image', () => ({
+  // biome-ignore lint/performance/noImgElement: test mock, not a real image component
   default: ({ alt }: { alt: string }) => <img alt={alt} />,
 }));
 
