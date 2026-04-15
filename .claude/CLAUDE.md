@@ -14,20 +14,11 @@ Tooling and infrastructure context for Claude sessions in this repo. For codebas
 
 ## Worktree workflow
 
-Worktrees live at `.claude/worktrees/<branch-name>/` and are created via `claude --worktree <name>` or `git worktree add`. They share a git object store with the root checkout but **do not** share installed dependencies. See ADR-004 (`docs/adr/004-yarn-hardlinks-global.md`) for the disk-dedup decision that underlies this workflow.
+Worktrees live at `.claude/worktrees/<branch-name>/` and are created via `claude --worktree <name>` or `git worktree add`. They share a git object store with the root checkout but **do not** share installed dependencies. See `docs/adr/004-yarn-hardlinks-global.md` for the disk-dedup decision that underlies this workflow.
 
 ### Installing dependencies per worktree
 
-Always run `yarn install` inside the worktree immediately after creation. **Never** symlink `node_modules/` back to the root checkout:
-
-```bash
-cd .claude/worktrees/<name>
-yarn install
-```
-
-Yarn Berry 4's global cache at `~/.yarn/berry/cache/` makes this cheap (typically 20–60s on this project): downloads are skipped, only the link step runs.
-
-If `claude --worktree` creates a symlinked `node_modules/` by default, delete it (`rm .claude/worktrees/<name>/node_modules`) before running `yarn install`.
+Always run `yarn install` inside the worktree immediately after creation. **Never** symlink `node_modules/` back to the root checkout. Yarn Berry 4's global cache at `~/.yarn/berry/cache/` makes per-worktree installs cheap (tens of seconds cache-warm): downloads are skipped, only the link step runs.
 
 A symlinked `node_modules/` silently breaks in several ways:
 
@@ -36,11 +27,9 @@ A symlinked `node_modules/` silently breaks in several ways:
 - Next.js file watchers follow the symlink and pick up changes written by another worktree's build.
 - `node_modules/.cache/` (Next, webpack, Biome, tsc) is shared — worktrees thrash each other's caches.
 
-### Disk dedup via `nmMode: hardlinks-global`
+### Disk dedup
 
-`.yarnrc.yml` sets `nmMode: hardlinks-global`. Each worktree's `node_modules/` hardlinks into a central content-addressed store under `~/.yarn/berry/`, so per-worktree disk cost is near-zero (inodes, not bytes) while each worktree keeps an independent dependency tree for lockfile purposes.
-
-Note this is the **global** variant, not `hardlinks-local`. `hardlinks-local` only dedupes duplicates within a single `node_modules/` — it does nothing cross-worktree.
+`.yarnrc.yml:16` sets `nmMode: hardlinks-global` so each worktree's `node_modules/` hardlinks into Yarn Berry's global store. See `docs/adr/004-yarn-hardlinks-global.md` for the rationale and the `hardlinks-local` rejection.
 
 ### Caveats to watch for
 
@@ -49,8 +38,6 @@ These scenarios are unlikely in this repo today but will cause problems if they 
 - **Shared inodes across worktrees.** Editing a file inside `node_modules/foo/` in one worktree mutates the same inode in every other worktree. If you need to experiment-patch a dependency, delete and reinstall that package's subtree to unshare first.
 - **`patch-package` incompatibility.** Tools that mutate `node_modules/` files directly collide with the global store. `yarn patch` (Berry-native) is safe — it writes to `.yarn/patches/`. Classic `patch-package` is dangerous; audit before adopting. This repo uses neither today.
 - **Cross-volume worktrees fall back to copying.** The global store lives under `~/.yarn/berry/`. A worktree on a different filesystem (external drive, NFS mount) silently degrades to copying. Not broken, just not optimized.
-- **`node_modules/.cache/` writes.** Next/webpack/Biome cache writers unlink-and-recreate, so hardlinked caches behave normally in practice. Verify on the first few `yarn dev` runs of a new worktree.
-- **Reverting is safe.** Remove `nmMode: hardlinks-global` from `.yarnrc.yml` and run `yarn install` in each tree — Berry rebuilds with copies, no corruption risk.
 
 ## Investigating production issues
 

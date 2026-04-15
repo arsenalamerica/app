@@ -17,7 +17,7 @@ The alternative setting `hardlinks-local` only dedupes duplicate packages within
 Material caveats exist but are unlikely to bite this repo today:
 
 - `patch-package` mutates `node_modules/` files in place and would collide with the hardlinked global store. The repo has no `patch-package` dependency and no `patches/` directory. `yarn patch` (Berry-native) is unaffected — it writes to `.yarn/patches/`.
-- Editing a file inside one worktree's `node_modules/` mutates the inode shared with every other worktree. Unusual in normal development; noted in `.claude/CLAUDE.md` for anyone who does reach for an in-place `node_modules/` edit.
+- Editing a file inside one worktree's `node_modules/` mutates the inode shared with every other worktree. Unusual in normal development; noted in the `Worktree workflow` section of `.claude/CLAUDE.md` for anyone who does reach for an in-place `node_modules/` edit.
 - Worktrees on a different filesystem from `~/.yarn/berry/` fall back to copying silently — correct, just not optimized.
 - No CI impact: CI's `~/.yarn/berry/` is empty at the start of every run, so `nmMode: hardlinks-global` is a no-op there.
 
@@ -31,9 +31,9 @@ Material caveats exist but are unlikely to bite this repo today:
 ## Consequences
 
 - **Disk**: marginal cost of each additional worktree's `node_modules/` is near-zero. N worktrees ≈ the size of one, not N × 500MB.
-- **Install time**: unchanged for the first install on a cold cache. Subsequent worktrees link from the global store and complete in tens of seconds (`20–60s` observed on this project).
+- **Install time**: unchanged for the first install on a cold cache. Subsequent worktrees link from the global store and complete in tens of seconds.
 - **Independence preserved**: each worktree has its own lockfile state and its own `node_modules/` tree. A dependency change in one worktree does not leak into another.
 - **`patch-package` becomes a latent blocker**: if the repo ever adopts `patch-package`, this ADR must be revisited (either supersede, or switch that workflow to `yarn patch`).
-- **In-place `node_modules/` edits propagate**: a behavioral change worth knowing about; documented in `.claude/CLAUDE.md`. Delete-and-reinstall unshares the subtree.
+- **In-place `node_modules/` edits propagate**: a behavioral change worth knowing about; documented in the `Worktree workflow` section of `.claude/CLAUDE.md`. Delete-and-reinstall unshares the subtree.
 - **Reverting is cheap**: remove the `nmMode` line from `.yarnrc.yml` and run `yarn install` in each tree. Berry rebuilds with copies; no corruption risk.
 - **CI**: no change. The setting is a no-op against an empty Berry store.
