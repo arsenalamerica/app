@@ -27,7 +27,7 @@ describe('Icon route handler', () => {
     size,
   }) => {
     mockHost(domain);
-    const response = await Icon({ id: String(size) });
+    const response = await Icon({ id: Promise.resolve(String(size)) });
     expect(response).toBeInstanceOf(Response);
   });
 });

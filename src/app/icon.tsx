@@ -16,7 +16,7 @@ export function generateImageMetadata() {
   }));
 }
 
-export default async function Icon({ id }: { id: string }) {
+export default async function Icon({ id }: { id: Promise<string> | string }) {
   const host = (await headers()).get('host') ?? '';
   const isLocal = host.startsWith('localhost');
   const domain = isLocal
@@ -27,7 +27,7 @@ export default async function Icon({ id }: { id: string }) {
 
   const Logo = branchLogo[domain];
   const rasterSrc = branchLogoSrc[domain];
-  const size = parseInt(id, 10);
+  const size = parseInt(await id, 10);
 
   const isFavicon = size === 32;
   const logoSize = isFavicon ? size : Math.floor(size * 0.9);
