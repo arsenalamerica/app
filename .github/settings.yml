@@ -1,6 +1,6 @@
 repository:
   name: app
-  description: Arsenal America branches app
+  description: Arsenal America branch apps
   topics: nextjs, react, typescript
   private: false
 
