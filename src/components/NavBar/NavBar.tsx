@@ -25,7 +25,7 @@ export function NavBar() {
   ];
 
   return (
-    <Ariakit.Toolbar render={<nav />} className={styles._}>
+    <Ariakit.Toolbar className={styles._}>
       {ITEMS.map((item, index) => (
         <NavBarItem key={index} {...item} />
       ))}
