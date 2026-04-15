@@ -122,7 +122,7 @@ jobs:
         uses: treosh/lighthouse-ci-action@12.6.2
         with:
           urls: "${{ needs.build.outputs.url }}${{ matrix.path }}?x-vercel-protection-bypass=${{ secrets.VERCEL_BYPASS_SECRET }}"
-          runs: 2
+          runs: 3
           uploadArtifacts: true
           artifactName: "lighthouse-${{ matrix.name }}"
           configPath: ./lighthouserc.json
