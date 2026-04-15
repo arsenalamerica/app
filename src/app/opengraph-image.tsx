@@ -41,7 +41,7 @@ export default async function Image() {
         // biome-ignore lint/a11y/useAltText: rendered to PNG via Satori, not served to browsers
         <img
           src={rasterSrc}
-          height={String(size.height * 0.9)}
+          height={size.height * 0.9}
           style={{ objectFit: 'contain' }}
         />
       ) : (

@@ -51,8 +51,8 @@ export default async function Icon({ id }: { id: string }) {
         // biome-ignore lint/a11y/useAltText: rendered to PNG via Satori, not served to browsers
         <img
           src={rasterSrc}
-          width={String(logoSize)}
-          height={String(logoSize)}
+          width={logoSize}
+          height={logoSize}
           style={{ objectFit: 'contain' }}
         />
       ) : (
