@@ -37,15 +37,15 @@ export default async function Layout(props: LayoutProps) {
     <HeadingLevel>
       <PWAInstallPrompt />
       <Suspense>
-        {branch && (
-          <>
-            <FathomNext fathomId='RFIYDIHQ' />
+        {branch && <FathomNext fathomId='RFIYDIHQ' />}
+        <header>
+          {branch && (
             <VisuallyHidden>
               <Heading>{branch.name}</Heading>
             </VisuallyHidden>
-          </>
-        )}
-        <NavBar />
+          )}
+          <NavBar />
+        </header>
         <HeadingLevel>{children}</HeadingLevel>
         <HeadingLevel level={3}>
           <footer>
