@@ -1,0 +1,28 @@
+{
+  "fathom-id": "IYFKKURJ",
+  "domain": "eastlagooners.com",
+  "name": "East Los Angeles Gooners",
+  "pub": {
+    "name": "Lucky Baldwin's Pub",
+    "address": "17 S Raymond Ave, Pasadena, CA 91105",
+    "website": "https://maps.app.goo.gl/8GugzNrcEXXDLrSo8"
+  },
+  "social": [
+    {
+      "name": "Facebook",
+      "url": "https://www.facebook.com/EastLAGooners"
+    },
+    {
+      "name": "Instagram",
+      "url": "https://www.instagram.com/eastsidegooners"
+    },
+    {
+      "name": "Threads",
+      "url": "https://www.threads.net/@eastsidegooners"
+    },
+    {
+      "name": "Discord",
+      "url": "https://discord.gg/zfX2eQQVTW"
+    }
+  ]
+}

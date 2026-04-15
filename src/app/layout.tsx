@@ -1,25 +1,23 @@
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import type { Metadata } from 'next';
+import type { Viewport } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Arsenal America',
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
-
-interface Props {
-  children: React.ReactNode;
-}
 
 export default function RootLayout({
   children,
-}: Readonly<Props>): React.ReactNode {
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang='en'>
-      <body>
-        <main>{children}</main>
-        <Analytics />
-        <SpeedInsights />
-      </body>
+      <body>{children}</body>
+      <Analytics />
+      <SpeedInsights />
     </html>
   );
 }

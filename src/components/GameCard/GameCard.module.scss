@@ -1,0 +1,97 @@
+$margin: 8vw;
+
+._ {
+  position: relative;
+  z-index: 50;
+  margin: 0 -1em;
+  aspect-ratio: 1/1;
+  // background-color: white;
+
+  h2 {
+    position: initial;
+    padding: initial;
+    margin: 0;
+    background-color: transparent;
+    box-shadow: none;
+    font-size: inherit;
+    letter-spacing: -0.03em;
+
+    &::after {
+      display: none;
+    }
+
+    span {
+      font-family: ars-reg, sans-serif;
+      font-size: 0.75em;
+      font-weight: 400;
+    }
+  }
+
+  .Logo,
+  .GameTime,
+  .MainBilling {
+    position: absolute;
+    z-index: 10;
+    right: 33%;
+    transform: translateX(50%);
+  }
+
+  .MainBilling,
+  .GameTime {
+    text-align: center;
+    text-shadow: 0 0 1rem rgb(0 0 0 / 30%);
+  }
+
+  .Logo {
+    top: $margin;
+    width: 25%;
+    filter: drop-shadow(0 1.5vmin 3vmin rgb(0 0 0 / 30%));
+  }
+
+  .Badges {
+    position: absolute;
+    top: 50%;
+    left: 8%;
+    display: flex;
+    flex-direction: column;
+    gap: 5vw;
+    transform: translateY(-50%);
+
+    svg,
+    img {
+      width: 25vw;
+      height: auto;
+      fill: #fff;
+    }
+  }
+
+  .MainBilling {
+    top: 50%;
+    width: 50%;
+    transform: translate(50%, -40%);
+
+    h2 {
+      line-height: 0.9;
+    }
+  }
+
+  .GameTime {
+    bottom: $margin;
+    width: 40%;
+
+    h2 {
+      line-height: 1;
+    }
+
+    > *:first-child {
+      h2 {
+        font-family: ars-reg, sans-serif;
+        font-weight: 400;
+      }
+    }
+  }
+
+  .Background {
+    display: block;
+  }
+}

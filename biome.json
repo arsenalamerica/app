@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.11/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -30,6 +30,35 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": [
+        "data/src/branches/**/Logo.tsx",
+        "src/components/GameCard/GameCard.tsx",
+        "src/components/NavBar/**/*.tsx",
+        "src/components/LeagueTable/LeagueTable.tsx",
+        "src/components/SocialLinks/SocialLinks.tsx",
+        "src/components/FixtureCard/FixtureCard.tsx",
+        "src/app/\\[domain\\]/fixtures/loading.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noSvgWithoutTitle": "off"
+          },
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          },
+          "performance": {
+            "noDynamicNamespaceImportAccess": "off"
+          },
+          "correctness": {
+            "noUnusedFunctionParameters": "off"
+          }
+        }
+      }
+    }
+  ],
   "javascript": {
     "formatter": {
       "quoteStyle": "single",

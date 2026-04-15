@@ -1,0 +1,13 @@
+._ {
+  address {
+    white-space: pre-line;
+  }
+
+  & > * {
+    margin: 0;
+
+    & + * {
+      margin-top: 1rem;
+    }
+  }
+}

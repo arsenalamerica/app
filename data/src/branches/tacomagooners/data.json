@@ -1,0 +1,25 @@
+{
+  "fathom-id": "MSPJPMLP",
+  "domain": "tacomagooners.com",
+  "name": "Tacoma Gooners",
+  "pub": {
+    "name": "Doyle's Public House",
+    "address": "208 St Helens Ave, Tacoma, WA 98402",
+    "website": "http://www.doylespublichouse.com/"
+  },
+  "social": [
+    {
+      "name": "Facebook",
+      "url": "https://www.facebook.com/groups/tacomagooners"
+    },
+    {
+      "name": "Instagram",
+      "url": "https://www.instagram.com/tacomagooners/"
+    },
+    {
+      "name": "Bluesky",
+      "url": "https://bsky.app/profile/tacomagooners.com"
+    }
+  ],
+  "footer": "We acknowledge that in Tacoma, we are on the traditional homelands of the Puyallup Tribe. The Puyallup people have lived on and stewarded these lands since the beginning of time, and continue to do so today."
+}
