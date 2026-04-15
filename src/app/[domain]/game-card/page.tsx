@@ -1,6 +1,15 @@
+import type { Metadata } from 'next';
+
 import { GameCard } from '@/components';
 import { branchData } from '@/data';
 import { getNextFixture } from '@/lib/data/fixtures';
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#revalidate
 export const revalidate = 45; // 45 seconds

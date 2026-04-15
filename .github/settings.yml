@@ -83,6 +83,7 @@ rulesets:
             - context: test
             - context: build
             - context: e2e
+            - context: lighthouse-required
 
   - name: shared-cd-preview
     target: branch

@@ -116,6 +116,10 @@ jobs:
         include:
           - path: /
             name: root
+          - path: /fixtures
+            name: fixtures
+          - path: /table
+            name: table
     steps:
       - uses: actions/checkout@v6.0.2
       - id: lighthouse
@@ -126,3 +130,18 @@ jobs:
           uploadArtifacts: true
           artifactName: "lighthouse-${{ matrix.name }}"
           configPath: ./lighthouserc.json
+
+  lighthouse-required:
+    runs-on: ubuntu-latest
+    needs: [lighthouse]
+    if: always()
+    env:
+      LIGHTHOUSE_RESULT: ${{ needs.lighthouse.result }}
+    steps:
+      - run: |
+          if [[ "$LIGHTHOUSE_RESULT" == "success" || "$LIGHTHOUSE_RESULT" == "skipped" ]]; then
+            echo "All Lighthouse audits passed"
+          else
+            echo "Lighthouse failed"
+            exit 1
+          fi
