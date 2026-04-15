@@ -31,9 +31,6 @@ export default async function Icon({ id }: { id: Promise<string> | string }) {
 
   const isFavicon = size === 32;
   const logoSize = isFavicon ? size : Math.floor(size * 0.9);
-  const backgroundImage = isFavicon
-    ? 'none'
-    : 'linear-gradient(0deg, rgba(163,22,27,1) 0%, rgba(218,31,38,1) 100%)';
 
   return new ImageResponse(
     <div
@@ -43,7 +40,14 @@ export default async function Icon({ id }: { id: Promise<string> | string }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundImage,
+        // Satori rejects 'none' as a backgroundImage value, so omit the
+        // property entirely for the favicon rather than unsetting it.
+        ...(isFavicon
+          ? {}
+          : {
+              backgroundImage:
+                'linear-gradient(0deg, rgba(163,22,27,1) 0%, rgba(218,31,38,1) 100%)',
+            }),
       }}
     >
       {rasterSrc ? (

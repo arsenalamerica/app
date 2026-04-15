@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+import { ICON_SIZES } from '../src/app/icon-sizes';
+
 /**
  * Smoke tests for routes excluded from the proxy middleware matcher.
  * Each path here must remain in the matcher's negative-lookahead so the
@@ -7,22 +9,18 @@ import { expect, test } from '@playwright/test';
  *
  * Matcher exclusion list (src/proxy.ts):
  *   favicon.ico | icon | opengraph-image | sitemap.xml | robots.txt | manifest.webmanifest
+ *
+ * Icon coverage is driven by ICON_SIZES so it cannot drift from
+ * src/app/manifest.ts, which emits one <link rel="icon"> per size.
  */
 
-test('GET /icon/32 returns 200 (favicon size)', async ({ request }) => {
-  const response = await request.get('/icon/32');
-  expect(response.ok()).toBeTruthy();
-});
-
-test('GET /icon/192 returns 200', async ({ request }) => {
-  const response = await request.get('/icon/192');
-  expect(response.ok()).toBeTruthy();
-});
-
-test('GET /icon/512 returns 200', async ({ request }) => {
-  const response = await request.get('/icon/512');
-  expect(response.ok()).toBeTruthy();
-});
+for (const size of ICON_SIZES) {
+  const label = size === 32 ? `${size} (favicon)` : String(size);
+  test(`GET /icon/${size} returns 200 (${label})`, async ({ request }) => {
+    const response = await request.get(`/icon/${size}`);
+    expect(response.ok()).toBeTruthy();
+  });
+}
 
 test('GET /opengraph-image returns 200', async ({ request }) => {
   const response = await request.get('/opengraph-image');
