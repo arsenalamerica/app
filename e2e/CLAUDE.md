@@ -40,3 +40,15 @@ Use chained locators to scope queries to a subtree when multiple elements share 
 // Scope to a container to disambiguate — equivalent to Testing Library's within().
 await page.getByRole('dialog').getByRole('button', { name: 'Reset' }).click();
 ```
+
+## Dynamic Import Timing
+
+Components loaded via `next/dynamic` with `ssr: false` are absent from the initial server-rendered HTML. Do not assert on them immediately after navigation.
+
+Playwright's `expect` assertions auto-wait up to the configured timeout, so this is sufficient:
+
+```ts
+await expect(page.getByRole('button', { name: 'Some Action' })).toBeVisible();
+```
+
+No explicit `waitForSelector` or `waitFor` wrapper is needed.
