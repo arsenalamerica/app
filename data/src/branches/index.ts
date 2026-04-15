@@ -20,6 +20,14 @@ const exportLogoHelper = ({
   [data.domain]: Logo,
 });
 
+const exportLogoSrcHelper = ({
+  data,
+  logoSrc,
+}: {
+  data: BranchData;
+  logoSrc?: string;
+}) => (logoSrc ? { [data.domain]: logoSrc } : {});
+
 export const branchData = {
   ...exportDataHelper(boisegooners),
   ...exportDataHelper(cascadiagooners),
@@ -36,4 +44,13 @@ export const branchLogo = {
   ...exportLogoHelper(pdxgooners),
   ...exportLogoHelper(tacomagooners),
   ...exportLogoHelper(vancouverarsenal),
+};
+
+export const branchLogoSrc: Partial<Record<string, string>> = {
+  ...exportLogoSrcHelper(boisegooners),
+  ...exportLogoSrcHelper(cascadiagooners),
+  ...exportLogoSrcHelper(eastlagooners),
+  ...exportLogoSrcHelper(pdxgooners),
+  ...exportLogoSrcHelper(tacomagooners),
+  ...exportLogoSrcHelper(vancouverarsenal),
 };

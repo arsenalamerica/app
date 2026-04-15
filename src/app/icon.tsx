@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
 import { ImageResponse } from 'next/og';
 
-import { branchData, branchLogo } from '@/data';
+import { branchData, branchLogo, branchLogoSrc } from '@/data';
 
 import { ICON_SIZES } from './icon-sizes';
 
@@ -26,6 +26,7 @@ export default async function Icon({ id }: { id: string }) {
       : PREVIEW_FALLBACK;
 
   const Logo = branchLogo[domain];
+  const rasterSrc = branchLogoSrc[domain];
   const size = parseInt(id, 10);
 
   const isFavicon = size === 32;
@@ -45,7 +46,18 @@ export default async function Icon({ id }: { id: string }) {
         backgroundImage,
       }}
     >
-      <Logo width={String(logoSize)} preserveAspectRatio='xMidYMid meet' />
+      {rasterSrc ? (
+        // biome-ignore lint/performance/noImgElement: <img> required inside ImageResponse — Next/Image is not compatible with next/og
+        // biome-ignore lint/a11y/useAltText: rendered to PNG via Satori, not served to browsers
+        <img
+          src={rasterSrc}
+          width={String(logoSize)}
+          height={String(logoSize)}
+          style={{ objectFit: 'contain' }}
+        />
+      ) : (
+        <Logo width={String(logoSize)} preserveAspectRatio='xMidYMid meet' />
+      )}
     </div>,
     { width: size, height: size },
   );

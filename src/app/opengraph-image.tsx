@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
 import { ImageResponse } from 'next/og';
 
-import { branchData, branchLogo } from '@/data';
+import { branchData, branchLogo, branchLogoSrc } from '@/data';
 
 const DOMAINS = Object.keys(branchData);
 const PREVIEW_FALLBACK = DOMAINS[0];
@@ -22,6 +22,7 @@ export default async function Image() {
       : PREVIEW_FALLBACK;
 
   const Logo = branchLogo[domain];
+  const rasterSrc = branchLogoSrc[domain];
 
   return new ImageResponse(
     <div
@@ -35,10 +36,20 @@ export default async function Image() {
         justifyContent: 'center',
       }}
     >
-      <Logo
-        height={String(size.height * 0.9)}
-        preserveAspectRatio='xMidYMid meet'
-      />
+      {rasterSrc ? (
+        // biome-ignore lint/performance/noImgElement: <img> required inside ImageResponse — Next/Image is not compatible with next/og
+        // biome-ignore lint/a11y/useAltText: rendered to PNG via Satori, not served to browsers
+        <img
+          src={rasterSrc}
+          height={String(size.height * 0.9)}
+          style={{ objectFit: 'contain' }}
+        />
+      ) : (
+        <Logo
+          height={String(size.height * 0.9)}
+          preserveAspectRatio='xMidYMid meet'
+        />
+      )}
     </div>,
     { ...size },
   );
