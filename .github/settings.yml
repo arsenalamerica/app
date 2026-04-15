@@ -1,7 +1,7 @@
 repository:
   name: app
   description: Arsenal America branch apps
-  topics: nextjs, react, typescript
+  topics: nextjs, react, typescript, multi-tenant, pwa
   private: false
 
   # General
