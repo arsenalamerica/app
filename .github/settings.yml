@@ -83,6 +83,9 @@ rulesets:
             - context: test
             - context: build
             - context: e2e
+            - context: "lighthouse (/, root)"
+            - context: "lighthouse (/fixtures, fixtures)"
+            - context: "lighthouse (/table, table)"
 
   - name: shared-cd-preview
     target: branch

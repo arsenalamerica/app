@@ -116,6 +116,10 @@ jobs:
         include:
           - path: /
             name: root
+          - path: /fixtures
+            name: fixtures
+          - path: /table
+            name: table
     steps:
       - uses: actions/checkout@v6.0.2
       - id: lighthouse
