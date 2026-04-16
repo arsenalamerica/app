@@ -7,6 +7,11 @@ import Icon from './icon';
 import { ICON_SIZES } from './icon-sizes';
 
 vi.mock('next/headers');
+vi.mock('next/navigation', () => ({
+  notFound: vi.fn(() => {
+    throw new Error('NEXT_NOT_FOUND');
+  }),
+}));
 
 const mockHost = (host: string) =>
   vi.mocked(headers).mockResolvedValue({

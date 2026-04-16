@@ -1,12 +1,9 @@
-import { headers } from 'next/headers';
 import { ImageResponse } from 'next/og';
 
-import { branchData, branchLogo, branchLogoSrc } from '@/data';
+import { branchLogo, branchLogoSrc } from '@/data';
+import { resolveTenantFromHeaders } from '@/lib/tenant/resolveTenantFromHeaders';
 
 import { ICON_SIZES } from './icon-sizes';
-
-const DOMAINS = Object.keys(branchData);
-const PREVIEW_FALLBACK = DOMAINS[0];
 
 export function generateImageMetadata() {
   return ICON_SIZES.map((size) => ({
@@ -17,13 +14,10 @@ export function generateImageMetadata() {
 }
 
 export default async function Icon({ id }: { id: Promise<string> | string }) {
-  const host = (await headers()).get('host') ?? '';
-  const isLocal = host.startsWith('localhost');
-  const domain = isLocal
-    ? 'tacomagooners.com'
-    : host in branchData
-      ? host
-      : PREVIEW_FALLBACK;
+  const domain = await resolveTenantFromHeaders({
+    caller: 'icon',
+    strict: true,
+  });
 
   const Logo = branchLogo[domain];
   const rasterSrc = branchLogoSrc[domain];
