@@ -9,10 +9,3 @@ export function dateFromEpoch(timestamp: number, timeZone?: string) {
     timeZone,
   });
 }
-
-export function timeFromEpoch(timestamp: number, timeZone?: string) {
-  return new Date(epochToTime(timestamp)).toLocaleTimeString(undefined, {
-    timeStyle: 'short',
-    timeZone,
-  });
-}
