@@ -1,9 +1,5 @@
+import seasons from './seasons.json';
 import { type Sportmonks, sportmonks } from './sportmonks';
-
-// Needed for the static table endpoint - We will need to find a way to look this up based on the
-// team at some point maybe create some sort of highly cached current season endpoint.
-// FOR NOW THIS HAS TO BE UPDATED MANUALLY EVERY SEASON!!!
-const TEMP_SEASON_ID = 25583;
 
 export type StandingEntity = {
   id: number;
@@ -59,12 +55,9 @@ export type StandingsEndpoint = {
   data: StandingEntity[];
 } & Sportmonks;
 
-export async function smStandings(
-  _id: string | undefined,
-  query: object,
-): Promise<StandingsEndpoint> {
+export async function smStandings(query: object): Promise<StandingsEndpoint> {
   return sportmonks
-    .url(`/standings/seasons/${TEMP_SEASON_ID}`)
+    .url(`/standings/seasons/${seasons.premierLeague.seasonId}`)
     .query(query)
     .get() as Promise<StandingsEndpoint>;
 }

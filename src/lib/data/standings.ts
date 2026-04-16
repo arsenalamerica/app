@@ -2,7 +2,7 @@ import { type StandingEntity, smStandings } from '@/lib/sportmonks';
 
 export async function getStandings(): Promise<StandingEntity[]> {
   try {
-    const { data, ...rest } = await smStandings(undefined, {
+    const { data, ...rest } = await smStandings({
       include: [
         ['participant', ['name', 'short_code', 'image_path'].join()].join(':'),
         'details.type',

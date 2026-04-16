@@ -46,6 +46,23 @@ Config: `.github/workflows/dependabot-auto-merge.yml`
 
 Triggers on `pull_request_target` (runs in base branch context so `GITHUB_TOKEN` has full permissions). Checks `github.actor == 'dependabot[bot]'` and enables auto-merge via squash. `pull_request_target` is safe here because no PR code is checked out or executed.
 
+## Sync Seasons Workflow
+
+Config: `.github/workflows/sync-seasons.yml`
+
+Monthly cron (1st of the month at noon UTC) + manual `workflow_dispatch`. Runs `scripts/sync-seasons.mjs` to fetch the current Premier League season ID from Sportmonks and update `src/lib/sportmonks/seasons.json`. If the season ID changed, force-pushes a `chore/sync-seasons` branch and creates a PR (or updates the existing one) via the GitHub App token.
+
+Does **not** use the composite setup action — the script only needs Node.js, not `yarn install`.
+
+Idempotent: re-running on the same day force-pushes the branch and reuses the existing PR.
+
+Required secrets (in addition to those listed in Vercel Deployment):
+- `MONK_TOKEN` — Sportmonks API token
+- `APP_ID` — GitHub App ID for automated PR creation
+- `APP_PK` — GitHub App private key
+
+The GitHub App token is used instead of `GITHUB_TOKEN` so the resulting PR triggers CI workflows. See `actions/create-github-app-token@v2`.
+
 ## E2E Coverage Policy
 
 Any new user-facing feature must have a corresponding e2e spec added or updated before the PR is merged. Document the spec in the PR description's test plan section.
