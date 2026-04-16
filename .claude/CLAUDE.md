@@ -16,6 +16,14 @@ Tooling and infrastructure context for Claude sessions in this repo. For codebas
 
 Worktrees live at `.claude/worktrees/<branch-name>/` and are created via `claude --worktree <name>` or `git worktree add`. They share a git object store with the root checkout but **do not** share installed dependencies. See `docs/adr/004-yarn-hardlinks-global.md` for the disk-dedup decision that underlies this workflow.
 
+### Branch naming convention
+
+All worktree branches **must** use the prefix `wktr-<issueNumber>-<oneToThreeWordDesc>` so branches are immediately identifiable as worktree work tied to a specific issue. Examples:
+
+- `wktr-42-fix-tenant-layout`
+- `wktr-15-add-error-boundaries`
+- `wktr-99-knip-cleanup`
+
 ### Installing dependencies per worktree
 
 Always run `yarn install` inside the worktree immediately after creation. **Never** symlink `node_modules/` back to the root checkout. Yarn Berry 4's global cache at `~/.yarn/berry/cache/` makes per-worktree installs cheap (tens of seconds cache-warm): downloads are skipped, only the link step runs.
