@@ -22,9 +22,6 @@ export async function getStandings(): Promise<StandingEntity[]> {
     return cleanData as unknown as StandingEntity[];
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      error,
-    } as unknown as StandingEntity[];
+    throw error;
   }
 }
