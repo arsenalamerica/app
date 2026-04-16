@@ -3076,7 +3076,7 @@ __metadata:
     react-ios-pwa-prompt: "npm:2.0.6"
     react-textfit: "npm:1.1.1"
     sass: "npm:1.99.0"
-    simple-icons: "npm:13.9.0"
+    simple-icons: "npm:16.16.0"
     typescript: "npm:5.9.3"
     vercel: "npm:51.2.1"
     vite: "npm:7.3.2"
@@ -6349,10 +6349,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-icons@npm:13.9.0":
-  version: 13.9.0
-  resolution: "simple-icons@npm:13.9.0"
-  checksum: 10c0/af8699b11f142f34ff6785169e9c0ce36bec3a7f9d86a28e522bf3cc33f6cef1a343847f293ebd806d2a77c211f357683e11dc703b481495d1ce60187dc85f55
+"simple-icons@npm:16.16.0":
+  version: 16.16.0
+  resolution: "simple-icons@npm:16.16.0"
+  checksum: 10c0/1986e10e413fd9cb18099a40fd65391475fbc9cc7e9453cb01f594462e3be2b68fe2bd894879c752dcc53a2e0c97c124e3de3c60fec13d04624dd2cfe8e67a7c
   languageName: node
   linkType: hard
 
