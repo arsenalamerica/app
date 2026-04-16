@@ -12,36 +12,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ariakit/core@npm:0.4.17":
-  version: 0.4.17
-  resolution: "@ariakit/core@npm:0.4.17"
-  checksum: 10c0/44ee25835d5629b7107662c71b4f166820c9aa4552ae2e018ca3eb1dc823d79e9c438334e1a8bbf90806243979601904c533dd883a1a03a4f03a39bf50e823e7
+"@ariakit/core@npm:0.4.19":
+  version: 0.4.19
+  resolution: "@ariakit/core@npm:0.4.19"
+  checksum: 10c0/219d60ede44660540de023d3a6e22fa920f70adc8da87756e72c8101f9e0bcefc9f9c91a6aeaedd16822a3dcc2a4b6d1f0a0b3b1d47bfeb988ad815ecadac038
   languageName: node
   linkType: hard
 
-"@ariakit/react-core@npm:0.4.20":
-  version: 0.4.20
-  resolution: "@ariakit/react-core@npm:0.4.20"
+"@ariakit/react-core@npm:0.4.25":
+  version: 0.4.25
+  resolution: "@ariakit/react-core@npm:0.4.25"
   dependencies:
-    "@ariakit/core": "npm:0.4.17"
+    "@ariakit/core": "npm:0.4.19"
     "@floating-ui/dom": "npm:^1.0.0"
-    use-sync-external-store: "npm:^1.2.0"
+    use-sync-external-store: "npm:^1.6.0"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/0a8a76839f09a6fc9bd217fe9c1372788727a2ca193f3da4f65a309413598456a90f5eaeae89c513f9f3eb0b6c8d792cc3a1c3faa2d32b516c48bd3695adfd46
+  checksum: 10c0/bf6d6d2b3968760ee15302c49e562acbf0ed95de50fa20bada5cc8b77093aa9f365e6cf63034288e854777bfbf4479306a20c04c11cb0317130f5e63c13e1f3a
   languageName: node
   linkType: hard
 
-"@ariakit/react@npm:0.4.20":
-  version: 0.4.20
-  resolution: "@ariakit/react@npm:0.4.20"
+"@ariakit/react@npm:0.4.25":
+  version: 0.4.25
+  resolution: "@ariakit/react@npm:0.4.25"
   dependencies:
-    "@ariakit/react-core": "npm:0.4.20"
+    "@ariakit/react-core": "npm:0.4.25"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/2244be878f7e95ffda4e98c3376c6a7206ce0f7b3e8476184319dfc665c8e9b45feb270a4b0aad40bd40eb4cb6759b68e4dcee6700a3eea229b4631c5095587e
+  checksum: 10c0/895b5b9ae5252fd5d4e12b0a37391eaff476b44da5a733be39c61248fddd7f2507e4bb5301d252b8532d56fd39b75a8f1fb04e8f2b98fa46ea47e4bac9fe19fa
   languageName: node
   linkType: hard
 
@@ -3050,7 +3050,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "app@workspace:."
   dependencies:
-    "@ariakit/react": "npm:0.4.20"
+    "@ariakit/react": "npm:0.4.25"
     "@axe-core/playwright": "npm:4.11.1"
     "@biomejs/biome": "npm:2.4.12"
     "@playwright/test": "npm:1.59.1"
@@ -6795,7 +6795,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-sync-external-store@npm:^1.2.0":
+"use-sync-external-store@npm:^1.6.0":
   version: 1.6.0
   resolution: "use-sync-external-store@npm:1.6.0"
   peerDependencies:
