@@ -18,11 +18,11 @@ Worktrees live at `.claude/worktrees/<branch-name>/` and are created via `claude
 
 ### Branch naming convention
 
-All worktree branches **must** use the prefix `wrktree-<issueNumber>-<oneToThreeWordDesc>` so branches are immediately identifiable as worktree work tied to a specific issue. Examples:
+All worktree branches **must** use the prefix `wktr-<issueNumber>-<oneToThreeWordDesc>` so branches are immediately identifiable as worktree work tied to a specific issue. Examples:
 
-- `wrktree-42-fix-tenant-layout`
-- `wrktree-15-add-error-boundaries`
-- `wrktree-99-knip-cleanup`
+- `wktr-42-fix-tenant-layout`
+- `wktr-15-add-error-boundaries`
+- `wktr-99-knip-cleanup`
 
 ### Installing dependencies per worktree
 
