@@ -1,9 +1,0 @@
-@use 'mixins';
-
-%clearfix {
-  @include mixins.clearfix;
-}
-
-%unselectable {
-  @include mixins.unselectable;
-}

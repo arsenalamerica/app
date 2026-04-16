@@ -15,7 +15,7 @@ Phase 4 moves every non-config file under `source/apps/branches/**` into `arsena
 ### Code move
 
 1. `source/data/` → `app/data/` at repo root (21 files, matches career's layout).
-2. `source/apps/branches/src/{components,lib/sportmonks,lib/utils,styles/bork}/` → `app/src/{components,lib/sportmonks,lib/utils,styles/bork}/`.
+2. `source/apps/branches/src/{components,lib/sportmonks,lib/utils,styles/bork}/` → `app/src/{components,lib/sportmonks,lib/utils,styles/}`. The source tree's `styles/bork/` directory was flattened during cleanup — only `button.scss` and `color.scss` (color utility functions) survive at `src/styles/`.
 3. `source/apps/branches/lib/data/` → `app/src/lib/data/`; the three `../../lib/data/...` imports in `[domain]/**/page.tsx` were rewritten to `@/lib/data/...`.
 4. `source/apps/branches/app/*` → `app/src/app/*`, replacing the Phase 3 hello-world `page.tsx` / `layout.tsx`. The Phase 3 `page.test.tsx` was deleted — real specs live adjacent to their components.
 5. `source/apps/branches/middleware.ts` → `app/src/proxy.ts` (see Next 16 compatibility below).
@@ -68,9 +68,9 @@ Scope of this PR is a code move, not a redesign. The following lint/Knip finding
 - `performance/noDynamicNamespaceImportAccess` — simple-icons lookups in `SocialLinks.tsx`.
 - `correctness/noUnusedFunctionParameters` — skeleton row helper in `fixtures/loading.tsx`.
 
-**`knip.config.ts` ignores** retain the carried-over `NextGameError.tsx`, `NextGameLoading.tsx`, `FixtureCard/types.ts`, and the `bork/` aggregate SCSS indexes — all unreferenced, but kept for follow-up evaluation alongside a component-level refactor.
+**`knip.config.ts` ignores** — retired. Dead files (`NextGameError.tsx`, `NextGameLoading.tsx`, `FixtureCard/types.ts`) and unused SCSS aggregates/utilities deleted. Two surviving style files (`button.scss`, `color.scss`) relocated to `src/styles/`. Ignore list now contains only `.claude/**`.
 
-Follow-up work (not this PR): rule-by-rule cleanup of the overrides, tightening Vitest coverage thresholds past `0`, and deciding whether to keep or drop the NextGame shell components and bork aggregates.
+Follow-up work (not this PR): rule-by-rule cleanup of the biome overrides and tightening Vitest coverage thresholds past `0`.
 
 ## Consequences
 

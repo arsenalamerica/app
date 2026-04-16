@@ -1,6 +1,6 @@
 $active-attribute: 'data-active-item' !default;
 
-@use '../utilities/functions' as func;
+@use './color' as func;
 @use 'sass:color';
 
 @mixin default {
