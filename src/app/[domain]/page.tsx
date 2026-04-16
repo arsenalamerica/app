@@ -12,7 +12,7 @@ export default async function Home(props: {
 }) {
   const params = await props.params;
   const branch = branchData[params.domain];
-  const Logo = branchLogo[branch?.domain];
+  const Logo = branchLogo[branch.domain];
 
   // TODO: Move this into the fixture card itself or the suspense boundary will never catch an issue (500 returns an object not an array)
   const [nextFixture] = await getNextFixture();
