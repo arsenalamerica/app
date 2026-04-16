@@ -38,7 +38,7 @@
     "@vercel/python-analysis/minimatch": "^10.2.3"
   },
   "dependencies": {
-    "@ariakit/react": "0.4.20",
+    "@ariakit/react": "0.4.25",
     "@vercel/analytics": "2.0.1",
     "@vercel/speed-insights": "2.0.0",
     "clsx": "2.1.1",
