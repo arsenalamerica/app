@@ -9,6 +9,8 @@ pre-commit:
       glob: "package.json"
       run: npx sort-package-json
       stage_fixed: true
+    knip:
+      run: yarn knip
     test:
       run: yarn test
     typecheck:
