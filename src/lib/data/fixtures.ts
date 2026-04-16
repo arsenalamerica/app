@@ -1,5 +1,4 @@
 import { type FixtureEntity, smFixtures, smTvStation } from '@/lib/sportmonks';
-import { season } from '@/lib/utils';
 
 const USA_COUNTRY_ID = 3483;
 
@@ -36,13 +35,7 @@ export async function getFixtures(): Promise<FixtureEntity[]> {
     return all;
   } catch (error) {
     console.error(error);
-    return [
-      {
-        season,
-        status: 500,
-        error,
-      },
-    ] as unknown as FixtureEntity[];
+    throw error;
   }
 }
 
@@ -83,12 +76,6 @@ export async function getNextFixture(): Promise<FixtureEntity[]> {
     return data;
   } catch (error) {
     console.error(error);
-    return [
-      {
-        season,
-        status: 500,
-        error,
-      },
-    ] as unknown as FixtureEntity[];
+    throw error;
   }
 }

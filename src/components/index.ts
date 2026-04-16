@@ -10,5 +10,6 @@ export * from './Main/Main';
 export * from './NavBar/NavBar';
 export * from './NextGame/NextGame';
 export * from './PWAInstallPrompt/PWAInstallPrompt';
+export * from './RouteError/RouteError';
 export * from './SocialLinks/SocialLinks';
 export * from './TeamLogo/TeamLogo';
