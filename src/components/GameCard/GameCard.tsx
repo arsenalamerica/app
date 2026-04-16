@@ -1,6 +1,5 @@
 import { branchLogo } from '@/data';
 import type { FixtureEntity } from '@/lib/sportmonks';
-// import { ClientOnly } from '../ClientOnly/ClientOnly';
 import { TeamLogo } from '../TeamLogo/TeamLogo';
 import styles from './GameCard.module.scss';
 
@@ -11,7 +10,7 @@ export function GameCard({
   branch,
   participants,
   starting_at_timestamp,
-}: { branch: { domain: string } } & FixtureEntity) {
+}: { branch: { domain: string; timezone: string } } & FixtureEntity) {
   const Logo = branchLogo[branch.domain];
 
   const localTeam = participants.find((team) => team.meta.location === 'home');
@@ -41,7 +40,10 @@ export function GameCard({
             />
           </div>
           <GameCardBilling localTeam={localTeam} visitorTeam={visitorTeam} />
-          <GameCardTime starting_at_timestamp={starting_at_timestamp} />
+          <GameCardTime
+            starting_at_timestamp={starting_at_timestamp}
+            timeZone={branch.timezone}
+          />
         </>
       )}
       {isHomeGame ? (

@@ -1,19 +1,17 @@
-'use client'; // Needed because we are dealing with dates relative to the user. We can move this to the game info section later on to encapsulate the date
-
 import { Heading, HeadingLevel, VisuallyHidden } from '@ariakit/react';
 
-import { useEffect, useRef } from 'react';
 import {
   type FixtureEntity,
   REGULAR_TIME_ACTIVE_STATES,
 } from '@/lib/sportmonks';
 import { shite } from '@/lib/utils';
 import { Card, type CardProps } from '../Card/Card';
-import { ClientOnly } from '../ClientOnly/ClientOnly';
 import { LeagueLogo } from '../LeagueLogo/LeagueLogo';
+import { LocalDateTime } from '../LocalDateTime/LocalDateTime';
 import styles from './FixtureCard.module.scss';
 
 import { FixtureCardTeam } from './FixtureCardTeam';
+import { ScrollIntoView } from './ScrollIntoView';
 
 type FixtureCardProps = Omit<CardProps, 'id'> &
   Omit<FixtureEntity, 'id'> & { id: number | string | undefined };
@@ -32,27 +30,9 @@ export function FixtureCard({
   id,
   ...rest
 }: FixtureCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (id) {
-      console.log(id);
-      cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [id]);
-
-  const gameTime = new Date(starting_at_timestamp * 1000).toLocaleTimeString(
-    [],
-    { timeStyle: 'short' },
-  );
-  const gameDate = new Date(starting_at_timestamp * 1000).toLocaleDateString(
-    [],
-    { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' },
-  );
-
   if (!participants) {
     return (
-      <Card className={[styles._, className].join(' ')} ref={cardRef}>
+      <Card className={[styles._, className].join(' ')}>
         <HeadingLevel>
           <VisuallyHidden>
             <Heading>{name}</Heading>
@@ -79,7 +59,8 @@ export function FixtureCard({
   const isFuture = state.state === 'NS';
 
   return (
-    <Card className={[styles._, className].join(' ')} ref={cardRef}>
+    <Card className={[styles._, className].join(' ')}>
+      <ScrollIntoView active={!!id} />
       <HeadingLevel>
         <VisuallyHidden>
           <Heading>{name}</Heading>
@@ -88,16 +69,33 @@ export function FixtureCard({
           {localTeam && <FixtureCardTeam {...localTeam} />}
           <div className={styles.Separator}>
             <div className={styles.Date}>
-              <ClientOnly>
-                {isActive ? (ticking ? `${ticking.minutes}'` : 'HT') : gameDate}
-              </ClientOnly>
+              {isActive ? (
+                ticking ? (
+                  `${ticking.minutes}'`
+                ) : (
+                  'HT'
+                )
+              ) : (
+                <LocalDateTime
+                  epoch={starting_at_timestamp}
+                  options={{
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  }}
+                />
+              )}
             </div>
             <div className={styles.Score}>
-              <ClientOnly>
-                {isFuture
-                  ? gameTime
-                  : `${currentScores.get('home')}-${currentScores.get('away')}`}
-              </ClientOnly>
+              {isFuture ? (
+                <LocalDateTime
+                  epoch={starting_at_timestamp}
+                  options={{ timeStyle: 'short' }}
+                />
+              ) : (
+                `${currentScores.get('home')}-${currentScores.get('away')}`
+              )}
             </div>
           </div>
           {visitorTeam && <FixtureCardTeam {...visitorTeam} />}

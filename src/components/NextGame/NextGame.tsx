@@ -1,11 +1,9 @@
-'use client'; // Needed because we are dealing with dates relative to the user. We can move this to the game info section later on to encapsulate the date
-
 import { Heading } from '@ariakit/react';
 import type { BranchData } from '@/data';
 import type { FixtureEntity } from '@/lib/sportmonks';
-import { dateFromEpoch, timeFromEpoch } from '@/lib/utils';
+import { epochToTime } from '@/lib/utils';
 import { Card } from '../Card/Card';
-import { ClientOnly } from '../ClientOnly/ClientOnly';
+import { LocalDateTime } from '../LocalDateTime/LocalDateTime';
 import styles from './NextGame.module.scss';
 
 export function NextGame({
@@ -17,29 +15,28 @@ export function NextGame({
 }) {
   const { starting_at_timestamp } = fixture;
 
-  const fixtureDate = dateFromEpoch(starting_at_timestamp);
-  const fixtureTime = timeFromEpoch(starting_at_timestamp);
-  const fakeDate = '1/1/2000 ';
+  const fixtureDate = new Date(epochToTime(starting_at_timestamp));
+  const branchHour = Number(
+    fixtureDate.toLocaleTimeString('en-US', {
+      timeZone: branch.timezone,
+      hour: 'numeric',
+      hour12: false,
+    }),
+  );
+
+  const fixtureTimeBranch = fixtureDate.toLocaleTimeString('en-US', {
+    timeZone: branch.timezone,
+    timeStyle: 'short',
+  });
 
   const isReplay = branch?.pub?.replayTime
-    ? new Date(fakeDate + branch.pub.replayTime) >
-      new Date(fakeDate + fixtureTime)
+    ? new Date(`1/1/2000 ${branch.pub.replayTime}`) >
+      new Date(`1/1/2000 ${fixtureTimeBranch}`)
     : false;
-
-  const adjustedFixtureTime = isReplay
-    ? `${branch.pub?.replayTime} (replay)`
-    : fixtureTime;
-
-  const fixtureTime24 = new Date(
-    starting_at_timestamp * 1000,
-  ).toLocaleTimeString(undefined, {
-    timeStyle: 'short',
-    hour12: false,
-  });
 
   // THIS IS A TEMPORARY HARD-CODED FIX
   const viewingPub = branch?.pubs
-    ? fixtureTime24 >= '06:00' // Note to compare times here, we need to use 24-hour format, including the leading zero
+    ? branchHour >= 6
       ? branch.pubs[0]
       : branch.pubs[1]
     : branch?.pub;
@@ -49,9 +46,23 @@ export function NextGame({
       <Heading>Match Watch Party</Heading>
       <Card render={<div />} className={styles._}>
         <p>
-          <ClientOnly>
-            {fixtureDate} {adjustedFixtureTime}
-          </ClientOnly>
+          <LocalDateTime
+            epoch={starting_at_timestamp}
+            options={{
+              weekday: 'long',
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            }}
+          />{' '}
+          {isReplay ? (
+            `${branch.pub?.replayTime} (replay)`
+          ) : (
+            <LocalDateTime
+              epoch={starting_at_timestamp}
+              options={{ timeStyle: 'short' }}
+            />
+          )}
         </p>
         {viewingPub && (
           <address>
