@@ -5,7 +5,7 @@ const USA_COUNTRY_ID = 3483;
 
 export async function getFixtures(): Promise<FixtureEntity[]> {
   try {
-    const { data, ...rest } = await smFixtures(undefined, {
+    const params = {
       include: [
         'league:name,image_path',
         'participants:name,short_code,image_path',
@@ -16,36 +16,24 @@ export async function getFixtures(): Promise<FixtureEntity[]> {
       ].join(';'),
       sort_by: 'starting_at',
       order: 'asc',
-      per_page: ['50'].join(';'),
-    });
+      per_page: '50',
+    };
 
-    let data2: FixtureEntity[] = [];
-    let rest2 = {};
+    const all: FixtureEntity[] = [];
+    let page = 1;
+    const MAX_PAGES = 2;
 
-    if (rest.pagination.has_more) {
-      const { data, ...rest } = await smFixtures(undefined, {
-        include: [
-          'league:name,image_path',
-          'participants:name,short_code,image_path',
-          'scores',
-          'state',
-          'periods',
-          'venue:name,city_name',
-        ].join(';'),
-        sort_by: 'starting_at',
-        order: 'asc',
-        per_page: ['50'].join(';'),
-        page: ['2'].join(';'),
+    while (page <= MAX_PAGES) {
+      const { data, pagination } = await smFixtures(undefined, {
+        ...params,
+        page: String(page),
       });
-
-      data2 = data;
-      rest2 = rest;
+      all.push(...data);
+      if (!pagination.has_more) break;
+      page += 1;
     }
 
-    console.info(rest);
-    console.info(rest2);
-
-    return [...data, ...data2];
+    return all;
   } catch (error) {
     console.error(error);
     return [
@@ -74,10 +62,10 @@ export async function getNextFixture(): Promise<FixtureEntity[]> {
         'venue:name,city_name',
       ].join(';'),
       // All active or upcoming fixture states: https://docs.sportmonks.com/football/tutorials-and-guides/tutorials/includes/states#state-interactions
-      filters: ['fixtureStates:1,2,3,22,4,6,21,6,7,25,9'].join(';'),
+      filters: 'fixtureStates:1,2,3,22,4,6,21,7,25,9',
       sort_by: 'starting_at',
       order: 'asc',
-      per_page: ['1'].join(';'),
+      per_page: '1',
     });
 
     const tvstations = await Promise.all(
