@@ -50,6 +50,16 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_BODY: |
+            ## Summary
+
+            - Automated update of `src/lib/sportmonks/seasons.json` with the current Premier League season ID from Sportmonks
+
+            ## Test plan
+
+            - [ ] `yarn typecheck` passes
+            - [ ] `yarn build` passes
+            - [ ] Standings table renders correctly on preview deployment
         run: |
           BRANCH="chore/sync-seasons"
           git config user.name "github-actions[bot]"
@@ -61,16 +71,5 @@ jobs:
           if ! gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' | grep -q .; then
             gh pr create \
               --title "chore(data): sync Premier League season ID" \
-              --body "$(cat <<'EOF'
-## Summary
-
-- Automated update of `src/lib/sportmonks/seasons.json` with the current Premier League season ID from Sportmonks
-
-## Test plan
-
-- [ ] `yarn typecheck` passes
-- [ ] `yarn build` passes
-- [ ] Standings table renders correctly on preview deployment
-EOF
-            )"
+              --body "$PR_BODY"
           fi
