@@ -61,7 +61,7 @@ Required secrets (in addition to those listed in Vercel Deployment):
 - `APP_ID` — GitHub App ID for automated PR creation
 - `APP_PK` — GitHub App private key
 
-The GitHub App token is used instead of `GITHUB_TOKEN` so the resulting PR triggers CI workflows. See `actions/create-github-app-token@v2`.
+The `gunnersaurus-bot` GitHub App token is used instead of `GITHUB_TOKEN` so the resulting PR triggers CI workflows. See `actions/create-github-app-token@v2`. Commits are attributed to `gunnersaurus-bot[bot]`.
 
 ## E2E Coverage Policy
 
