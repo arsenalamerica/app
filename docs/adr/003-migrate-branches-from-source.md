@@ -68,9 +68,9 @@ Scope of this PR is a code move, not a redesign. The following lint/Knip finding
 - `performance/noDynamicNamespaceImportAccess` — simple-icons lookups in `SocialLinks.tsx`.
 - `correctness/noUnusedFunctionParameters` — skeleton row helper in `fixtures/loading.tsx`.
 
-**`knip.config.ts` ignores** retain the carried-over `NextGameError.tsx`, `NextGameLoading.tsx`, `FixtureCard/types.ts`, and the `bork/` aggregate SCSS indexes — all unreferenced, but kept for follow-up evaluation alongside a component-level refactor.
+**`knip.config.ts` ignores** — retired. Dead files (`NextGameError.tsx`, `NextGameLoading.tsx`, `FixtureCard/types.ts`) deleted. Unused `bork/` aggregates and utilities deleted; surviving `button.scss` and `functions.scss` relocated to `src/styles/` with semantic names. Ignore list now contains only `.claude/**`.
 
-Follow-up work (not this PR): rule-by-rule cleanup of the overrides, tightening Vitest coverage thresholds past `0`, and deciding whether to keep or drop the NextGame shell components and bork aggregates.
+Follow-up work (not this PR): rule-by-rule cleanup of the biome overrides and tightening Vitest coverage thresholds past `0`.
 
 ## Consequences
 
