@@ -1,10 +1,7 @@
-import { headers } from 'next/headers';
 import { ImageResponse } from 'next/og';
 
-import { branchData, branchLogo, branchLogoSrc } from '@/data';
-
-const DOMAINS = Object.keys(branchData);
-const PREVIEW_FALLBACK = DOMAINS[0];
+import { branchLogo, branchLogoSrc } from '@/data';
+import { resolveTenantFromHeaders } from '@/lib/tenant/resolveTenantFromHeaders';
 
 export const size = {
   width: 1200,
@@ -13,13 +10,10 @@ export const size = {
 export const contentType = 'image/png';
 
 export default async function Image() {
-  const host = (await headers()).get('host') ?? '';
-  const isLocal = host.startsWith('localhost');
-  const domain = isLocal
-    ? 'tacomagooners.com'
-    : host in branchData
-      ? host
-      : PREVIEW_FALLBACK;
+  const domain = await resolveTenantFromHeaders({
+    caller: 'opengraph-image',
+    strict: true,
+  });
 
   const Logo = branchLogo[domain];
   const rasterSrc = branchLogoSrc[domain];
