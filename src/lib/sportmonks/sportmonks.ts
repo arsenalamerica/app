@@ -41,6 +41,17 @@ export async function sportmonksFetch<T>(
     headers: { Authorization: token },
   });
 
-  if (!res.ok) throw new Error(`Sportmonks ${res.status}: ${path}`);
+  if (!res.ok) {
+    let detail = '';
+    try {
+      const body = (await res.json()) as { message?: string };
+      detail = body.message ?? '';
+    } catch {
+      // body was not JSON
+    }
+    throw new Error(
+      `Sportmonks ${res.status}${detail ? ` ${detail}` : ''}: ${path}`,
+    );
+  }
   return res.json() as Promise<T>;
 }
