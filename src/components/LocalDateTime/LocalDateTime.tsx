@@ -10,7 +10,7 @@ export function LocalDateTime({
   const ms = epoch * 1000;
 
   return (
-    <time dateTime={new Date(ms).toISOString()} suppressHydrationWarning>
+    <time dateTime={new Date(ms).toISOString()}>
       {new Intl.DateTimeFormat(undefined, options).format(new Date(ms))}
     </time>
   );
