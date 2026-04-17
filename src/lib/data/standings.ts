@@ -1,7 +1,13 @@
+'use cache';
+
+import { cacheLife, cacheTag } from 'next/cache';
+
 import { type StandingEntity, smStandings } from '@/lib/sportmonks';
 import { shite } from '@/lib/utils';
 
 export async function getStandings(): Promise<StandingEntity[]> {
+  cacheLife('hours');
+  cacheTag('standings');
   try {
     const { data } = await smStandings({
       include: [

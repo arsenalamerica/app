@@ -1,6 +1,3 @@
-import wretch from 'wretch';
-import QueryStringAddon from 'wretch/addons/queryString';
-
 export type Sportmonks = {
   subscription: [];
   rate_limit: {
@@ -26,11 +23,24 @@ export type EntityBase = {
 
 export const ARSENAL_TEAM_ID = 19;
 
-export const sportmonks = wretch('https://api.sportmonks.com/v3/football', {
-  cache: 'no-cache',
-  // next: { revalidate: 5 },
-})
-  .headers({ Authorization: `${process.env.MONK_TOKEN}` })
-  .addon(QueryStringAddon)
-  .errorType('json')
-  .resolve((r) => r.json());
+const SPORTMONKS_BASE = 'https://api.sportmonks.com/v3/football';
+
+export async function sportmonksFetch<T>(
+  path: string,
+  params: Record<string, string> = {},
+): Promise<T> {
+  const token = process.env.MONK_TOKEN;
+  if (!token) throw new Error('MONK_TOKEN is not set');
+
+  const url = new URL(`${SPORTMONKS_BASE}${path}`);
+  for (const [k, v] of Object.entries(params)) {
+    url.searchParams.set(k, v);
+  }
+
+  const res = await fetch(url, {
+    headers: { Authorization: token },
+  });
+
+  if (!res.ok) throw new Error(`Sportmonks ${res.status}: ${path}`);
+  return res.json() as Promise<T>;
+}

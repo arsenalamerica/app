@@ -1,5 +1,5 @@
 import seasons from './seasons.json';
-import { type Sportmonks, sportmonks } from './sportmonks';
+import { type Sportmonks, sportmonksFetch } from './sportmonks';
 
 export type StandingEntity = {
   id: number;
@@ -55,9 +55,11 @@ export type StandingsEndpoint = {
   data: StandingEntity[];
 } & Sportmonks;
 
-export async function smStandings(query: object): Promise<StandingsEndpoint> {
-  return sportmonks
-    .url(`/standings/seasons/${seasons.premierLeague.seasonId}`)
-    .query(query)
-    .get() as Promise<StandingsEndpoint>;
+export async function smStandings(
+  query: Record<string, string>,
+): Promise<StandingsEndpoint> {
+  return sportmonksFetch<StandingsEndpoint>(
+    `/standings/seasons/${seasons.premierLeague.seasonId}`,
+    query,
+  );
 }

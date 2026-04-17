@@ -1,9 +1,6 @@
 import { FixtureCard } from '@/components';
 import { getFixtures, getNextFixture } from '@/lib/data/fixtures';
 
-// https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#revalidate
-export const revalidate = 60; // 1 minute
-
 export default async function FixturesPage() {
   const upcomingFixtures = await getFixtures();
   const [{ id: nextFixtureId }] = await getNextFixture();

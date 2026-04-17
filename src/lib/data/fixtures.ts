@@ -1,3 +1,7 @@
+'use cache';
+
+import { cacheLife, cacheTag } from 'next/cache';
+
 import { type FixtureEntity, smFixtures, smTvStation } from '@/lib/sportmonks';
 import { shite } from '@/lib/utils';
 
@@ -17,6 +21,8 @@ function applyShite(fixture: FixtureEntity): FixtureEntity {
 }
 
 export async function getFixtures(): Promise<FixtureEntity[]> {
+  cacheLife('minutes');
+  cacheTag('fixtures');
   try {
     const params = {
       include: [
@@ -54,6 +60,8 @@ export async function getFixtures(): Promise<FixtureEntity[]> {
 }
 
 export async function getNextFixture(): Promise<FixtureEntity[]> {
+  cacheLife('minutes');
+  cacheTag('next-fixture');
   try {
     const { data } = await smFixtures(undefined, {
       include: [
