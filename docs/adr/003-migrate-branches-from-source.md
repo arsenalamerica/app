@@ -65,7 +65,6 @@ Scope of this PR is a code move, not a redesign. The following lint/Knip finding
 
 - `a11y/noSvgWithoutTitle` — `data/src/branches/**/Logo.tsx`, several social/team/league SVG renderers.
 - `suspicious/noArrayIndexKey` — `NavBar.tsx`, `LeagueTable.tsx`, `GameCard.tsx`.
-- `performance/noDynamicNamespaceImportAccess` — simple-icons lookups in `SocialLinks.tsx`.
 - `correctness/noUnusedFunctionParameters` — skeleton row helper in `fixtures/loading.tsx`.
 
 **`knip.config.ts` ignores** — retired. Dead files (`NextGameError.tsx`, `NextGameLoading.tsx`, `FixtureCard/types.ts`) and unused SCSS aggregates/utilities deleted. Two surviving style files (`button.scss`, `color.scss`) relocated to `src/styles/`. Ignore list now contains only `.claude/**`.

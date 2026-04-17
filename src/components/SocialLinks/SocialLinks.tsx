@@ -2,9 +2,9 @@
 import clsx from 'clsx';
 import { trackEvent } from 'fathom-client';
 import type React from 'react';
-import * as icons from 'simple-icons';
 import ExternalLink from '../ExternalLink/ExternalLink';
 import styles from './SocialLinks.module.scss';
+import socialIcons from './socialIcons';
 
 export interface SocialLinksProperties
   extends React.HTMLAttributes<HTMLUListElement> {
@@ -13,18 +13,6 @@ export interface SocialLinksProperties
     url?: string;
   }[];
 }
-
-const getBrandIcon = (name: string) => {
-  const icon =
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error: Implicit any
-    icons[
-      'si' +
-        name.charAt(0).toUpperCase() +
-        name.slice(1).replace(' ', '').toLowerCase()
-    ];
-  return icon;
-};
 
 const handleClick = () => {
   trackEvent('social');
@@ -39,27 +27,27 @@ export function SocialLinks({
     links && (
       <ul {...rest} className={clsx(styles._, className)}>
         {links.map(({ name, url }) => {
-          const icon = getBrandIcon(name);
-          // console.log(getBrandIcon(name));
+          const path = socialIcons.get(name);
+
+          if (!path) {
+            console.warn(`Social icon not found: ${name}`);
+            return null;
+          }
 
           return (
             <li key={name}>
-              {icon ? (
-                <ExternalLink onClick={handleClick} href={url}>
-                  <svg
-                    role='img'
-                    viewBox='0 0 24 24'
-                    width='24'
-                    height='24'
-                    xmlns='http://www.w3.org/2000/svg'
-                  >
-                    <title>{name}</title>
-                    <path d={icon.path} />
-                  </svg>
-                </ExternalLink>
-              ) : (
-                <p>NO ICON FOUND FOR {name}</p>
-              )}
+              <ExternalLink onClick={handleClick} href={url}>
+                <svg
+                  role='img'
+                  viewBox='0 0 24 24'
+                  width='24'
+                  height='24'
+                  xmlns='http://www.w3.org/2000/svg'
+                >
+                  <title>{name}</title>
+                  <path d={path} />
+                </svg>
+              </ExternalLink>
             </li>
           );
         })}
