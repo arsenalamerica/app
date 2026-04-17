@@ -60,7 +60,7 @@ export function FixtureCard({
 
   return (
     <Card className={[styles._, className].join(' ')}>
-      <ScrollIntoView active={!!id} />
+      {id && <ScrollIntoView />}
       <HeadingLevel>
         <VisuallyHidden>
           <Heading>{name}</Heading>

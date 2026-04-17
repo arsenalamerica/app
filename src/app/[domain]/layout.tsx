@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import {
   FathomNext,
+  HydratedProvider,
   NavBar,
   PWAInstallPrompt,
   SocialLinks,
@@ -46,7 +47,9 @@ export default async function Layout(props: LayoutProps) {
           </VisuallyHidden>
           <NavBar />
         </header>
-        <HeadingLevel>{children}</HeadingLevel>
+        <HeadingLevel>
+          <HydratedProvider>{children}</HydratedProvider>
+        </HeadingLevel>
         <HeadingLevel level={3}>
           <footer>
             <Heading>Socials</Heading>

@@ -2,14 +2,12 @@
 
 import { useEffect, useRef } from 'react';
 
-export function ScrollIntoView({ active }: { active: boolean }) {
+export function ScrollIntoView() {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (active) {
-      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [active]);
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, []);
 
   return <div ref={ref} />;
 }
