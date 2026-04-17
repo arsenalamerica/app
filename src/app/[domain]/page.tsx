@@ -4,9 +4,6 @@ import { FixtureCard, Main, NextGame } from '@/components';
 import { branchData, branchLogo } from '@/data';
 import { getNextFixture } from '@/lib/data/fixtures';
 
-// https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#revalidate
-export const revalidate = 45; // 45 seconds
-
 export default async function Home(props: {
   params: Promise<{ domain: string }>;
 }) {

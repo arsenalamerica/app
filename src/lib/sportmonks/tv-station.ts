@@ -1,4 +1,4 @@
-import { type Sportmonks, sportmonks } from './sportmonks';
+import { type Sportmonks, sportmonksFetch } from './sportmonks';
 
 export type TvStationEntity = {
   id: number;
@@ -15,10 +15,10 @@ type TvStationEndpoint = {
 
 export async function smTvStation(
   station_id: number,
-  query?: object,
+  params?: Record<string, string>,
 ): Promise<TvStationEndpoint> {
-  return sportmonks
-    .url(`/tv-stations/${station_id}`)
-    .query(query || {})
-    .get() as Promise<TvStationEndpoint>;
+  return sportmonksFetch<TvStationEndpoint>(
+    `/tv-stations/${station_id}`,
+    params,
+  );
 }

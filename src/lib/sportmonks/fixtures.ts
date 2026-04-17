@@ -4,7 +4,7 @@ import {
   ARSENAL_TEAM_ID,
   type EntityBase,
   type Sportmonks,
-  sportmonks,
+  sportmonksFetch,
 } from './sportmonks';
 
 type Participant = {
@@ -64,10 +64,10 @@ export type FixturesEndpoint = {
 
 export async function smFixtures(
   _id: string | undefined,
-  query: object,
+  query: Record<string, string>,
 ): Promise<FixturesEndpoint> {
-  return sportmonks
-    .url(`/fixtures/between/${season.start}/${season.end}/${ARSENAL_TEAM_ID}`)
-    .query(query)
-    .get() as Promise<FixturesEndpoint>;
+  return sportmonksFetch<FixturesEndpoint>(
+    `/fixtures/between/${season.start}/${season.end}/${ARSENAL_TEAM_ID}`,
+    query,
+  );
 }

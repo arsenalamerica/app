@@ -3080,7 +3080,6 @@ __metadata:
     vercel: "npm:51.5.1"
     vite: "npm:7.3.2"
     vitest: "npm:4.0.18"
-    wretch: "npm:2.11.0"
   languageName: unknown
   linkType: soft
 
@@ -7028,13 +7027,6 @@ __metadata:
   version: 1.0.2
   resolution: "wrappy@npm:1.0.2"
   checksum: 10c0/56fece1a4018c6a6c8e28fbc88c87e0fbf4ea8fd64fc6c63b18f4acc4bd13e0ad2515189786dd2c30d3eec9663d70f4ecf699330002f8ccb547e4a18231fc9f0
-  languageName: node
-  linkType: hard
-
-"wretch@npm:2.11.0":
-  version: 2.11.0
-  resolution: "wretch@npm:2.11.0"
-  checksum: 10c0/5fea89eea46a29d32b9277d79c96426832f326f9f4ef9d0c5babc8c8747e2b20f7bcb6355c5a7dca2f1f5cab5aad37d94f08d86377015d734acddac93b0fbda1
   languageName: node
   linkType: hard
 

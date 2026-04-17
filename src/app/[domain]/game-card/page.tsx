@@ -11,9 +11,6 @@ export const metadata: Metadata = {
   },
 };
 
-// https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#revalidate
-export const revalidate = 45; // 45 seconds
-
 export default async function GameCardPage(props: {
   params: Promise<{ domain: string }>;
 }) {
