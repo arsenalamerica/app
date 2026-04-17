@@ -5,7 +5,6 @@ export * from './FixtureCard/FixtureCard';
 export * from './GameCard/GameCard';
 export * from './LeagueLogo/LeagueLogo';
 export * from './LeagueTable/LeagueTable';
-export * from './LocalDateTime/HydratedProvider';
 export * from './LocalDateTime/LocalDateTime';
 export * from './Main/Main';
 export * from './NavBar/NavBar';

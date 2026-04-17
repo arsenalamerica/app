@@ -1,6 +1,6 @@
 'use client';
 
-import { useHydrated } from './HydratedProvider';
+import { useEffect, useState } from 'react';
 
 export function LocalDateTime({
   epoch,
@@ -9,9 +9,9 @@ export function LocalDateTime({
   epoch: number;
   options: Intl.DateTimeFormatOptions;
 }) {
-  // Subscribe to hydration context — triggers a single batched re-render
-  // so the formatted output uses the client's locale/timezone.
-  useHydrated();
+  // Force a re-render after hydration so the formatted output uses the client's locale/timezone.
+  const [, rerender] = useState(false);
+  useEffect(() => rerender(true), []);
 
   const ms = epoch * 1000;
   const formatted = new Intl.DateTimeFormat(undefined, options).format(
