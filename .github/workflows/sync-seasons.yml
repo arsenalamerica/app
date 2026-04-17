@@ -1,0 +1,75 @@
+name: Sync Seasons
+
+on:
+  schedule:
+    - cron: '0 12 1 * *' # 1st of every month at noon UTC
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PK }}
+
+      - uses: actions/checkout@v6.0.2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.2.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Sync season data from Sportmonks
+        env:
+          MONK_TOKEN: ${{ secrets.MONK_TOKEN }}
+        run: node scripts/sync-seasons.mjs
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet src/lib/sportmonks/seasons.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create or update pull request
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_BODY: |
+            ## Summary
+
+            - Automated update of `src/lib/sportmonks/seasons.json` with the current Premier League season ID from Sportmonks
+
+            ## Test plan
+
+            - [ ] `yarn typecheck` passes
+            - [ ] `yarn build` passes
+            - [ ] Standings table renders correctly on preview deployment
+        run: |
+          BRANCH="chore/sync-seasons"
+          git config user.name "gunnersaurus-bot[bot]"
+          git config user.email "276655943+gunnersaurus-bot[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add src/lib/sportmonks/seasons.json
+          git commit -m "chore(data): sync Premier League season ID from Sportmonks"
+          git push --force origin "$BRANCH"
+          if ! gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' | grep -q .; then
+            gh pr create \
+              --title "chore(data): sync Premier League season ID" \
+              --body "$PR_BODY"
+          fi

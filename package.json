@@ -9,6 +9,7 @@
     "e2e": "playwright test",
     "knip": "knip",
     "start": "next start",
+    "sync:seasons": "node scripts/sync-seasons.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
