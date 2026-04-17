@@ -3,15 +3,13 @@ import { shite } from '@/lib/utils';
 
 export async function getStandings(): Promise<StandingEntity[]> {
   try {
-    const { data, ...rest } = await smStandings({
+    const { data } = await smStandings({
       include: [
         ['participant', ['name', 'short_code', 'image_path'].join()].join(':'),
         'details.type',
         'form',
       ].join(';'),
     });
-
-    console.info(rest);
 
     const cleanData = data.map(({ details, participant, ...rest }) => ({
       ...rest,
