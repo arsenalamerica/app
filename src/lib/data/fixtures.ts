@@ -55,7 +55,7 @@ export async function getFixtures(): Promise<FixtureEntity[]> {
 
 export async function getNextFixture(): Promise<FixtureEntity[]> {
   try {
-    const { data, ...rest } = await smFixtures(undefined, {
+    const { data } = await smFixtures(undefined, {
       include: [
         'league:name,image_path',
         'participants.sidelined.player',
@@ -84,8 +84,6 @@ export async function getNextFixture(): Promise<FixtureEntity[]> {
         }),
     );
     data[0].tvstations = tvstations;
-
-    console.info(rest);
 
     return data.map(applyShite);
   } catch (error) {

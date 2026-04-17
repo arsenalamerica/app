@@ -20,8 +20,6 @@ export function GameCard({
 
   const isHomeGame = localTeam?.id === 19;
 
-  console.log(isHomeGame);
-
   return (
     <div className={styles._}>
       {Logo && <Logo className={styles.Logo} />}
