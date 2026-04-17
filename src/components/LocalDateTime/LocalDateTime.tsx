@@ -1,5 +1,9 @@
 'use client';
 
+// suppressHydrationWarning is intentionally NOT used here. It completely
+// deactivates hydration for the element, preventing React from patching
+// server-rendered text to the client timezone.
+// See: https://github.com/vercel/next.js/issues/61911
 export function LocalDateTime({
   epoch,
   options,
