@@ -11,7 +11,13 @@ pre-commit:
       stage_fixed: true
     knip:
       run: yarn knip
-    test:
-      run: yarn test
+    test-related:
+      glob: "*.{js,jsx,ts,tsx}"
+      run: yarn vitest related --run {staged_files}
+
+pre-push:
+  commands:
     typecheck:
       run: yarn typecheck
+    test:
+      run: yarn test

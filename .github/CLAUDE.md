@@ -25,6 +25,14 @@ Concurrency is configured to cancel in-progress runs on PRs when new commits are
 
 A top-level `permissions: contents: read` block restricts all jobs to read-only token access by default. The `build` job overrides this with `contents: read` + `deployments: write` for Vercel deployment.
 
+## Git Hooks (lefthook)
+
+Config: `lefthook.yml`
+
+- **pre-commit** runs scoped checks on staged files only: `biome`, `sort-package-json`, `knip`, and `vitest related` (JS/TS staged files only). Docs-only commits incur near-zero hook cost.
+- **pre-push** runs project-wide `yarn typecheck` and full `yarn test` once before the push, preserving CI parity without per-commit latency.
+- Never use `--no-verify`. Pre-commit failures must be fixed, not bypassed (root `CLAUDE.md`).
+
 ## Vercel Deployment
 
 The `build` job uses the Vercel CLI (`vercel` devDependency) with three required repository secrets:
