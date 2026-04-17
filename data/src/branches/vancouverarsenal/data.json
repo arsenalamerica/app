@@ -2,6 +2,7 @@
   "fathom-id": "VLVXAOCQ",
   "domain": "vancouverarsenal.com",
   "name": "Vancouver Arsenal",
+  "timezone": "America/Vancouver",
   "pub": {
     "name": "Cinema Public House",
     "address": "901 Granville St, Vancouver, BC V6Z 1L3",

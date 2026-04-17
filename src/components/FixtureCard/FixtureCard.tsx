@@ -1,4 +1,4 @@
-'use client'; // Needed because we are dealing with dates relative to the user. We can move this to the game info section later on to encapsulate the date
+'use client';
 
 import { Heading, HeadingLevel, VisuallyHidden } from '@ariakit/react';
 
@@ -9,7 +9,6 @@ import {
 } from '@/lib/sportmonks';
 import { shite } from '@/lib/utils';
 import { Card, type CardProps } from '../Card/Card';
-import { ClientOnly } from '../ClientOnly/ClientOnly';
 import { LeagueLogo } from '../LeagueLogo/LeagueLogo';
 import styles from './FixtureCard.module.scss';
 
@@ -36,19 +35,9 @@ export function FixtureCard({
 
   useEffect(() => {
     if (id) {
-      console.log(id);
       cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [id]);
-
-  const gameTime = new Date(starting_at_timestamp * 1000).toLocaleTimeString(
-    [],
-    { timeStyle: 'short' },
-  );
-  const gameDate = new Date(starting_at_timestamp * 1000).toLocaleDateString(
-    [],
-    { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' },
-  );
 
   if (!participants) {
     return (
@@ -62,6 +51,8 @@ export function FixtureCard({
       </Card>
     );
   }
+
+  const ms = starting_at_timestamp * 1000;
 
   const localTeam = participants.find((team) => team.meta.location === 'home');
   const visitorTeam = participants.find(
@@ -88,16 +79,35 @@ export function FixtureCard({
           {localTeam && <FixtureCardTeam {...localTeam} />}
           <div className={styles.Separator}>
             <div className={styles.Date}>
-              <ClientOnly>
-                {isActive ? (ticking ? `${ticking.minutes}'` : 'HT') : gameDate}
-              </ClientOnly>
+              {isActive ? (
+                ticking ? (
+                  `${ticking.minutes}'`
+                ) : (
+                  'HT'
+                )
+              ) : (
+                // Do NOT add suppressHydrationWarning — it disables text patching entirely.
+                // https://github.com/vercel/next.js/issues/61911
+                <time dateTime={new Date(ms).toISOString()}>
+                  {new Intl.DateTimeFormat(undefined, {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  }).format(new Date(ms))}
+                </time>
+              )}
             </div>
             <div className={styles.Score}>
-              <ClientOnly>
-                {isFuture
-                  ? gameTime
-                  : `${currentScores.get('home')}-${currentScores.get('away')}`}
-              </ClientOnly>
+              {isFuture ? (
+                <time dateTime={new Date(ms).toISOString()}>
+                  {new Intl.DateTimeFormat(undefined, {
+                    timeStyle: 'short',
+                  }).format(new Date(ms))}
+                </time>
+              ) : (
+                `${currentScores.get('home')}-${currentScores.get('away')}`
+              )}
             </div>
           </div>
           {visitorTeam && <FixtureCardTeam {...visitorTeam} />}

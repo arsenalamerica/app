@@ -6,15 +6,16 @@ import styles from './GameCard.module.scss';
 
 export function GameCardTime({
   starting_at_timestamp,
+  timeZone,
 }: {
   starting_at_timestamp: number;
+  timeZone: string;
 }) {
-  const fixtureDate = dateFromEpoch(starting_at_timestamp);
-  // const fixtureTime = timeFromEpoch(starting_at_timestamp);
+  const fixtureDate = dateFromEpoch(starting_at_timestamp, timeZone);
   const fixtureTime = new Date(
     epochToTime(starting_at_timestamp),
   ).toLocaleTimeString('en-US', {
-    timeZone: 'America/Los_Angeles',
+    timeZone,
     timeStyle: 'short',
   });
 

@@ -2,6 +2,7 @@
   "fathom-id": "MSPJPMLP",
   "domain": "tacomagooners.com",
   "name": "Tacoma Gooners",
+  "timezone": "America/Los_Angeles",
   "pub": {
     "name": "Doyle's Public House",
     "address": "208 St Helens Ave, Tacoma, WA 98402",
