@@ -38,6 +38,7 @@ describe('sitemap', () => {
   it('returns tacomagooners sitemap on localhost', async () => {
     mockHost('localhost:3000');
     const entries = await sitemap();
+    expect(entries).toHaveLength(3);
     expect(entries[0].url).toBe('https://tacomagooners.com');
   });
 
@@ -45,7 +46,8 @@ describe('sitemap', () => {
     process.env.VERCEL_ENV = 'preview';
     mockHost('app-git-foo-arsenalamerica.vercel.app');
     const entries = await sitemap();
-    expect(entries[0].url).toMatch(/^https:\/\/boisegooners\.com/);
+    expect(entries).toHaveLength(3);
+    expect(entries[0].url).toBe('https://boisegooners.com');
   });
 
   it('calls notFound() and warns for unknown host in production', async () => {

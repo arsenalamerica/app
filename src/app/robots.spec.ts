@@ -27,6 +27,7 @@ describe('robots', () => {
   it('returns robots for a known branch hostname', async () => {
     mockHost('tacomagooners.com');
     const result = await robots();
+    expect(result.rules).toEqual({ userAgent: '*', allow: '/' });
     expect(result.sitemap).toBe('https://tacomagooners.com/sitemap.xml');
   });
 
@@ -40,7 +41,7 @@ describe('robots', () => {
     process.env.VERCEL_ENV = 'preview';
     mockHost('app-git-foo-arsenalamerica.vercel.app');
     const result = await robots();
-    expect(result.sitemap).toMatch(/^https:\/\/boisegooners\.com/);
+    expect(result.sitemap).toBe('https://boisegooners.com/sitemap.xml');
   });
 
   it('calls notFound() and warns for unknown host in production', async () => {
