@@ -8,7 +8,7 @@ Shared helpers for resolving which branch site (tenant) a request belongs to.
 
 ## Callers
 
-Used by the three metadata routes: `src/app/manifest.ts`, `src/app/opengraph-image.tsx`, `src/app/icon.tsx`. All call with `strict: true`.
+Used by the five metadata routes: `src/app/manifest.ts`, `src/app/opengraph-image.tsx`, `src/app/icon.tsx`, `src/app/sitemap.ts`, `src/app/robots.ts`. All call with `strict: true`.
 
 ## Testing
 

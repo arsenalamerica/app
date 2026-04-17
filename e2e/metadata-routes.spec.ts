@@ -27,11 +27,10 @@ test('GET /opengraph-image returns 200', async ({ request }) => {
   expect(response.ok()).toBeTruthy();
 });
 
-// Commented out until sitemap.ts route is added — see #43
-// test('GET /sitemap.xml returns 200', async ({ request }) => {
-//   const response = await request.get('/sitemap.xml');
-//   expect(response.ok()).toBeTruthy();
-// });
+test('GET /sitemap.xml returns 200', async ({ request }) => {
+  const response = await request.get('/sitemap.xml');
+  expect(response.ok()).toBeTruthy();
+});
 
 test('GET /robots.txt returns 200', async ({ request }) => {
   const response = await request.get('/robots.txt');
