@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default async function NotFound() {
   const h = await headers();
   const host = h.get('host') ?? 'unknown';
-  const pathname = h.get('x-pathname') ?? '(unknown path)';
+  const pathname = h.get('x-pathname') ?? '(middleware-excluded route)';
   console.warn(`[404] ${host}${pathname}`);
   return <Image src={notFound} alt='Not Found' />;
 }

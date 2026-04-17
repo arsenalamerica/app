@@ -6,11 +6,6 @@ import { branchData } from '@/data';
 import Image from './opengraph-image';
 
 vi.mock('next/headers');
-vi.mock('next/navigation', () => ({
-  notFound: vi.fn(() => {
-    throw new Error('NEXT_NOT_FOUND');
-  }),
-}));
 
 const mockHost = (host: string) =>
   vi.mocked(headers).mockResolvedValue({

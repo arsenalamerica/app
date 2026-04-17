@@ -13,7 +13,7 @@ vi.mock('next/image', () => ({
 describe('NotFound', () => {
   afterEach(() => vi.restoreAllMocks());
 
-  it('warns with host and pathname', async () => {
+  it('warns with host and pathname when middleware ran', async () => {
     vi.mocked(headers).mockResolvedValue({
       get: (k: string) =>
         k === 'host'
@@ -29,5 +29,19 @@ describe('NotFound', () => {
 
     expect(warn).toHaveBeenCalledWith('[404] tacomagooners.com/oops');
     expect(baseElement).toBeTruthy();
+  });
+
+  it('warns with middleware-excluded marker when x-pathname is absent', async () => {
+    vi.mocked(headers).mockResolvedValue({
+      get: (k: string) => (k === 'host' ? 'tacomagooners.com' : null),
+    } as unknown as Awaited<ReturnType<typeof headers>>);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const ui = await NotFound();
+    render(ui);
+
+    expect(warn).toHaveBeenCalledWith(
+      '[404] tacomagooners.com(middleware-excluded route)',
+    );
   });
 });
