@@ -1,5 +1,8 @@
+'use client';
+
 import { Heading, HeadingLevel, VisuallyHidden } from '@ariakit/react';
 
+import { useEffect, useRef } from 'react';
 import {
   type FixtureEntity,
   REGULAR_TIME_ACTIVE_STATES,
@@ -7,11 +10,9 @@ import {
 import { shite } from '@/lib/utils';
 import { Card, type CardProps } from '../Card/Card';
 import { LeagueLogo } from '../LeagueLogo/LeagueLogo';
-import { LocalDateTime } from '../LocalDateTime/LocalDateTime';
 import styles from './FixtureCard.module.scss';
 
 import { FixtureCardTeam } from './FixtureCardTeam';
-import { ScrollIntoView } from './ScrollIntoView';
 
 type FixtureCardProps = Omit<CardProps, 'id'> &
   Omit<FixtureEntity, 'id'> & { id: number | string | undefined };
@@ -30,9 +31,17 @@ export function FixtureCard({
   id,
   ...rest
 }: FixtureCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (id) {
+      cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [id]);
+
   if (!participants) {
     return (
-      <Card className={[styles._, className].join(' ')}>
+      <Card className={[styles._, className].join(' ')} ref={cardRef}>
         <HeadingLevel>
           <VisuallyHidden>
             <Heading>{name}</Heading>
@@ -42,6 +51,8 @@ export function FixtureCard({
       </Card>
     );
   }
+
+  const ms = starting_at_timestamp * 1000;
 
   const localTeam = participants.find((team) => team.meta.location === 'home');
   const visitorTeam = participants.find(
@@ -59,8 +70,7 @@ export function FixtureCard({
   const isFuture = state.state === 'NS';
 
   return (
-    <Card className={[styles._, className].join(' ')}>
-      {id && <ScrollIntoView />}
+    <Card className={[styles._, className].join(' ')} ref={cardRef}>
       <HeadingLevel>
         <VisuallyHidden>
           <Heading>{name}</Heading>
@@ -76,23 +86,25 @@ export function FixtureCard({
                   'HT'
                 )
               ) : (
-                <LocalDateTime
-                  epoch={starting_at_timestamp}
-                  options={{
+                // Do NOT add suppressHydrationWarning — it disables text patching entirely.
+                // https://github.com/vercel/next.js/issues/61911
+                <time dateTime={new Date(ms).toISOString()}>
+                  {new Intl.DateTimeFormat(undefined, {
                     weekday: 'short',
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric',
-                  }}
-                />
+                  }).format(new Date(ms))}
+                </time>
               )}
             </div>
             <div className={styles.Score}>
               {isFuture ? (
-                <LocalDateTime
-                  epoch={starting_at_timestamp}
-                  options={{ timeStyle: 'short' }}
-                />
+                <time dateTime={new Date(ms).toISOString()}>
+                  {new Intl.DateTimeFormat(undefined, {
+                    timeStyle: 'short',
+                  }).format(new Date(ms))}
+                </time>
               ) : (
                 `${currentScores.get('home')}-${currentScores.get('away')}`
               )}
