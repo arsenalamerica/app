@@ -14,10 +14,7 @@ export function generateImageMetadata() {
 }
 
 export default async function Icon({ id }: { id: Promise<string> | string }) {
-  const domain = await resolveTenantFromHeaders({
-    caller: 'icon',
-    strict: true,
-  });
+  const domain = await resolveTenantFromHeaders({ caller: 'icon' });
 
   const Logo = branchLogo[domain];
   const rasterSrc = branchLogoSrc[domain];

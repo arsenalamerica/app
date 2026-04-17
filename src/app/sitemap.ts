@@ -5,10 +5,7 @@ import { resolveTenantFromHeaders } from '@/lib/tenant/resolveTenantFromHeaders'
 const ROUTES = ['', '/fixtures', '/table'] as const;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const host = await resolveTenantFromHeaders({
-    caller: 'sitemap',
-    strict: true,
-  });
+  const host = await resolveTenantFromHeaders({ caller: 'sitemap' });
 
   const lastModified = new Date();
 

@@ -6,10 +6,7 @@ import { resolveTenantFromHeaders } from '@/lib/tenant/resolveTenantFromHeaders'
 import { ICON_SIZES } from './icon-sizes';
 
 export default async function Manifest(): Promise<MetadataRoute.Manifest> {
-  const branchSite = await resolveTenantFromHeaders({
-    caller: 'manifest',
-    strict: true,
-  });
+  const branchSite = await resolveTenantFromHeaders({ caller: 'manifest' });
 
   const branch = branchData[branchSite];
 

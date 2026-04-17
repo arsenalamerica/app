@@ -1,15 +1,9 @@
 import { headers } from 'next/headers';
-import { notFound } from 'next/navigation';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import robots from './robots';
 
 vi.mock('next/headers');
-vi.mock('next/navigation', () => ({
-  notFound: vi.fn(() => {
-    throw new Error('NEXT_NOT_FOUND');
-  }),
-}));
 
 const mockHost = (host: string | null) =>
   vi.mocked(headers).mockResolvedValue({
@@ -44,13 +38,14 @@ describe('robots', () => {
     expect(result.sitemap).toBe('https://boisegooners.com/sitemap.xml');
   });
 
-  it('calls notFound() and warns for unknown host in production', async () => {
+  it('warns and falls back to PREVIEW_FALLBACK for unknown host in production', async () => {
     process.env.VERCEL_ENV = 'production';
     mockHost('not-a-branch.example');
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    await expect(robots()).rejects.toThrow('NEXT_NOT_FOUND');
-    expect(notFound).toHaveBeenCalled();
+    const result = await robots();
+
+    expect(result.sitemap).toBe('https://boisegooners.com/sitemap.xml');
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining('not-a-branch.example'),
     );

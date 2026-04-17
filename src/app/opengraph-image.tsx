@@ -10,10 +10,7 @@ export const size = {
 export const contentType = 'image/png';
 
 export default async function Image() {
-  const domain = await resolveTenantFromHeaders({
-    caller: 'opengraph-image',
-    strict: true,
-  });
+  const domain = await resolveTenantFromHeaders({ caller: 'opengraph-image' });
 
   const Logo = branchLogo[domain];
   const rasterSrc = branchLogoSrc[domain];
