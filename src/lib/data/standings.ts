@@ -1,4 +1,5 @@
 import { type StandingEntity, smStandings } from '@/lib/sportmonks';
+import { shite } from '@/lib/utils';
 
 export async function getStandings(): Promise<StandingEntity[]> {
   try {
@@ -12,8 +13,13 @@ export async function getStandings(): Promise<StandingEntity[]> {
 
     console.info(rest);
 
-    const cleanData = data.map(({ details, ...rest }) => ({
+    const cleanData = data.map(({ details, participant, ...rest }) => ({
       ...rest,
+      participant: {
+        ...participant,
+        name: shite(participant.name),
+        short_code: shite(participant.short_code),
+      },
       stats: Object.fromEntries(
         details.map(({ type, value }) => [type.code, value]),
       ),

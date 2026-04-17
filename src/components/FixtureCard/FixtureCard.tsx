@@ -7,7 +7,6 @@ import {
   type FixtureEntity,
   REGULAR_TIME_ACTIVE_STATES,
 } from '@/lib/sportmonks';
-import { shite } from '@/lib/utils';
 import { Card, type CardProps } from '../Card/Card';
 import { LeagueLogo } from '../LeagueLogo/LeagueLogo';
 import styles from './FixtureCard.module.scss';
@@ -121,7 +120,7 @@ export function FixtureCard({
             />
             <span>{league.name}</span>
           </div>
-          <div>{shite(venue?.name)}</div>
+          <div>{venue?.name}</div>
         </footer>
       </HeadingLevel>
     </Card>
