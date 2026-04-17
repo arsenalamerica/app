@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import type { StandingEntity } from '@/lib/sportmonks';
-import { shite } from '@/lib/utils';
 import { Card } from '../Card/Card';
 import { TeamLogo } from '../TeamLogo/TeamLogo';
 import styles from './LeagueTable.module.scss';
@@ -36,14 +35,12 @@ export function LeagueTable({ standings }: { standings: StandingEntity[] }) {
           <td>
             <TeamLogo
               teamId={team.participant.id}
-              name={shite(team.participant.name)}
+              name={team.participant.name}
               fallback={team.participant.image_path}
             />
-            <span className={styles.TeamName}>
-              {shite(team.participant.name)}
-            </span>
+            <span className={styles.TeamName}>{team.participant.name}</span>
             <span className={styles.ShortName}>
-              {shite(team.participant.short_code)}
+              {team.participant.short_code}
             </span>
           </td>
           <td>{team.stats['overall-matches-played']}</td>

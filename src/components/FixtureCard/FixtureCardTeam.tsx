@@ -1,5 +1,4 @@
 import type { EntityBase } from '@/lib/sportmonks';
-import { shite } from '@/lib/utils';
 import { TeamLogo } from '../TeamLogo/TeamLogo';
 import styles from './FixtureCard.module.scss';
 
@@ -15,8 +14,6 @@ export function FixtureCardTeam({
   short_code,
   isLoading,
 }: FixtureCardTeamProps) {
-  const properName = shite(name);
-
   const loadingClassname = isLoading ? 'loading' : '';
 
   return (
@@ -29,7 +26,7 @@ export function FixtureCardTeam({
         fallback={image_path}
       />
       <div className={[styles.TeamName, loadingClassname].join(' ')}>
-        {properName}
+        {name}
       </div>
       <div className={[styles.TeamAbbr, loadingClassname].join(' ')}>
         {short_code}

@@ -1,6 +1,20 @@
 import { type FixtureEntity, smFixtures, smTvStation } from '@/lib/sportmonks';
+import { shite } from '@/lib/utils';
 
 const USA_COUNTRY_ID = 3483;
+
+function applyShite(fixture: FixtureEntity): FixtureEntity {
+  return {
+    ...fixture,
+    participants: fixture.participants?.map((p) => ({
+      ...p,
+      name: shite(p.name),
+    })),
+    venue: fixture.venue
+      ? { ...fixture.venue, name: shite(fixture.venue.name) }
+      : fixture.venue,
+  };
+}
 
 export async function getFixtures(): Promise<FixtureEntity[]> {
   try {
@@ -27,7 +41,7 @@ export async function getFixtures(): Promise<FixtureEntity[]> {
         ...params,
         page: String(page),
       });
-      all.push(...data);
+      all.push(...data.map(applyShite));
       if (!pagination.has_more) break;
       page += 1;
     }
@@ -73,7 +87,7 @@ export async function getNextFixture(): Promise<FixtureEntity[]> {
 
     console.info(rest);
 
-    return data;
+    return data.map(applyShite);
   } catch (error) {
     console.error(error);
     throw error;
