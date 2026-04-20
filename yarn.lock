@@ -45,14 +45,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@axe-core/playwright@npm:4.11.1":
-  version: 4.11.1
-  resolution: "@axe-core/playwright@npm:4.11.1"
+"@axe-core/playwright@npm:4.11.2":
+  version: 4.11.2
+  resolution: "@axe-core/playwright@npm:4.11.2"
   dependencies:
-    axe-core: "npm:~4.11.1"
+    axe-core: "npm:~4.11.3"
   peerDependencies:
     playwright-core: ">= 1.0.0"
-  checksum: 10c0/8c916cd2dd831d91f8c2ab9e3a07ef19837415bb41d40439e4acb88ed0009af2479696b865670199b13ccad984a247868610fbb34d520fca9f7c02de0f7a9439
+  checksum: 10c0/cb6f259c969668ae41b1c56e9fbf8d380d4b9440ef76f3037faa615fdcd36a748f53451116bb53b101dae52c6adc9183ce8de7f62819beb3866989849a9834b6
   languageName: node
   linkType: hard
 
@@ -3063,7 +3063,7 @@ __metadata:
   resolution: "app@workspace:."
   dependencies:
     "@ariakit/react": "npm:0.4.25"
-    "@axe-core/playwright": "npm:4.11.1"
+    "@axe-core/playwright": "npm:4.11.2"
     "@biomejs/biome": "npm:2.4.12"
     "@playwright/test": "npm:1.59.1"
     "@testing-library/dom": "npm:10.4.1"
@@ -3219,7 +3219,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axe-core@npm:~4.11.1":
+"axe-core@npm:~4.11.3":
   version: 4.11.3
   resolution: "axe-core@npm:4.11.3"
   checksum: 10c0/bc757775ef41396faf6470752a12e96f3972d0d97cae4ec28e99cec7bca2c5aaa6d040b97e7f0278e8d1ea354fa0b0bf7fcaa51775a725d7ed0a0834e7ea13d7
