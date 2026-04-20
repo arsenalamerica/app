@@ -1,15 +1,14 @@
-'use client';
-
 import { Heading, HeadingLevel, VisuallyHidden } from '@ariakit/react';
 
-import { useEffect, useRef } from 'react';
 import {
   type FixtureEntity,
   REGULAR_TIME_ACTIVE_STATES,
 } from '@/lib/sportmonks';
 import { Card, type CardProps } from '../Card/Card';
 import { LeagueLogo } from '../LeagueLogo/LeagueLogo';
+import { LocalDateTime } from '../LocalDateTime/LocalDateTime';
 import styles from './FixtureCard.module.scss';
+import { FixtureCardAnchor } from './FixtureCardAnchor';
 
 import { FixtureCardTeam } from './FixtureCardTeam';
 
@@ -30,35 +29,25 @@ export function FixtureCard({
   id,
   ...rest
 }: FixtureCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
   // Only treat string ids as DOM anchors. Numeric fixture ids reach this
   // component via spread on the home page and shouldn't pollute the DOM.
   const domId = typeof id === 'string' ? id : undefined;
 
-  useEffect(() => {
-    if (id) {
-      cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [id]);
-
   if (!participants) {
     return (
-      <Card
-        id={domId}
-        className={[styles._, className].join(' ')}
-        ref={cardRef}
-      >
-        <HeadingLevel>
-          <VisuallyHidden>
-            <Heading>{name}</Heading>
-          </VisuallyHidden>
-          <div className={styles.Details}>No upcoming fixtures...</div>
-        </HeadingLevel>
-      </Card>
+      <>
+        {domId && <FixtureCardAnchor targetId={domId} />}
+        <Card id={domId} className={[styles._, className].join(' ')} {...rest}>
+          <HeadingLevel>
+            <VisuallyHidden>
+              <Heading>{name}</Heading>
+            </VisuallyHidden>
+            <div className={styles.Details}>No upcoming fixtures...</div>
+          </HeadingLevel>
+        </Card>
+      </>
     );
   }
-
-  const ms = starting_at_timestamp * 1000;
 
   const localTeam = participants.find((team) => team.meta.location === 'home');
   const visitorTeam = participants.find(
@@ -76,61 +65,81 @@ export function FixtureCard({
   const isFuture = state.state === 'NS';
 
   return (
-    <Card id={domId} className={[styles._, className].join(' ')} ref={cardRef}>
-      <HeadingLevel>
-        <VisuallyHidden>
-          <Heading>{name}</Heading>
-        </VisuallyHidden>
-        <div className={styles.Details}>
-          {localTeam && <FixtureCardTeam {...localTeam} />}
-          <div className={styles.Separator}>
-            <div className={styles.Date}>
-              {isActive ? (
-                ticking ? (
-                  `${ticking.minutes}'`
+    <>
+      {domId && <FixtureCardAnchor targetId={domId} />}
+      <Card id={domId} className={[styles._, className].join(' ')} {...rest}>
+        <HeadingLevel>
+          <VisuallyHidden>
+            <Heading>{name}</Heading>
+          </VisuallyHidden>
+          <div className={styles.Details}>
+            {localTeam && <FixtureCardTeam {...localTeam} />}
+            <div className={styles.Separator}>
+              <div className={styles.Date}>
+                {isActive ? (
+                  ticking ? (
+                    `${ticking.minutes}'`
+                  ) : (
+                    'HT'
+                  )
+                ) : isFuture ? (
+                  <LocalDateTime
+                    epoch={starting_at_timestamp}
+                    options={{
+                      weekday: 'short',
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    }}
+                  />
                 ) : (
-                  'HT'
-                )
-              ) : (
-                // Do NOT add suppressHydrationWarning — it disables text patching entirely.
-                // https://github.com/vercel/next.js/issues/61911
-                <time dateTime={new Date(ms).toISOString()}>
-                  {new Intl.DateTimeFormat(undefined, {
-                    weekday: 'short',
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  }).format(new Date(ms))}
-                </time>
-              )}
+                  // Past fixture shows a date only (no time). Render it on
+                  // the server in UTC to skip the client island — all
+                  // branches are in North America and matches are in Europe,
+                  // so the UTC/local date never disagree for a completed
+                  // match.
+                  <time
+                    dateTime={new Date(
+                      starting_at_timestamp * 1000,
+                    ).toISOString()}
+                  >
+                    {new Intl.DateTimeFormat('en-US', {
+                      weekday: 'short',
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      timeZone: 'UTC',
+                    }).format(new Date(starting_at_timestamp * 1000))}
+                  </time>
+                )}
+              </div>
+              <div className={styles.Score}>
+                {isFuture ? (
+                  <LocalDateTime
+                    epoch={starting_at_timestamp}
+                    options={{ timeStyle: 'short' }}
+                  />
+                ) : (
+                  `${currentScores.get('home')}-${currentScores.get('away')}`
+                )}
+              </div>
             </div>
-            <div className={styles.Score}>
-              {isFuture ? (
-                <time dateTime={new Date(ms).toISOString()}>
-                  {new Intl.DateTimeFormat(undefined, {
-                    timeStyle: 'short',
-                  }).format(new Date(ms))}
-                </time>
-              ) : (
-                `${currentScores.get('home')}-${currentScores.get('away')}`
-              )}
+            {visitorTeam && <FixtureCardTeam {...visitorTeam} />}
+          </div>
+          <footer className={styles.Metadata}>
+            <div>
+              <LeagueLogo
+                leagueId={league.id}
+                name={league.name}
+                fallback={league.image_path}
+              />
+              <span>{league.name}</span>
             </div>
-          </div>
-          {visitorTeam && <FixtureCardTeam {...visitorTeam} />}
-        </div>
-        <footer className={styles.Metadata}>
-          <div>
-            <LeagueLogo
-              leagueId={league.id}
-              name={league.name}
-              fallback={league.image_path}
-            />
-            <span>{league.name}</span>
-          </div>
-          <div>{venue?.name}</div>
-        </footer>
-      </HeadingLevel>
-    </Card>
+            <div>{venue?.name}</div>
+          </footer>
+        </HeadingLevel>
+      </Card>
+    </>
   );
 }
 

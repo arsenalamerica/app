@@ -1,4 +1,4 @@
-# ADR-005: Static fixture index and state-aware per-fixture caching
+# ADR-005: Static fixture index, state-aware caching, and build-time prerender
 
 ## Status
 
@@ -17,13 +17,13 @@ Two things about this workload make it a poor fit for per-request fetching:
 - **The fixture list itself is ~static.** Premier League schedules change fewer than five times a season (postponements, cup-tie replacements). The overwhelming majority of requests re-fetch data that has not moved.
 - **Individual fixtures have sharply different staleness windows.** A settled past match (scores final, lineups known, stats reconciled) never changes in practice — barring a rare retroactive correction. An upcoming or in-progress fixture changes minute-to-minute while live, and hour-to-hour in the days leading up to kickoff.
 
-PR #69 added Next 16 cache components (`'use cache'` + `cacheLife` + `cacheTag`) to this repo but the fixtures path was not yet using them at fixture-ID granularity. The bulk `getFixtures()` response was cached, but one tenant's request fetched all fixtures for every tenant; every deploy discarded the cache; and one failure in the bulk call failed the entire route.
+PR #69 added Next 16 cache components (`'use cache'` + `cacheLife` + `cacheTag`) to this repo. `cacheComponents: true` is enabled in `next.config.ts` — the Next 16 replacement for `experimental.ppr`, which gives us static shell + cached components + dynamic Suspense holes in a single route.
 
 ### The public-repo constraint
 
-An early draft of this work (tracked on the original issue #63) proposed committing full Sportmonks fixture payloads into the repo as `fixtures.json`. This repository is public. Committing raw structured match data (scores, lineups, events, stats) publishes a re-scrapeable copy of licensed Sportmonks data into git history and violates their terms. This ADR's decisions flow from that narrow constraint.
+An early draft proposed committing full Sportmonks fixture payloads into the repo as `fixtures.json`. This repository is public. Committing raw structured match data (scores, lineups, events, stats) publishes a re-scrapeable copy of licensed Sportmonks data into git history and violates their terms. This ADR's decisions flow from that narrow constraint.
 
-The ToS line is about **raw data redistribution**, not about all forms of persisted rendering. Pre-rendered HTML of the same matches — shipped as a Vercel build artifact — is a derivative display of licensed data, which is exactly what the API license authorizes and is not the same concern. That distinction is material to follow-up work; see "Future work" below.
+The ToS line is about **raw data redistribution**, not about all forms of persisted rendering. Pre-rendered HTML of the same matches — shipped as a Vercel build artifact — is a derivative display of licensed data, which is exactly what the API license authorizes. Build output lives in Vercel's non-public build cache, not git. That distinction makes build-time prerender of settled fixtures architecturally safe.
 
 ### What the Data Cache gives us
 
@@ -31,9 +31,13 @@ Next 16's `'use cache'` integrates with Vercel's Data Cache. Three properties ma
 
 - **Persists across deploys.** A cache entry written on deploy N is still hit on deploy N+1 unless the `cacheTag` is revalidated or the profile TTL elapses.
 - **Shared across function instances.** All serverless invocations in a region (and across regions on Pro, which this team is on — see ADR-003) read the same store.
-- **Keyed on function identity + argument tuple.** Two tenants calling `getFixtureById(19477832)` hit the same cache entry. A per-tenant wrapper would defeat this; a fixture-ID-only signature preserves it.
+- **Keyed on function identity + argument tuple.** Two tenants calling `getSettledFixtureById(19477832)` hit the same cache entry. A per-tenant wrapper would defeat this; a fixture-ID-only signature preserves it.
 
 Together these mean: if every rendered card is fetched by fixture ID through a cached function, the Data Cache will deduplicate across tenants for free, without any external cache store (no Redis, no KV).
+
+### Baseline Lighthouse observation
+
+Before this work, `/fixtures` rendered as streaming SSR with 61 Suspense boundaries on the critical path. Lighthouse perf scores were `0.82, 0.88, 0.9` across three sequential runs — consistent enough to rule out cold-cache noise and below the `0.95` threshold applied elsewhere in the app.
 
 ## Decision
 
@@ -47,34 +51,39 @@ The index is maintained by a daily GitHub Actions cron (`.github/workflows/sync-
 
 Replace the single bulk `getFixtures()` with two single-fixture fetchers in `src/lib/data/fixtures.ts`:
 
-- `getSettledFixtureById(id)` — `cacheLife('max')`, `cacheTag('fixture:${id}')`. For fixtures more than 24 hours past kickoff, data is effectively frozen; the Data Cache should hold onto it indefinitely.
+- `getSettledFixtureById(id)` — `cacheLife('max')`, `cacheTag('fixture:${id}')`. For fixtures more than 24 hours past kickoff, data is effectively frozen; the Data Cache should hold onto it indefinitely. This profile also makes the fetcher eligible for build-time evaluation, which is how settled cards end up prerendered in the shell (see "Build-time prerender" below).
 - `getUnsettledFixtureById(id)` — `cacheLife('minutes')`, `cacheTag('fixture:${id}')`. For upcoming, live, and just-ended fixtures, short TTL keeps scores and state fresh.
 
 Both take only `id: number` to preserve cross-tenant cache sharing. Both apply the existing `shite()` rewrite at the data layer per prior convention. The 24-hour "settled" threshold balances two concerns: staying cache-eligible as early as possible after the final whistle, while leaving a buffer for Sportmonks' post-match reconciliation (stats corrections, delayed lineup entries).
 
+### Build-time PPR shell + request-time streaming from cache
+
+Under `cacheComponents: true`, `/fixtures` is Partial-Prerender-eligible. `generateStaticParams()` enumerates every branch domain so Next builds one concrete PPR entry per tenant (`/[domain]/fixtures`); the prerendered RSC segment carries the static shell — page heading, error boundaries, `FixtureCardLoading` fallbacks — and ships in the build artifact. Cached card payloads live in the Vercel Data Cache, not in the prerender segment.
+
+At request time, the static shell streams first and each card's Suspense boundary resolves from the Vercel Data Cache. Settled cards hit `cacheLife('max')` and come back instantly (no network); unsettled cards hit `cacheLife('minutes')` and may call Sportmonks if the per-fixture entry has expired. The initial HTML arriving at the browser contains `FixtureCardLoading` skeletons while React resolves each boundary, then `<template id="B:N">` chunks + `$RC(...)` inline the real card markup. For settled cards the whole cycle completes in single-digit to low-double-digit milliseconds from the shell paint.
+
+Two changes make this work cleanly:
+
+- **Cached timing helper.** `src/lib/data/fixtureTiming.ts` exports `getFixtureTiming()` (`'use cache'`, `cacheLife('hours')`, `cacheTag('fixtures:timing')`). It computes `nowS = Math.floor(Date.now() / 1000)` — allowed inside `'use cache'` — and returns `{ nextFixtureId, settledIds }`. The page body awaits this helper and dispatches per fixture without calling `await connection()` or touching `Date.now()` directly, so the route stays PPR-eligible.
+- **Client-island scroll effect.** The scroll-into-view behavior that previously forced `'use client'` on the whole `FixtureCard` is extracted into a null-rendering client component (`FixtureCardAnchor`). It runs `document.getElementById(id)?.scrollIntoView(...)` on mount. The `FixtureCard` body is now a server component, which is what the PPR render pipeline needs.
+
+**What cached-component rendering is not.** `'use cache'` + `cacheLife('max')` does not inline the cached JSX directly into the prerendered static HTML shell; cached data sits in the Data Cache and streams back through the normal Suspense pipeline at request time. The practical difference from "inlined in shell" is one render frame of skeleton flash on initial paint. The ADR's architectural promise — zero Sportmonks calls for settled cards, cross-tenant sharing, per-card isolation — holds regardless.
+
 ### Per-card isolation
 
-The fixtures page becomes a static dispatcher over the committed index:
+Every card — settled or unsettled — is wrapped identically: `<ErrorBoundary>` on the outside, `<Suspense fallback={<FixtureCardLoading />}>` on the inside. The Suspense boundary is what lets React stream the PPR shell while each card resolves asynchronously from the Data Cache. Without it, the shell would block until every card's cache lookup completed (even fast ones add up at 55× sequential awaits), defeating the point of streaming and regressing LCP. A Sportmonks failure on any one fixture renders a single-card error fallback; the rest of the page is unaffected. The only structural difference between settled and unsettled paths is which data-layer fetcher the card calls (and therefore the `cacheLife` profile behind it), not the Suspense wrapping.
 
-```
-for each { id, kickoff } in fixtures.json:
-  isSettled = (now - kickoff) > 24h
-  Card = isSettled ? SettledFixtureCard : UnsettledFixtureCard
-  render <ErrorBoundary><Suspense><Card fixtureId={id} /></Suspense></ErrorBoundary>
-```
-
-Each card is wrapped in `react-error-boundary` + `<Suspense>`. A Sportmonks failure on one fixture renders a single-card error fallback; the rest of the page streams in normally. The existing `FixtureCardLoading` skeleton is reused as the Suspense fallback, and `src/app/[domain]/fixtures/loading.tsx` renders exactly `fixtures.length` skeletons for an exact first-paint match.
-
-The "next fixture" scroll anchor (HTML id `next-fixture`) is derived on the server by sorting the index by `kickoff` and selecting the first fixture whose kickoff is within the unsettled window. The client-side scroll behavior in `FixtureCard.tsx` is unchanged; only the source of the ID moved from an API round-trip (`getNextFixture()`) to the static index.
+The "next fixture" scroll anchor (HTML id `next-fixture`) is derived inside the cached timing helper — sort by `kickoff`, pick the first fixture whose kickoff has not yet crossed the 24h-settled threshold. The anchor id is rendered server-side on the one matching card; the client island reads that id and scrolls on mount.
 
 ### Request-path flow
 
 ```mermaid
 flowchart TD
-    A["fixtures.json<br/>(id + kickoff only, committed)"] --> B["fixtures/page.tsx<br/>static dispatcher"]
-    B --> C{"now − kickoff &gt; 24h?"}
-    C -->|yes| D["&lt;SettledFixtureCard&gt;<br/>wrapped in Suspense + ErrorBoundary"]
-    C -->|no| E["&lt;UnsettledFixtureCard&gt;<br/>wrapped in Suspense + ErrorBoundary"]
+    A["fixtures.json<br/>(id + kickoff only, committed)"] --> B["fixtures/page.tsx<br/>static shell"]
+    B --> T["getFixtureTiming()<br/>cacheLife('hours')<br/>cacheTag('fixtures:timing')"]
+    T --> C{"settledIds.has(id)?"}
+    C -->|yes| D["&lt;SettledFixtureCard&gt;<br/>resolves from Data Cache<br/>(Suspense + ErrorBoundary)"]
+    C -->|no| E["&lt;UnsettledFixtureCard&gt;<br/>streams at request<br/>(Suspense + ErrorBoundary)"]
     D --> F["getSettledFixtureById(id)<br/>cacheLife('max')<br/>cacheTag('fixture:{id}')"]
     E --> G["getUnsettledFixtureById(id)<br/>cacheLife('minutes')<br/>cacheTag('fixture:{id}')"]
     F --> H["smFixture(id)"]
@@ -88,7 +97,7 @@ flowchart TD
 
 - **No automated cache invalidation.** `cacheTag('fixture:${id}')` reserves the hook; a manual invalidation path can be layered on later if a real need materializes. Cold-path discovery of stale data is acceptable for this workload.
 - **No changes to `getNextFixture()`.** It is still used by the home page and game-card routes and is out of scope.
-- **No custom `cacheLife` profiles.** `'max'` and `'minutes'` are the built-in Next 16 profiles; no `experimental.cacheLife` configuration is needed.
+- **No custom `cacheLife` profiles.** `'max'`, `'hours'`, and `'minutes'` are the built-in Next 16 profiles; no `experimental.cacheLife` configuration is needed.
 
 ### Rejected alternatives
 
@@ -96,19 +105,19 @@ flowchart TD
 - **Redis / Upstash / external cache store.** Vercel Data Cache already persists across deploys and shares across all function instances. Keying the fetchers on fixture ID alone gives cross-tenant sharing for free. Adding Redis would be redundant infrastructure for a problem already solved by the framework.
 - **Private npm package for match data.** Solves licensing but introduces a private registry, build-time auth, and cross-repo release coordination. Premature infrastructure given the Data Cache path works.
 - **Keep the bulk `getFixtures()` with tighter TTLs.** Does not fix per-card isolation (one failure still blanks the page) and does not share across tenants the way per-fixture keys do.
-
-### Deferred, not rejected
-
-- **Build-time prerender of settled fixtures (Next 16 PPR).** Settled fixtures (`cacheLife('max')`) are immutable and a natural fit for build-time rendering: static shell + static settled cards + dynamic unsettled holes. This collapses 50+ Suspense boundaries on the critical rendering path and materially improves both Lighthouse perf and steady-state UX. It does **not** violate the licensing constraint above — the build artifact is rendered HTML, not raw data. Deferred because the current `await connection()` / `Date.now()` dispatcher blocks prerender (the "which card is next?" derivation has to move) and `FixtureCard`'s `'use client'` scroll effect needs to be isolated so the card body can render as a server component. Tracked in issue #75.
+- **Opt the whole page out of prerender with `connection()`.** The interim shape of this work did this to allow `Date.now()` in the page body. The cached timing helper replaces it; the whole page is PPR-eligible again and the static shell ships in the build artifact. Settled card payloads still stream from the Data Cache through Suspense at request time (Next 16's `'use cache'` semantics), so the throttled-network Lighthouse score on `/fixtures` remains network-bound by the ~500 KiB HTML document — `lighthouserc.json` carries a lower threshold specifically for `/fixtures` pending list windowing (tracked in #65).
 
 ## Consequences
 
-- **Cold-path cost shifts from per-request to per-fixture-first-view.** The first render of a given fixture's card triggers one Sportmonks call; every subsequent render (any tenant, any request) hits the Data Cache. Over the life of a deploy the number of Sportmonks calls the fixtures page generates trends to the count of unique fixtures viewed, not the count of page views.
+- **Settled-card payloads live in the Vercel Data Cache, not the prerender segment.** `generateStaticParams()` enumerates every branch domain and Next builds one PPR entry per tenant. The prerendered RSC segment for `/[domain]/fixtures` carries the static shell — heading, error boundaries, `FixtureCardLoading` skeletons — and ships in the build artifact. On each request, `'use cache'` streams the cached card markup back into each Suspense boundary from the Data Cache. Sportmonks is not called at request time for settled fixtures once the cache is warm.
+- **Unsettled cards stream in at request time.** `<Suspense fallback={<FixtureCardLoading />}>` wraps each; the skeleton is visible until the server-side cache entry resolves. `cacheLife('minutes')` keeps scores fresh.
+- **Sportmonks call count on `/fixtures` trends to `count(unsettled fixtures)`.** Settled cards' data is already in the Data Cache (seeded by the first request that misses after a deploy or tag invalidation, then shared across every subsequent request and every tenant).
 - **Cross-tenant cache sharing comes for free.** All six tenants rendering the same fixture share the same cache entry. No Redis, no tenant-aware keying to reason about.
-- **Per-card isolation.** One fixture's Sportmonks failure renders a single card's error fallback, not a blank page. The rest of the schedule streams in.
-- **`fixtures.json` is a committed artifact.** The daily cron opens a PR only when the content actually changes. Schedule shifts land as human-reviewed PRs — not silent auto-merges — which is consistent with the low-frequency, high-visibility nature of Premier League schedule changes.
+- **Per-card isolation.** One fixture's Sportmonks failure renders a single card's error fallback, not a blank page. The rest of the schedule is untouched.
+- **Timing decisions revalidate hourly.** `getFixtureTiming()` uses `cacheLife('hours')`, so when a fixture crosses the 24h-past-kickoff threshold, it can take up to ~1 hour before the page re-dispatches from `UnsettledFixtureCard` to `SettledFixtureCard` and the `#next-fixture` anchor moves to the next match. Acceptable for a scroll target.
+- **`fixtures.json` is a committed artifact.** The daily cron opens a PR only when the content actually changes. Schedule shifts land as human-reviewed PRs.
 - **A rare retroactive Sportmonks correction to a settled fixture stays cached.** `cacheLife('max')` means a historic stat edit will not surface until the cache entry is manually invalidated or the function signature changes. The `cacheTag('fixture:${id}')` is the escape hatch when that need comes up.
 - **Dependency added:** `react-error-boundary`. Small, stable, widely-used; the equivalent local class component would be strictly more code to maintain.
-- **`getFixtures()` is deleted.** `getNextFixture()` is the only remaining caller of `smFixtures()`; the latter is kept. The unused `_id` parameter on `smFixtures` can be dropped as incidental cleanup.
-- **Loading skeleton count is exact.** `loading.tsx` reads `fixtures.length` from the committed index, so first-paint skeletons match the rendered page exactly — no over- or under-rendering.
-- **Lighthouse performance on `/fixtures` takes a measurable hit.** 61 streaming Suspense boundaries + the hydration cost of 61 `'use client'` `FixtureCard` components move first-paint work out of prerender and onto the request path. The `/fixtures` threshold in `lighthouserc.json` is temporarily relaxed (0.85 vs 0.95 elsewhere) to reflect the current ceiling; restoration is tracked in issue #75.
+- **`getFixtures()` is deleted.** `getNextFixture()` is the only remaining caller of `smFixtures()`; the latter is kept.
+- **Brief skeleton flash on first paint.** The static shell arrives with `FixtureCardLoading` placeholders for every card. Settled cards resolve from the Data Cache in single-digit to low-double-digit milliseconds and the skeleton is immediately replaced by a `<template>`/`$RC()` streaming chunk; unsettled cards may take longer if the minutes-TTL entry expired and Sportmonks is queried. The skeleton flash is the cost of Next 16 cached-component streaming — it is not a correctness issue and the cards are present before the browser paints a second frame in the common case.
+- **Lighthouse performance on `/fixtures` is below the app-wide threshold.** PPR moves all the JS work off the critical path, but FCP/LCP on throttled networks remains bound by the ~500 KiB HTML document carrying 55 card Suspense boundaries. `lighthouserc.json` carves out a lower threshold specifically for `/fixtures` via `assertMatrix` pending list windowing (tracked in #65); every other route still clears the app-wide `0.95` target.
