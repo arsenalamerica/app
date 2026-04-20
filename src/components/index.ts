@@ -2,6 +2,7 @@ export * from './Card/Card';
 export * from './ExternalLink/ExternalLink';
 export * from './FathomNext/FathomNext';
 export * from './FixtureCard/FixtureCard';
+export * from './FixtureCard/FixtureCardAnchor';
 export * from './FixtureCard/FixtureCardError';
 export * from './FixtureCard/SettledFixtureCard';
 export * from './FixtureCard/UnsettledFixtureCard';

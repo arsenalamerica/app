@@ -1,8 +1,5 @@
-'use client';
-
 import { Heading, HeadingLevel, VisuallyHidden } from '@ariakit/react';
 
-import { useEffect, useRef } from 'react';
 import {
   type FixtureEntity,
   REGULAR_TIME_ACTIVE_STATES,
@@ -10,6 +7,7 @@ import {
 import { Card, type CardProps } from '../Card/Card';
 import { LeagueLogo } from '../LeagueLogo/LeagueLogo';
 import styles from './FixtureCard.module.scss';
+import { FixtureCardAnchor } from './FixtureCardAnchor';
 
 import { FixtureCardTeam } from './FixtureCardTeam';
 
@@ -30,31 +28,23 @@ export function FixtureCard({
   id,
   ...rest
 }: FixtureCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
   // Only treat string ids as DOM anchors. Numeric fixture ids reach this
   // component via spread on the home page and shouldn't pollute the DOM.
   const domId = typeof id === 'string' ? id : undefined;
 
-  useEffect(() => {
-    if (id) {
-      cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [id]);
-
   if (!participants) {
     return (
-      <Card
-        id={domId}
-        className={[styles._, className].join(' ')}
-        ref={cardRef}
-      >
-        <HeadingLevel>
-          <VisuallyHidden>
-            <Heading>{name}</Heading>
-          </VisuallyHidden>
-          <div className={styles.Details}>No upcoming fixtures...</div>
-        </HeadingLevel>
-      </Card>
+      <>
+        {domId && <FixtureCardAnchor targetId={domId} />}
+        <Card id={domId} className={[styles._, className].join(' ')}>
+          <HeadingLevel>
+            <VisuallyHidden>
+              <Heading>{name}</Heading>
+            </VisuallyHidden>
+            <div className={styles.Details}>No upcoming fixtures...</div>
+          </HeadingLevel>
+        </Card>
+      </>
     );
   }
 
@@ -76,61 +66,64 @@ export function FixtureCard({
   const isFuture = state.state === 'NS';
 
   return (
-    <Card id={domId} className={[styles._, className].join(' ')} ref={cardRef}>
-      <HeadingLevel>
-        <VisuallyHidden>
-          <Heading>{name}</Heading>
-        </VisuallyHidden>
-        <div className={styles.Details}>
-          {localTeam && <FixtureCardTeam {...localTeam} />}
-          <div className={styles.Separator}>
-            <div className={styles.Date}>
-              {isActive ? (
-                ticking ? (
-                  `${ticking.minutes}'`
+    <>
+      {domId && <FixtureCardAnchor targetId={domId} />}
+      <Card id={domId} className={[styles._, className].join(' ')}>
+        <HeadingLevel>
+          <VisuallyHidden>
+            <Heading>{name}</Heading>
+          </VisuallyHidden>
+          <div className={styles.Details}>
+            {localTeam && <FixtureCardTeam {...localTeam} />}
+            <div className={styles.Separator}>
+              <div className={styles.Date}>
+                {isActive ? (
+                  ticking ? (
+                    `${ticking.minutes}'`
+                  ) : (
+                    'HT'
+                  )
                 ) : (
-                  'HT'
-                )
-              ) : (
-                // Do NOT add suppressHydrationWarning — it disables text patching entirely.
-                // https://github.com/vercel/next.js/issues/61911
-                <time dateTime={new Date(ms).toISOString()}>
-                  {new Intl.DateTimeFormat(undefined, {
-                    weekday: 'short',
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  }).format(new Date(ms))}
-                </time>
-              )}
+                  // Do NOT add suppressHydrationWarning — it disables text patching entirely.
+                  // https://github.com/vercel/next.js/issues/61911
+                  <time dateTime={new Date(ms).toISOString()}>
+                    {new Intl.DateTimeFormat(undefined, {
+                      weekday: 'short',
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    }).format(new Date(ms))}
+                  </time>
+                )}
+              </div>
+              <div className={styles.Score}>
+                {isFuture ? (
+                  <time dateTime={new Date(ms).toISOString()}>
+                    {new Intl.DateTimeFormat(undefined, {
+                      timeStyle: 'short',
+                    }).format(new Date(ms))}
+                  </time>
+                ) : (
+                  `${currentScores.get('home')}-${currentScores.get('away')}`
+                )}
+              </div>
             </div>
-            <div className={styles.Score}>
-              {isFuture ? (
-                <time dateTime={new Date(ms).toISOString()}>
-                  {new Intl.DateTimeFormat(undefined, {
-                    timeStyle: 'short',
-                  }).format(new Date(ms))}
-                </time>
-              ) : (
-                `${currentScores.get('home')}-${currentScores.get('away')}`
-              )}
+            {visitorTeam && <FixtureCardTeam {...visitorTeam} />}
+          </div>
+          <footer className={styles.Metadata}>
+            <div>
+              <LeagueLogo
+                leagueId={league.id}
+                name={league.name}
+                fallback={league.image_path}
+              />
+              <span>{league.name}</span>
             </div>
-          </div>
-          {visitorTeam && <FixtureCardTeam {...visitorTeam} />}
-        </div>
-        <footer className={styles.Metadata}>
-          <div>
-            <LeagueLogo
-              leagueId={league.id}
-              name={league.name}
-              fallback={league.image_path}
-            />
-            <span>{league.name}</span>
-          </div>
-          <div>{venue?.name}</div>
-        </footer>
-      </HeadingLevel>
-    </Card>
+            <div>{venue?.name}</div>
+          </footer>
+        </HeadingLevel>
+      </Card>
+    </>
   );
 }
 

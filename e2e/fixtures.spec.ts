@@ -1,4 +1,9 @@
 import { expect, test } from '@playwright/test';
+import fixturesData from '../src/lib/sportmonks/fixtures.json';
+
+type FixtureIndexEntry = { id: number; kickoff: number };
+const fixtures: FixtureIndexEntry[] = fixturesData;
+const SETTLED_THRESHOLD_S = 86_400;
 
 test('fixtures page renders the Fixtures heading', async ({ page }) => {
   await page.goto('/fixtures');
@@ -13,4 +18,36 @@ test('fixtures page exposes the next-fixture scroll anchor', async ({
   // the committed fixtures.json index without calling getNextFixture(), and
   // gives /fixtures#next-fixture a navigable deep-link target.
   await expect(page.locator('#next-fixture')).toBeAttached();
+});
+
+test('settled fixtures stream real card markup into the /fixtures response', async ({
+  request,
+}) => {
+  const nowS = Math.floor(Date.now() / 1000);
+  const settledCutoff = nowS - SETTLED_THRESHOLD_S;
+  const settledCount = fixtures.filter(
+    ({ kickoff }) => kickoff < settledCutoff,
+  ).length;
+
+  // No settled fixtures exist at the start of a new season. The assertion
+  // below has nothing meaningful to verify in that window.
+  test.skip(
+    settledCount === 0,
+    'no settled fixtures in index yet — start of season',
+  );
+
+  // request.get() returns the full streamed response body — the PPR shell
+  // plus every Suspense boundary that resolved before the stream closed.
+  // Settled cards hit cacheLife('max') and resolve ~instantly; their real
+  // markup must be present by the time the stream ends.
+  const response = await request.get('/fixtures');
+  const html = await response.text();
+
+  // `<time dateTime=` is emitted by FixtureCard (kickoff timestamp) and does
+  // not appear in FixtureCardLoading. One match = one resolved card. If a
+  // settled card regresses and never streams (e.g. cache miss + upstream
+  // failure), this count drops below the known settled count and the test
+  // fails.
+  const resolvedCardCount = (html.match(/<time dateTime=/g) ?? []).length;
+  expect(resolvedCardCount).toBeGreaterThanOrEqual(settledCount);
 });
