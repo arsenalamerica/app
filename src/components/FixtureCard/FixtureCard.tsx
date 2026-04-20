@@ -37,7 +37,7 @@ export function FixtureCard({
     return (
       <>
         {domId && <FixtureCardAnchor targetId={domId} />}
-        <Card id={domId} className={[styles._, className].join(' ')}>
+        <Card id={domId} className={[styles._, className].join(' ')} {...rest}>
           <HeadingLevel>
             <VisuallyHidden>
               <Heading>{name}</Heading>
@@ -67,7 +67,7 @@ export function FixtureCard({
   return (
     <>
       {domId && <FixtureCardAnchor targetId={domId} />}
-      <Card id={domId} className={[styles._, className].join(' ')}>
+      <Card id={domId} className={[styles._, className].join(' ')} {...rest}>
         <HeadingLevel>
           <VisuallyHidden>
             <Heading>{name}</Heading>

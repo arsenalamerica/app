@@ -13,6 +13,18 @@ test('fixtures page renders the Fixtures heading', async ({ page }) => {
 test('fixtures page exposes the next-fixture scroll anchor', async ({
   page,
 }) => {
+  const nowS = Math.floor(Date.now() / 1000);
+  const settledCutoff = nowS - SETTLED_THRESHOLD_S;
+  const hasUnsettled = fixtures.some(({ kickoff }) => kickoff > settledCutoff);
+
+  // End-of-season: every fixture is more than 24h past kickoff, so
+  // getFixtureTiming() returns nextFixtureId = undefined and no card renders
+  // the #next-fixture anchor. Nothing to assert.
+  test.skip(
+    !hasUnsettled,
+    'every fixture is settled — end of season, no next-fixture anchor',
+  );
+
   await page.goto('/fixtures');
   // Anchor presence confirms the server derived the correct fixture id from
   // the committed fixtures.json index without calling getNextFixture(), and
@@ -43,11 +55,11 @@ test('settled fixtures stream real card markup into the /fixtures response', asy
   const response = await request.get('/fixtures');
   const html = await response.text();
 
-  // `<time dateTime=` is emitted by FixtureCard (kickoff timestamp) and does
-  // not appear in FixtureCardLoading. One match = one resolved card. If a
-  // settled card regresses and never streams (e.g. cache miss + upstream
-  // failure), this count drops below the known settled count and the test
-  // fails.
-  const resolvedCardCount = (html.match(/<time dateTime=/g) ?? []).length;
+  // data-settled="true" is emitted only by SettledFixtureCard. Unsettled
+  // cards and FixtureCardLoading skeletons do not carry it, so the count is
+  // a strict lower bound on settled-card Suspense resolution. A regression
+  // where settled cards never stream (cache miss + upstream failure, bad
+  // dispatch, rendering exception) drops this below settledCount and fails.
+  const resolvedCardCount = (html.match(/data-settled="true"/g) ?? []).length;
   expect(resolvedCardCount).toBeGreaterThanOrEqual(settledCount);
 });

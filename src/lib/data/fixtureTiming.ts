@@ -19,9 +19,10 @@ export type FixtureTiming = {
 };
 
 // Wraps Date.now() inside 'use cache' so the page body can stay prerender-
-// eligible under Next 16 cacheComponents. cacheLife('hours') means the
-// Settled/Unsettled dispatch — and the #next-fixture anchor — re-evaluate at
-// most hourly; acceptable given the 24h settlement threshold.
+// eligible under Next 16 cacheComponents. The chosen cacheLife profile is the
+// upper bound on how long it takes the Settled/Unsettled dispatch — and the
+// #next-fixture anchor — to move to the next match after a fixture crosses
+// the 24h-settled threshold.
 export async function getFixtureTiming(): Promise<FixtureTiming> {
   'use cache';
   cacheLife('hours');
