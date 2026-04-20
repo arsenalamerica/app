@@ -2,10 +2,24 @@
 
 import { cacheLife, cacheTag } from 'next/cache';
 
-import { type FixtureEntity, smFixtures, smTvStation } from '@/lib/sportmonks';
+import {
+  type FixtureEntity,
+  smFixture,
+  smFixtures,
+  smTvStation,
+} from '@/lib/sportmonks';
 import { shite } from '@/lib/utils';
 
 const USA_COUNTRY_ID = 3483;
+
+const FIXTURE_INCLUDES = [
+  'league:name,image_path',
+  'participants:name,short_code,image_path',
+  'scores',
+  'state',
+  'periods',
+  'venue:name,city_name',
+].join(';');
 
 function applyShite(fixture: FixtureEntity): FixtureEntity {
   return {
@@ -20,46 +34,32 @@ function applyShite(fixture: FixtureEntity): FixtureEntity {
   };
 }
 
-export async function getFixtures(): Promise<FixtureEntity[]> {
+async function fetchFixtureWithRewrite(id: number): Promise<FixtureEntity> {
+  const { data } = await smFixture(id, { include: FIXTURE_INCLUDES });
+  return applyShite(data);
+}
+
+export async function getSettledFixtureById(
+  id: number,
+): Promise<FixtureEntity> {
+  cacheLife('max');
+  cacheTag(`fixture:${id}`);
+  return fetchFixtureWithRewrite(id);
+}
+
+export async function getUnsettledFixtureById(
+  id: number,
+): Promise<FixtureEntity> {
   cacheLife('minutes');
-  cacheTag('fixtures');
-
-  const params = {
-    include: [
-      'league:name,image_path',
-      'participants:name,short_code,image_path',
-      'scores',
-      'state',
-      'periods',
-      'venue:name,city_name',
-    ].join(';'),
-    sort_by: 'starting_at',
-    order: 'asc',
-    per_page: '50',
-  };
-
-  const all: FixtureEntity[] = [];
-  let page = 1;
-  const MAX_PAGES = 2;
-
-  while (page <= MAX_PAGES) {
-    const { data, pagination } = await smFixtures(undefined, {
-      ...params,
-      page: String(page),
-    });
-    all.push(...data.map(applyShite));
-    if (!pagination.has_more) break;
-    page += 1;
-  }
-
-  return all;
+  cacheTag(`fixture:${id}`);
+  return fetchFixtureWithRewrite(id);
 }
 
 export async function getNextFixture(): Promise<FixtureEntity[]> {
   cacheLife('minutes');
   cacheTag('next-fixture');
 
-  const { data } = await smFixtures(undefined, {
+  const { data } = await smFixtures({
     include: [
       'league:name,image_path',
       'participants.sidelined.player',

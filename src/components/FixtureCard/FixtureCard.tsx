@@ -31,6 +31,9 @@ export function FixtureCard({
   ...rest
 }: FixtureCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+  // Only treat string ids as DOM anchors. Numeric fixture ids reach this
+  // component via spread on the home page and shouldn't pollute the DOM.
+  const domId = typeof id === 'string' ? id : undefined;
 
   useEffect(() => {
     if (id) {
@@ -40,7 +43,11 @@ export function FixtureCard({
 
   if (!participants) {
     return (
-      <Card className={[styles._, className].join(' ')} ref={cardRef}>
+      <Card
+        id={domId}
+        className={[styles._, className].join(' ')}
+        ref={cardRef}
+      >
         <HeadingLevel>
           <VisuallyHidden>
             <Heading>{name}</Heading>
@@ -69,7 +76,7 @@ export function FixtureCard({
   const isFuture = state.state === 'NS';
 
   return (
-    <Card className={[styles._, className].join(' ')} ref={cardRef}>
+    <Card id={domId} className={[styles._, className].join(' ')} ref={cardRef}>
       <HeadingLevel>
         <VisuallyHidden>
           <Heading>{name}</Heading>
