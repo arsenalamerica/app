@@ -21,7 +21,9 @@ PR #69 added Next 16 cache components (`'use cache'` + `cacheLife` + `cacheTag`)
 
 ### The public-repo constraint
 
-An early draft of this work (tracked on the original issue #63) proposed committing full Sportmonks fixture payloads into the repo as `fixtures.json`. This repository is public. Sportmonks match data (scores, lineups, events, stats) is licensed data and cannot be committed to a public repo. A private-npm-package escape hatch was considered and rejected — the infrastructure cost (private registry, build-time auth, cross-repo release coordination) is not warranted for a problem the Vercel Data Cache can solve for free.
+An early draft of this work (tracked on the original issue #63) proposed committing full Sportmonks fixture payloads into the repo as `fixtures.json`. This repository is public. Committing raw structured match data (scores, lineups, events, stats) publishes a re-scrapeable copy of licensed Sportmonks data into git history and violates their terms. This ADR's decisions flow from that narrow constraint.
+
+The ToS line is about **raw data redistribution**, not about all forms of persisted rendering. Pre-rendered HTML of the same matches — shipped as a Vercel build artifact — is a derivative display of licensed data, which is exactly what the API license authorizes and is not the same concern. That distinction is material to follow-up work; see "Future work" below.
 
 ### What the Data Cache gives us
 
@@ -90,10 +92,14 @@ flowchart TD
 
 ### Rejected alternatives
 
-- **Commit full fixture payloads to the public repo.** Violates Sportmonks licensing terms. Rejected before implementation began.
+- **Commit full fixture payloads to the public repo.** Re-publishes licensed structured data into public git history. Rejected before implementation began.
 - **Redis / Upstash / external cache store.** Vercel Data Cache already persists across deploys and shares across all function instances. Keying the fetchers on fixture ID alone gives cross-tenant sharing for free. Adding Redis would be redundant infrastructure for a problem already solved by the framework.
 - **Private npm package for match data.** Solves licensing but introduces a private registry, build-time auth, and cross-repo release coordination. Premature infrastructure given the Data Cache path works.
 - **Keep the bulk `getFixtures()` with tighter TTLs.** Does not fix per-card isolation (one failure still blanks the page) and does not share across tenants the way per-fixture keys do.
+
+### Deferred, not rejected
+
+- **Build-time prerender of settled fixtures (Next 16 PPR).** Settled fixtures (`cacheLife('max')`) are immutable and a natural fit for build-time rendering: static shell + static settled cards + dynamic unsettled holes. This collapses 50+ Suspense boundaries on the critical rendering path and materially improves both Lighthouse perf and steady-state UX. It does **not** violate the licensing constraint above — the build artifact is rendered HTML, not raw data. Deferred because the current `await connection()` / `Date.now()` dispatcher blocks prerender (the "which card is next?" derivation has to move) and `FixtureCard`'s `'use client'` scroll effect needs to be isolated so the card body can render as a server component. Tracked in issue #75.
 
 ## Consequences
 
@@ -105,3 +111,4 @@ flowchart TD
 - **Dependency added:** `react-error-boundary`. Small, stable, widely-used; the equivalent local class component would be strictly more code to maintain.
 - **`getFixtures()` is deleted.** `getNextFixture()` is the only remaining caller of `smFixtures()`; the latter is kept. The unused `_id` parameter on `smFixtures` can be dropped as incidental cleanup.
 - **Loading skeleton count is exact.** `loading.tsx` reads `fixtures.length` from the committed index, so first-paint skeletons match the rendered page exactly — no over- or under-rendering.
+- **Lighthouse performance on `/fixtures` takes a measurable hit.** 61 streaming Suspense boundaries + the hydration cost of 61 `'use client'` `FixtureCard` components move first-paint work out of prerender and onto the request path. The `/fixtures` threshold in `lighthouserc.json` is temporarily relaxed (0.85 vs 0.95 elsewhere) to reflect the current ceiling; restoration is tracked in issue #75.
