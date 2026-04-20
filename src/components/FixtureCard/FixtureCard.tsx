@@ -82,7 +82,7 @@ export function FixtureCard({
                   ) : (
                     'HT'
                   )
-                ) : (
+                ) : isFuture ? (
                   <LocalDateTime
                     epoch={starting_at_timestamp}
                     options={{
@@ -92,6 +92,25 @@ export function FixtureCard({
                       day: 'numeric',
                     }}
                   />
+                ) : (
+                  // Past fixture shows a date only (no time). Render it on
+                  // the server in UTC to skip the client island — all
+                  // branches are in North America and matches are in Europe,
+                  // so the UTC/local date never disagree for a completed
+                  // match.
+                  <time
+                    dateTime={new Date(
+                      starting_at_timestamp * 1000,
+                    ).toISOString()}
+                  >
+                    {new Intl.DateTimeFormat('en-US', {
+                      weekday: 'short',
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      timeZone: 'UTC',
+                    }).format(new Date(starting_at_timestamp * 1000))}
+                  </time>
                 )}
               </div>
               <div className={styles.Score}>
