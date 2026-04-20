@@ -1,0 +1,76 @@
+name: Sync Fixtures
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # daily at 06:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PK }}
+
+      - uses: actions/checkout@v6.0.2
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.3.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Sync fixture index from Sportmonks
+        env:
+          MONK_TOKEN: ${{ secrets.MONK_TOKEN }}
+        run: node scripts/sync-fixtures.mjs
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet src/lib/sportmonks/fixtures.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create or update pull request
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_BODY: |
+            ## Summary
+
+            - Automated update of `src/lib/sportmonks/fixtures.json` from Sportmonks
+            - See `docs/adr/005-fixture-index-and-state-aware-caching.md` for why this file is committed
+
+            ## Test plan
+
+            - [ ] `yarn typecheck` passes
+            - [ ] `yarn build` passes
+            - [ ] Fixtures page renders the updated schedule on preview deployment
+        run: |
+          BRANCH="chore/sync-fixtures"
+          git config user.name "gunnersaurus-bot[bot]"
+          git config user.email "276655943+gunnersaurus-bot[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add src/lib/sportmonks/fixtures.json
+          git commit -m "chore(data): sync fixture index from Sportmonks"
+          git push --force origin "$BRANCH"
+          if ! gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' | grep -q .; then
+            gh pr create \
+              --title "chore(data): sync fixture index" \
+              --body "$PR_BODY"
+          fi

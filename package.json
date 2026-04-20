@@ -9,6 +9,7 @@
     "e2e": "playwright test",
     "knip": "knip",
     "start": "next start",
+    "sync:fixtures": "node scripts/sync-fixtures.mjs",
     "sync:seasons": "node scripts/sync-seasons.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -47,6 +48,7 @@
     "next": "16.2.4",
     "react": "19.2.5",
     "react-dom": "19.2.5",
+    "react-error-boundary": "6.1.1",
     "react-ios-pwa-prompt": "2.0.6",
     "react-textfit": "1.1.1"
   },

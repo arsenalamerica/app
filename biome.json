@@ -37,8 +37,7 @@
         "src/components/GameCard/GameCard.tsx",
         "src/components/NavBar/**/*.tsx",
         "src/components/LeagueTable/LeagueTable.tsx",
-        "src/components/FixtureCard/FixtureCard.tsx",
-        "src/app/\\[domain\\]/fixtures/loading.tsx"
+        "src/components/FixtureCard/FixtureCard.tsx"
       ],
       "linter": {
         "rules": {

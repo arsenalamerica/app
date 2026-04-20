@@ -1,7 +1,9 @@
-const loadingFixtures = Array.from({ length: 25 });
-
 import { FixtureCardLoading } from '@/components';
+import type { FixtureIndexEntry } from '@/lib/sportmonks/fixtures';
+import fixturesData from '@/lib/sportmonks/fixtures.json';
 
-export default async function FixturesPageLoading() {
-  return loadingFixtures?.map((_fixture, i) => <FixtureCardLoading key={i} />);
+const fixtures: FixtureIndexEntry[] = fixturesData;
+
+export default function FixturesPageLoading() {
+  return fixtures.map(({ id }) => <FixtureCardLoading key={id} />);
 }

@@ -62,12 +62,27 @@ export type FixturesEndpoint = {
   data: FixtureEntity[];
 } & Sportmonks;
 
+export type FixtureEndpoint = {
+  data: FixtureEntity;
+} & Sportmonks;
+
+export type FixtureIndexEntry = {
+  id: number;
+  kickoff: number;
+};
+
 export async function smFixtures(
-  _id: string | undefined,
   query: Record<string, string>,
 ): Promise<FixturesEndpoint> {
   return sportmonksFetch<FixturesEndpoint>(
     `/fixtures/between/${season.start}/${season.end}/${ARSENAL_TEAM_ID}`,
     query,
   );
+}
+
+export async function smFixture(
+  id: number,
+  query: Record<string, string> = {},
+): Promise<FixtureEndpoint> {
+  return sportmonksFetch<FixtureEndpoint>(`/fixtures/${id}`, query);
 }
