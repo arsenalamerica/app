@@ -71,7 +71,7 @@ Two changes make this work cleanly:
 
 ### Per-card isolation
 
-Each card is wrapped in `react-error-boundary`. Settled cards render directly inside the boundary (no Suspense — data is fully cached so there is nothing to fall back to). Unsettled cards wrap the boundary's child in `<Suspense fallback={<FixtureCardLoading />}>` so live scores can stream. A Sportmonks failure on any one fixture renders a single-card error fallback; the rest of the page is unaffected.
+Every card — settled or unsettled — is wrapped identically: `<ErrorBoundary>` on the outside, `<Suspense fallback={<FixtureCardLoading />}>` on the inside. The Suspense boundary is what lets React stream the PPR shell while each card resolves asynchronously from the Data Cache. Without it, the shell would block until every card's cache lookup completed (even fast ones add up at 55× sequential awaits), defeating the point of streaming and regressing LCP. A Sportmonks failure on any one fixture renders a single-card error fallback; the rest of the page is unaffected. The only structural difference between settled and unsettled paths is which data-layer fetcher the card calls (and therefore the `cacheLife` profile behind it), not the Suspense wrapping.
 
 The "next fixture" scroll anchor (HTML id `next-fixture`) is derived inside the cached timing helper — sort by `kickoff`, pick the first fixture whose kickoff has not yet crossed the 24h-settled threshold. The anchor id is rendered server-side on the one matching card; the client island reads that id and scrolls on mount.
 
@@ -82,7 +82,7 @@ flowchart TD
     A["fixtures.json<br/>(id + kickoff only, committed)"] --> B["fixtures/page.tsx<br/>static shell"]
     B --> T["getFixtureTiming()<br/>cacheLife('hours')<br/>cacheTag('fixtures:timing')"]
     T --> C{"settledIds.has(id)?"}
-    C -->|yes| D["&lt;SettledFixtureCard&gt;<br/>cached at build, served<br/>instantly from cache<br/>(ErrorBoundary only)"]
+    C -->|yes| D["&lt;SettledFixtureCard&gt;<br/>resolves from Data Cache<br/>(Suspense + ErrorBoundary)"]
     C -->|no| E["&lt;UnsettledFixtureCard&gt;<br/>streams at request<br/>(Suspense + ErrorBoundary)"]
     D --> F["getSettledFixtureById(id)<br/>cacheLife('max')<br/>cacheTag('fixture:{id}')"]
     E --> G["getUnsettledFixtureById(id)<br/>cacheLife('minutes')<br/>cacheTag('fixture:{id}')"]

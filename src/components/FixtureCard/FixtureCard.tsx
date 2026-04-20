@@ -6,6 +6,7 @@ import {
 } from '@/lib/sportmonks';
 import { Card, type CardProps } from '../Card/Card';
 import { LeagueLogo } from '../LeagueLogo/LeagueLogo';
+import { LocalDateTime } from '../LocalDateTime/LocalDateTime';
 import styles from './FixtureCard.module.scss';
 import { FixtureCardAnchor } from './FixtureCardAnchor';
 
@@ -48,8 +49,6 @@ export function FixtureCard({
     );
   }
 
-  const ms = starting_at_timestamp * 1000;
-
   const localTeam = participants.find((team) => team.meta.location === 'home');
   const visitorTeam = participants.find(
     (team) => team.meta.location === 'away',
@@ -84,25 +83,23 @@ export function FixtureCard({
                     'HT'
                   )
                 ) : (
-                  // Do NOT add suppressHydrationWarning — it disables text patching entirely.
-                  // https://github.com/vercel/next.js/issues/61911
-                  <time dateTime={new Date(ms).toISOString()}>
-                    {new Intl.DateTimeFormat(undefined, {
+                  <LocalDateTime
+                    epoch={starting_at_timestamp}
+                    options={{
                       weekday: 'short',
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric',
-                    }).format(new Date(ms))}
-                  </time>
+                    }}
+                  />
                 )}
               </div>
               <div className={styles.Score}>
                 {isFuture ? (
-                  <time dateTime={new Date(ms).toISOString()}>
-                    {new Intl.DateTimeFormat(undefined, {
-                      timeStyle: 'short',
-                    }).format(new Date(ms))}
-                  </time>
+                  <LocalDateTime
+                    epoch={starting_at_timestamp}
+                    options={{ timeStyle: 'short' }}
+                  />
                 ) : (
                   `${currentScores.get('home')}-${currentScores.get('away')}`
                 )}

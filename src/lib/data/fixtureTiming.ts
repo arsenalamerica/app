@@ -11,6 +11,10 @@ export const SETTLED_THRESHOLD_S = 86_400;
 
 export type FixtureTiming = {
   nextFixtureId: number | undefined;
+  // fixtures.json is sorted by id (for deterministic PR diffs from the sync
+  // script). orderedIds is the same set re-sorted by kickoff so the page can
+  // iterate it in chronological order.
+  orderedIds: number[];
   settledIds: number[];
 };
 
@@ -26,15 +30,15 @@ export async function getFixtureTiming(): Promise<FixtureTiming> {
   const nowS = Math.floor(Date.now() / 1000);
   const settledCutoff = nowS - SETTLED_THRESHOLD_S;
 
-  const settledIds = fixtures
+  const ordered = [...fixtures].sort((a, b) => a.kickoff - b.kickoff);
+
+  const orderedIds = ordered.map(({ id }) => id);
+  const settledIds = ordered
     .filter(({ kickoff }) => kickoff < settledCutoff)
     .map(({ id }) => id);
+  const nextFixtureId = ordered.find(
+    ({ kickoff }) => kickoff > settledCutoff,
+  )?.id;
 
-  // fixtures.json is sorted by id — sort by kickoff so .find() returns the
-  // chronologically-next unsettled match, not just the lowest-id unsettled one.
-  const nextFixtureId = [...fixtures]
-    .sort((a, b) => a.kickoff - b.kickoff)
-    .find(({ kickoff }) => kickoff > settledCutoff)?.id;
-
-  return { nextFixtureId, settledIds };
+  return { nextFixtureId, orderedIds, settledIds };
 }
