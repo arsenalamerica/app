@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import {
   DeferredFixtureCard,
+  FixtureCardAnchor,
   FixtureCardError,
   FixtureCardLoading,
   SettledFixtureCard,
@@ -14,7 +15,6 @@ import {
   UPCOMING_REAL,
 } from '@/lib/data/fixtureTiming';
 import fixturesData from '@/lib/sportmonks/fixtures.json';
-import { NextFixtureAnchor } from './NextFixtureAnchor';
 
 // Enumerate the branch domains at build so Next prerenders a PPR shell per
 // tenant. Each card still streams from the Data Cache through Suspense at
@@ -45,7 +45,11 @@ export default async function FixturesPage() {
   const renderReal = (id: number) => {
     const Card = settled.has(id) ? SettledFixtureCard : UnsettledFixtureCard;
     return (
-      <ErrorBoundary key={id} FallbackComponent={FixtureCardError}>
+      <ErrorBoundary
+        key={id}
+        FallbackComponent={FixtureCardError}
+        onError={console.error}
+      >
         <Suspense fallback={<FixtureCardLoading />}>
           <Card fixtureId={id} />
         </Suspense>
@@ -64,22 +68,14 @@ export default async function FixturesPage() {
           ? renderReal(id)
           : renderDeferred(id),
       )}
-      {upcoming.map((id, i) => {
-        if (i !== 0)
-          return i < UPCOMING_REAL ? renderReal(id) : renderDeferred(id);
-        const Card = settled.has(id)
-          ? SettledFixtureCard
-          : UnsettledFixtureCard;
-        return (
-          <NextFixtureAnchor key={id}>
-            <ErrorBoundary FallbackComponent={FixtureCardError}>
-              <Suspense fallback={<FixtureCardLoading />}>
-                <Card fixtureId={id} />
-              </Suspense>
-            </ErrorBoundary>
-          </NextFixtureAnchor>
-        );
-      })}
+      {upcoming[0] != null && (
+        <FixtureCardAnchor>{renderReal(upcoming[0])}</FixtureCardAnchor>
+      )}
+      {upcoming
+        .slice(1)
+        .map((id, i) =>
+          i < UPCOMING_REAL - 1 ? renderReal(id) : renderDeferred(id),
+        )}
     </>
   );
 }

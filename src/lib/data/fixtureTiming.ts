@@ -24,8 +24,6 @@ export type FixtureTiming = {
   settledIds: number[];
 };
 
-// Pure sync helper so loading.tsx can compute the same ordering without
-// awaiting a cache read (the loading fallback must paint immediately).
 export function computeFixtureOrder(
   fixtureList: FixtureIndexEntry[],
   nowS: number,

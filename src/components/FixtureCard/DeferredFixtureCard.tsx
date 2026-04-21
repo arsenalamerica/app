@@ -15,16 +15,19 @@ export function DeferredFixtureCard({
 }) {
   const [data, setData] = useState<FixtureEntity | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   // Tracks whether the fetch has fired so the observer isn't recreated on
-  // every state update. Reset to false when the user retries after an error.
+  // every state update. Reset by the effect cleanup on retry.
   const fetchedRef = useRef(false);
 
   const resetError = useCallback(() => {
-    fetchedRef.current = false;
+    setData(null);
     setError(null);
+    setRetryCount((c) => c + 1);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: retryCount is a trigger dep — not read inside the body, but its change forces the effect to re-run after a retry
   useEffect(() => {
     if (fetchedRef.current) return;
     const el = ref.current;
@@ -40,8 +43,11 @@ export function DeferredFixtureCard({
             if (!cancelled) setData(d);
           })
           .catch((e) => {
-            if (!cancelled)
-              setError(e instanceof Error ? e : new Error(String(e)));
+            if (!cancelled) {
+              const err = e instanceof Error ? e : new Error(String(e));
+              console.error(err);
+              setError(err);
+            }
           });
       },
       { rootMargin: '400px 0px' },
@@ -55,28 +61,22 @@ export function DeferredFixtureCard({
       fetchedRef.current = false;
       io.disconnect();
     };
-  }, [fixtureId, settled]);
+  }, [fixtureId, settled, retryCount]);
 
-  if (error) {
-    return (
-      <div ref={ref} data-id={fixtureId}>
-        <FixtureCardError error={error} resetErrorBoundary={resetError} />
-      </div>
-    );
-  }
-
-  if (data) {
-    const { id: _id, ...rest } = data;
-    return (
-      <div ref={ref} data-id={fixtureId}>
-        <FixtureCard {...rest} />
-      </div>
-    );
+  function content() {
+    if (error) {
+      return <FixtureCardError error={error} resetErrorBoundary={resetError} />;
+    }
+    if (data) {
+      const { id: _id, ...rest } = data;
+      return <FixtureCard {...rest} />;
+    }
+    return <FixtureCardLoading />;
   }
 
   return (
     <div ref={ref} data-id={fixtureId}>
-      <FixtureCardLoading />
+      {content()}
     </div>
   );
 }

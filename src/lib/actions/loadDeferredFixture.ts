@@ -18,7 +18,7 @@ export async function loadDeferredFixture(
   // value from a trusted server-side source, breaking the taint chain from
   // the client-supplied parameter to the downstream fetch URL.
   const fixture = fixtures.find((f) => f.id === id);
-  if (!fixture) throw new Error('Unknown fixture');
+  if (!fixture) throw new Error(`Unknown fixture id=${id}`);
   return settled
     ? getSettledFixtureById(fixture.id)
     : getUnsettledFixtureById(fixture.id);
