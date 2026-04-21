@@ -15,7 +15,10 @@ export async function loadDeferredFixture(
       ? getSettledFixtureById(id)
       : getUnsettledFixtureById(id));
   } catch (err) {
-    console.error('[loadDeferredFixture] failed for fixture', id, err);
+    // Validate id before logging: server action args are user-controlled input,
+    // so a direct log of `id` triggers CodeQL's log-injection rule (CWE-117).
+    const safeId = Number.isInteger(id) && id > 0 ? id : Number.NaN;
+    console.error('[loadDeferredFixture] failed for fixture', safeId, err);
     throw err;
   }
 }
