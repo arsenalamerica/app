@@ -1,15 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 
-// Scrolls the element with the given id into view on mount. Rendered as a
-// sibling of the <Card> so the anchor id stays on the real card element and
-// DOM structure is unchanged — only the effect lives in the client boundary.
-export function FixtureCardAnchor({ targetId }: { targetId: string }) {
+// Isolated client boundary — keeps the scroll effect out of the PPR-eligible
+// page body while centering the next fixture in the viewport on first paint.
+export function FixtureCardAnchor({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    document
-      .getElementById(targetId)
-      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [targetId]);
-  return null;
+    ref.current?.scrollIntoView({ behavior: 'instant', block: 'center' });
+  }, []);
+  return <div ref={ref}>{children}</div>;
 }

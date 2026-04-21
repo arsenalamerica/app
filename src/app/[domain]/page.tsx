@@ -12,13 +12,14 @@ export default async function Home(props: {
   const Logo = branchLogo[branch.domain];
 
   const [nextFixture] = await getNextFixture();
+  const { id: _id, ...nextFixtureProps } = nextFixture;
 
   return (
     <Main>
       {Logo && <Logo title={branch.name} role='img' />}
       <Heading>Next Match</Heading>
       <Suspense>
-        <FixtureCard {...nextFixture} />
+        <FixtureCard {...nextFixtureProps} />
       </Suspense>
       <NextGame fixture={nextFixture} branch={branch} />
     </Main>
