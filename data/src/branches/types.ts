@@ -13,7 +13,6 @@ type Pub = {
 };
 
 export interface BranchData {
-  'fathom-id': string;
   domain: string;
   name: string;
   timezone: string;
