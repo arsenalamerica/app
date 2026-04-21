@@ -18,21 +18,14 @@ export type FixtureTiming = {
   settledIds: number[];
 };
 
-// Wraps Date.now() inside 'use cache' so the page body can stay prerender-
-// eligible under Next 16 cacheComponents. The chosen cacheLife profile is the
-// upper bound on how long it takes the Settled/Unsettled dispatch — and the
-// #next-fixture anchor — to move to the next match after a fixture crosses
-// the 24h-settled threshold.
-export async function getFixtureTiming(): Promise<FixtureTiming> {
-  'use cache';
-  cacheLife('hours');
-  cacheTag('fixtures:timing');
-
-  const nowS = Math.floor(Date.now() / 1000);
+// Pure sync helper so loading.tsx can compute the same ordering without
+// awaiting a cache read (the loading fallback must paint immediately).
+export function computeFixtureOrder(
+  fixtureList: FixtureIndexEntry[],
+  nowS: number,
+): FixtureTiming {
   const settledCutoff = nowS - SETTLED_THRESHOLD_S;
-
-  const ordered = [...fixtures].sort((a, b) => a.kickoff - b.kickoff);
-
+  const ordered = [...fixtureList].sort((a, b) => a.kickoff - b.kickoff);
   const orderedIds = ordered.map(({ id }) => id);
   const settledIds = ordered
     .filter(({ kickoff }) => kickoff < settledCutoff)
@@ -40,6 +33,16 @@ export async function getFixtureTiming(): Promise<FixtureTiming> {
   const nextFixtureId = ordered.find(
     ({ kickoff }) => kickoff > settledCutoff,
   )?.id;
-
   return { nextFixtureId, orderedIds, settledIds };
+}
+
+// Wraps Date.now() inside 'use cache' so the page body can stay prerender-
+// eligible under Next 16 cacheComponents. The chosen cacheLife profile is the
+// upper bound on how long it takes the Settled/Unsettled dispatch to move to
+// the next match after a fixture crosses the 24h-settled threshold.
+export async function getFixtureTiming(): Promise<FixtureTiming> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('fixtures:timing');
+  return computeFixtureOrder(fixtures, Math.floor(Date.now() / 1000));
 }
