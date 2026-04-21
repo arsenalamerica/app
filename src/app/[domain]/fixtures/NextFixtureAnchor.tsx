@@ -8,7 +8,7 @@ import { type ReactNode, useEffect, useRef } from 'react';
 export function NextFixtureAnchor({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    ref.current?.scrollIntoView({ behavior: 'instant', block: 'start' });
+    ref.current?.scrollIntoView({ behavior: 'instant', block: 'center' });
   }, []);
   return <div ref={ref}>{children}</div>;
 }
