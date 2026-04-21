@@ -1,6 +1,5 @@
 'use client';
 import clsx from 'clsx';
-import { trackEvent } from 'fathom-client';
 import type React from 'react';
 import ExternalLink from '../ExternalLink/ExternalLink';
 import styles from './SocialLinks.module.scss';
@@ -13,10 +12,6 @@ export interface SocialLinksProperties
     url?: string;
   }[];
 }
-
-const handleClick = () => {
-  trackEvent('social');
-};
 
 export function SocialLinks({
   className,
@@ -36,7 +31,7 @@ export function SocialLinks({
 
           return (
             <li key={name}>
-              <ExternalLink onClick={handleClick} href={url}>
+              <ExternalLink href={url}>
                 <svg
                   role='img'
                   viewBox='0 0 24 24'

@@ -3111,7 +3111,6 @@ __metadata:
     "@vitejs/plugin-react": "npm:5.1.4"
     "@vitest/coverage-v8": "npm:4.0.18"
     clsx: "npm:2.1.1"
-    fathom-client: "npm:3.7.2"
     happy-dom: "npm:20.9.0"
     knip: "npm:6.5.0"
     lefthook: "npm:2.1.6"
@@ -4101,13 +4100,6 @@ __metadata:
   dependencies:
     reusify: "npm:^1.0.4"
   checksum: 10c0/e5dd725884decb1f11e5c822221d76136f239d0236f176fab80b7b8f9e7619ae57e6b4e5b73defc21e6b9ef99437ee7b545cff8e6c2c337819633712fa9d352e
-  languageName: node
-  linkType: hard
-
-"fathom-client@npm:3.7.2":
-  version: 3.7.2
-  resolution: "fathom-client@npm:3.7.2"
-  checksum: 10c0/f198669fba3aa14c4f1adc2b5afdce282503945fe3ac3d842ab7a6d46c90cf4a703ccad99abcbc71faa095348d9940a2d1aa0cf718c58e4d8479fa5dcb88aff2
   languageName: node
   linkType: hard
 

@@ -4,12 +4,7 @@ import { Heading, HeadingLevel, VisuallyHidden } from '@ariakit/react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import {
-  FathomNext,
-  NavBar,
-  PWAInstallPrompt,
-  SocialLinks,
-} from '@/components';
+import { NavBar, PWAInstallPrompt, SocialLinks } from '@/components';
 import { branchData } from '@/data';
 
 export interface LayoutProps {
@@ -39,7 +34,6 @@ export default async function Layout(props: LayoutProps) {
     <HeadingLevel>
       <PWAInstallPrompt />
       <Suspense>
-        <FathomNext fathomId='RFIYDIHQ' />
         <header>
           <VisuallyHidden>
             <Heading>{branch.name}</Heading>
