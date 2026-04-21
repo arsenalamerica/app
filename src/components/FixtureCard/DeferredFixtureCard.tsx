@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { loadDeferredFixture } from '@/lib/actions/loadDeferredFixture';
 import type { FixtureEntity } from '@/lib/sportmonks';
 import { FixtureCard, FixtureCardLoading } from './FixtureCard';
@@ -16,31 +16,47 @@ export function DeferredFixtureCard({
   const [data, setData] = useState<FixtureEntity | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  // Tracks whether the fetch has fired so the observer isn't recreated on
+  // every state update. Reset to false when the user retries after an error.
+  const fetchedRef = useRef(false);
+
+  const resetError = useCallback(() => {
+    fetchedRef.current = false;
+    setError(null);
+  }, []);
 
   useEffect(() => {
-    if (data || error) return;
+    if (fetchedRef.current) return;
     const el = ref.current;
     if (!el) return;
+    let cancelled = false;
     const io = new IntersectionObserver(
       ([entry], observer) => {
         if (!entry.isIntersecting) return;
         observer.disconnect();
+        fetchedRef.current = true;
         loadDeferredFixture(fixtureId, settled)
-          .then(setData)
-          .catch((e) =>
-            setError(e instanceof Error ? e : new Error(String(e))),
-          );
+          .then((d) => {
+            if (!cancelled) setData(d);
+          })
+          .catch((e) => {
+            if (!cancelled)
+              setError(e instanceof Error ? e : new Error(String(e)));
+          });
       },
       { rootMargin: '400px 0px' },
     );
     io.observe(el);
-    return () => io.disconnect();
-  }, [fixtureId, settled, data, error]);
+    return () => {
+      cancelled = true;
+      io.disconnect();
+    };
+  }, [fixtureId, settled]);
 
   if (error) {
     return (
       <div ref={ref}>
-        <FixtureCardError error={error} resetErrorBoundary={() => {}} />
+        <FixtureCardError error={error} resetErrorBoundary={resetError} />
       </div>
     );
   }

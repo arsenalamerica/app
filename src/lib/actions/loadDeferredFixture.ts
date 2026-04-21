@@ -10,5 +10,12 @@ export async function loadDeferredFixture(
   id: number,
   settled: boolean,
 ): Promise<FixtureEntity> {
-  return settled ? getSettledFixtureById(id) : getUnsettledFixtureById(id);
+  try {
+    return await (settled
+      ? getSettledFixtureById(id)
+      : getUnsettledFixtureById(id));
+  } catch (err) {
+    console.error('[loadDeferredFixture] failed for fixture', id, err);
+    throw err;
+  }
 }

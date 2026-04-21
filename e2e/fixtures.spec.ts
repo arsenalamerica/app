@@ -37,8 +37,9 @@ test('windowed settled fixtures stream real card markup into the /fixtures respo
   const response = await request.get('/fixtures');
   const html = await response.text();
 
-  // data-settled="true" is emitted only by SettledFixtureCard. After
-  // windowing, exactly SETTLED_REAL (= 2) settled cards are server-rendered.
+  // data-settled="true" is emitted only by SettledFixtureCard. After windowing,
+  // min(SETTLED_REAL, settledCount) settled cards are server-rendered — up to
+  // SETTLED_REAL (= 2), fewer early in a season.
   const resolvedCardCount = (html.match(/data-settled="true"/g) ?? []).length;
   expect(resolvedCardCount).toBe(windowedCount);
 });

@@ -73,8 +73,6 @@ Two changes make this work cleanly:
 
 Every card — settled or unsettled — is wrapped identically: `<ErrorBoundary>` on the outside, `<Suspense fallback={<FixtureCardLoading />}>` on the inside. The Suspense boundary is what lets React stream the PPR shell while each card resolves asynchronously from the Data Cache. Without it, the shell would block until every card's cache lookup completed (even fast ones add up at 55× sequential awaits), defeating the point of streaming and regressing LCP. A Sportmonks failure on any one fixture renders a single-card error fallback; the rest of the page is unaffected. The only structural difference between settled and unsettled paths is which data-layer fetcher the card calls (and therefore the `cacheLife` profile behind it), not the Suspense wrapping.
 
-The "next fixture" scroll anchor (HTML id `next-fixture`) is derived inside the cached timing helper — sort by `kickoff`, pick the first fixture whose kickoff has not yet crossed the 24h-settled threshold. The anchor id is rendered server-side on the one matching card; the client island reads that id and scrolls on mount.
-
 ### Request-path flow
 
 ```mermaid
