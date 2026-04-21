@@ -49,6 +49,10 @@ export function DeferredFixtureCard({
     io.observe(el);
     return () => {
       cancelled = true;
+      // Reset so a remounted component registers a fresh observer instead of
+      // staying stuck on the loading skeleton when a prior mount's fetch was
+      // abandoned mid-flight.
+      fetchedRef.current = false;
       io.disconnect();
     };
   }, [fixtureId, settled]);

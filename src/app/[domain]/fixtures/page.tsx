@@ -8,13 +8,12 @@ import {
   UnsettledFixtureCard,
 } from '@/components';
 import { branchData } from '@/data';
-import { getFixtureTiming } from '@/lib/data/fixtureTiming';
+import {
+  getFixtureTiming,
+  SETTLED_REAL,
+  UPCOMING_REAL,
+} from '@/lib/data/fixtureTiming';
 import fixturesData from '@/lib/sportmonks/fixtures.json';
-
-// Cards rendered with full data on first paint. All other slots render as
-// skeleton placeholders that hydrate via IntersectionObserver on scroll.
-const UPCOMING_REAL = 8;
-const SETTLED_REAL = 2;
 
 // Enumerate the branch domains at build so Next prerenders a PPR shell per
 // tenant. Each card still streams from the Data Cache through Suspense at

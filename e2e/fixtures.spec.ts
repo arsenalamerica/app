@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { computeFixtureOrder } from '../src/lib/data/fixtureTiming';
+import {
+  computeFixtureOrder,
+  SETTLED_REAL,
+} from '../src/lib/data/fixtureTiming';
 import fixturesData from '../src/lib/sportmonks/fixtures.json';
 
 type FixtureIndexEntry = { id: number; kickoff: number };
 const fixtures: FixtureIndexEntry[] = fixturesData;
-
-// Keep in sync with the constant in fixtures/page.tsx.
-const SETTLED_REAL = 2;
 
 test('fixtures page renders the Fixtures heading', async ({ page }) => {
   await page.goto('/fixtures');

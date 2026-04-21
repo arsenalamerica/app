@@ -9,6 +9,12 @@ const fixtures: FixtureIndexEntry[] = fixturesData;
 // change. Before this threshold the fixture is upcoming, live, or just-ended.
 export const SETTLED_THRESHOLD_S = 86_400;
 
+// How many real fixture cards to render on first paint around the next match.
+// Exported so e2e tests can assert the exact windowed count without a
+// manually-synced local copy of these values.
+export const UPCOMING_REAL = 8;
+export const SETTLED_REAL = 2;
+
 export type FixtureTiming = {
   nextFixtureId: number | undefined;
   // fixtures.json is sorted by id (for deterministic PR diffs from the sync
