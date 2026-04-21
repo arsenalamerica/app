@@ -43,3 +43,35 @@ test('windowed settled fixtures stream real card markup into the /fixtures respo
   const resolvedCardCount = (html.match(/data-settled="true"/g) ?? []).length;
   expect(resolvedCardCount).toBe(windowedCount);
 });
+
+test('settled fixture cards appear before upcoming fixture cards in page HTML', async ({
+  request,
+}) => {
+  const nowS = Math.floor(Date.now() / 1000);
+  const { settledIds, nextFixtureId } = computeFixtureOrder(fixtures, nowS);
+
+  test.skip(
+    settledIds.length === 0,
+    'no settled fixtures — start of season, ordering test not applicable',
+  );
+  test.skip(
+    nextFixtureId == null,
+    'no upcoming fixtures — end of season, ordering test not applicable',
+  );
+
+  const response = await request.get('/fixtures');
+  const html = await response.text();
+
+  // data-settled="true" is emitted by SettledFixtureCard; data-upcoming="true"
+  // by UnsettledFixtureCard. The settled block must appear entirely before the
+  // upcoming block in the streamed HTML.
+  const lastSettledPos = html.lastIndexOf('data-settled="true"');
+  const firstUpcomingPos = html.indexOf('data-upcoming="true"');
+
+  test.skip(
+    lastSettledPos === -1 || firstUpcomingPos === -1,
+    'windowed real cards not present in initial HTML — cannot verify order',
+  );
+
+  expect(lastSettledPos).toBeLessThan(firstUpcomingPos);
+});

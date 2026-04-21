@@ -6,5 +6,5 @@ export async function UnsettledFixtureCard({
   fixtureId,
 }: FixtureCardByIdProps) {
   const { id: _id, ...rest } = await getUnsettledFixtureById(fixtureId);
-  return <FixtureCard {...rest} />;
+  return <FixtureCard data-upcoming='true' {...rest} />;
 }

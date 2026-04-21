@@ -30,9 +30,9 @@ export default async function FixturesPage() {
   const { nextFixtureId, orderedIds, settledIds } = await getFixtureTiming();
   const settled = new Set(settledIds);
 
-  // Pivot on the next upcoming fixture. Upcoming block starts at pivot
-  // (chronological); settled block starts below it in reverse-chronological
-  // order so natural scroll=0 puts the next match at the top of the page.
+  // Pivot on the next upcoming fixture. Settled block comes first in reverse-
+  // chronological order (most recent result at top); upcoming block follows
+  // starting with the next fixture in chronological order.
   const pivot =
     nextFixtureId != null
       ? orderedIds.indexOf(nextFixtureId)
@@ -57,11 +57,11 @@ export default async function FixturesPage() {
 
   return (
     <>
-      {upcoming.map((id, i) =>
-        i < UPCOMING_REAL ? renderReal(id) : renderDeferred(id),
-      )}
       {settledReversed.map((id, i) =>
         i < SETTLED_REAL ? renderReal(id) : renderDeferred(id),
+      )}
+      {upcoming.map((id, i) =>
+        i < UPCOMING_REAL ? renderReal(id) : renderDeferred(id),
       )}
     </>
   );
