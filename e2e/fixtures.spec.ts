@@ -44,34 +44,28 @@ test('windowed settled fixtures stream real card markup into the /fixtures respo
   expect(resolvedCardCount).toBe(windowedCount);
 });
 
-test('settled fixture cards appear before upcoming fixture cards in page HTML', async ({
+test('all fixture cards render in ascending kickoff order', async ({
   request,
 }) => {
-  const nowS = Math.floor(Date.now() / 1000);
-  const { settledIds, nextFixtureId } = computeFixtureOrder(fixtures, nowS);
-
-  test.skip(
-    settledIds.length === 0,
-    'no settled fixtures — start of season, ordering test not applicable',
-  );
-  test.skip(
-    nextFixtureId == null,
-    'no upcoming fixtures — end of season, ordering test not applicable',
-  );
-
   const response = await request.get('/fixtures');
   const html = await response.text();
 
-  // data-settled="true" is emitted by SettledFixtureCard; data-upcoming="true"
-  // by UnsettledFixtureCard. The settled block must appear entirely before the
-  // upcoming block in the streamed HTML.
-  const lastSettledPos = html.lastIndexOf('data-settled="true"');
-  const firstUpcomingPos = html.indexOf('data-upcoming="true"');
-
-  test.skip(
-    lastSettledPos === -1 || firstUpcomingPos === -1,
-    'windowed real cards not present in initial HTML — cannot verify order',
+  // Every card slot — real (SettledFixtureCard / UnsettledFixtureCard) and
+  // deferred (DeferredFixtureCard skeleton) — emits data-id. Extracting them
+  // in document order gives the full rendered sequence; mapping to kickoff
+  // timestamps lets us assert the entire list is a single ascending timeline.
+  const kickoffById = new Map(fixtures.map(({ id, kickoff }) => [id, kickoff]));
+  const ids = [...html.matchAll(/data-id="(\d+)"/g)].map(([, id]) =>
+    Number(id),
   );
 
-  expect(lastSettledPos).toBeLessThan(firstUpcomingPos);
+  test.skip(
+    ids.length === 0,
+    'no fixture cards in initial HTML — cannot verify order',
+  );
+
+  const kickoffs = ids.map((id) => kickoffById.get(id) ?? -1);
+  for (let i = 1; i < kickoffs.length; i++) {
+    expect(kickoffs[i]).toBeGreaterThanOrEqual(kickoffs[i - 1]);
+  }
 });

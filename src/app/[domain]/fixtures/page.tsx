@@ -30,15 +30,16 @@ export default async function FixturesPage() {
   const { nextFixtureId, orderedIds, settledIds } = await getFixtureTiming();
   const settled = new Set(settledIds);
 
-  // Pivot on the next upcoming fixture. Settled block comes first in reverse-
-  // chronological order (most recent result at top); upcoming block follows
-  // starting with the next fixture in chronological order.
+  // Pivot on the next upcoming fixture. Settled block comes first in
+  // chronological order (oldest result first); upcoming block follows starting
+  // with the next fixture. Together the full list is a single ascending
+  // timeline: oldest settled → most recent settled → next upcoming → last.
   const pivot =
     nextFixtureId != null
       ? orderedIds.indexOf(nextFixtureId)
       : orderedIds.length;
   const upcoming = orderedIds.slice(pivot);
-  const settledReversed = orderedIds.slice(0, pivot).reverse();
+  const settledOrdered = orderedIds.slice(0, pivot);
 
   const renderReal = (id: number) => {
     const Card = settled.has(id) ? SettledFixtureCard : UnsettledFixtureCard;
@@ -57,8 +58,10 @@ export default async function FixturesPage() {
 
   return (
     <>
-      {settledReversed.map((id, i) =>
-        i < SETTLED_REAL ? renderReal(id) : renderDeferred(id),
+      {settledOrdered.map((id, i) =>
+        i >= settledOrdered.length - SETTLED_REAL
+          ? renderReal(id)
+          : renderDeferred(id),
       )}
       {upcoming.map((id, i) =>
         i < UPCOMING_REAL ? renderReal(id) : renderDeferred(id),

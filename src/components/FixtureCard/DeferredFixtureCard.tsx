@@ -59,7 +59,7 @@ export function DeferredFixtureCard({
 
   if (error) {
     return (
-      <div ref={ref}>
+      <div ref={ref} data-id={fixtureId}>
         <FixtureCardError error={error} resetErrorBoundary={resetError} />
       </div>
     );
@@ -68,14 +68,14 @@ export function DeferredFixtureCard({
   if (data) {
     const { id: _id, ...rest } = data;
     return (
-      <div ref={ref}>
+      <div ref={ref} data-id={fixtureId}>
         <FixtureCard {...rest} />
       </div>
     );
   }
 
   return (
-    <div ref={ref}>
+    <div ref={ref} data-id={fixtureId}>
       <FixtureCardLoading />
     </div>
   );
