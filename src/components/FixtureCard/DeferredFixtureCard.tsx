@@ -45,7 +45,7 @@ export function DeferredFixtureCard({
           .catch((e) => {
             if (!cancelled) {
               const err = e instanceof Error ? e : new Error(String(e));
-              console.error(err);
+              console.error('DeferredFixtureCard: fetch failed');
               setError(err);
             }
           });

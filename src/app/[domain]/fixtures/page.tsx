@@ -1,9 +1,8 @@
 import { Suspense } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 import {
   DeferredFixtureCard,
   FixtureCardAnchor,
-  FixtureCardError,
+  FixtureCardBoundary,
   FixtureCardLoading,
   SettledFixtureCard,
   UnsettledFixtureCard,
@@ -45,15 +44,11 @@ export default async function FixturesPage() {
   const renderReal = (id: number) => {
     const Card = settled.has(id) ? SettledFixtureCard : UnsettledFixtureCard;
     return (
-      <ErrorBoundary
-        key={id}
-        FallbackComponent={FixtureCardError}
-        onError={console.error}
-      >
+      <FixtureCardBoundary key={id}>
         <Suspense fallback={<FixtureCardLoading />}>
           <Card fixtureId={id} />
         </Suspense>
-      </ErrorBoundary>
+      </FixtureCardBoundary>
     );
   };
 

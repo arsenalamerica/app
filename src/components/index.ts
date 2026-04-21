@@ -3,6 +3,7 @@ export * from './ExternalLink/ExternalLink';
 export * from './FixtureCard/DeferredFixtureCard';
 export * from './FixtureCard/FixtureCard';
 export * from './FixtureCard/FixtureCardAnchor';
+export * from './FixtureCard/FixtureCardBoundary';
 export * from './FixtureCard/FixtureCardError';
 export * from './FixtureCard/SettledFixtureCard';
 export * from './FixtureCard/UnsettledFixtureCard';
