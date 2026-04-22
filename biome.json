@@ -34,7 +34,6 @@
     {
       "includes": [
         "data/src/branches/**/Logo.tsx",
-        "src/components/GameCard/GameCard.tsx",
         "src/components/NavBar/**/*.tsx",
         "src/components/LeagueTable/LeagueTable.tsx",
         "src/components/FixtureCard/FixtureCard.tsx"
