@@ -5,6 +5,8 @@ const config: KnipConfig = {
     // Git worktrees used by Claude Code are checked out under .claude/worktrees/.
     // Knip would otherwise scan them and report false positives.
     '.claude/**',
+    // Older worktree convention; leftover directories may exist here.
+    '.clone/**',
   ],
 
   ignoreExportsUsedInFile: true,
