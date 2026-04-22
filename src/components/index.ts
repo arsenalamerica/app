@@ -7,7 +7,6 @@ export * from './FixtureCard/FixtureCardBoundary';
 export * from './FixtureCard/FixtureCardError';
 export * from './FixtureCard/SettledFixtureCard';
 export * from './FixtureCard/UnsettledFixtureCard';
-export * from './GameCard/GameCard';
 export * from './LeagueLogo/LeagueLogo';
 export * from './LeagueTable/LeagueTable';
 export * from './LocalDateTime/LocalDateTime';
