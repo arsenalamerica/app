@@ -22,6 +22,13 @@ export function FixtureCard({
   periods,
   venue,
   state,
+  // Discard remaining entity fields so they don't leak to the DOM via ...rest
+  starting_at: _starting_at,
+  state_id: _state_id,
+  tvstations: _tvstations,
+  has_odds: _has_odds,
+  has_premium_odds: _has_premium_odds,
+  placeholder: _placeholder,
   ...rest
 }: FixtureCardProps) {
   if (!participants) {

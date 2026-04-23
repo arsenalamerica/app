@@ -56,6 +56,9 @@ export type FixtureEntity = {
   }[];
   tvstations: { tvstation_id: number; country_id: number }[];
   venue: EntityBase;
+  has_odds?: boolean;
+  has_premium_odds?: boolean;
+  placeholder?: boolean;
 };
 
 export type FixturesEndpoint = {
