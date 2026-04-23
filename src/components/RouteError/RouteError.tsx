@@ -1,5 +1,6 @@
 'use client';
 
+import * as Sentry from '@sentry/nextjs';
 import { useEffect } from 'react';
 
 import styles from './RouteError.module.scss';
@@ -11,7 +12,7 @@ export interface RouteErrorProps {
 
 export function RouteError({ error, reset }: RouteErrorProps) {
   useEffect(() => {
-    console.error(error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
