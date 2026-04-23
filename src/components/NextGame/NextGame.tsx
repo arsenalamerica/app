@@ -44,7 +44,7 @@ export function NextGame({
   return (
     <>
       <Heading>Match Watch Party</Heading>
-      <Card render={<div />} className={styles._}>
+      <Card as='div' className={styles._}>
         <p>
           <LocalDateTime
             epoch={starting_at_timestamp}
