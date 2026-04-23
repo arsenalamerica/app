@@ -13,7 +13,6 @@ import { FixtureCardTeam } from './FixtureCardTeam';
 type FixtureCardProps = Omit<CardProps, 'id'> & Omit<FixtureEntity, 'id'>;
 
 export function FixtureCard({
-  render = <section />,
   name,
   className,
   participants,
