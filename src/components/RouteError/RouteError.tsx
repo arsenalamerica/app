@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 import styles from './RouteError.module.scss';
 
 export interface RouteErrorProps {
@@ -7,7 +9,11 @@ export interface RouteErrorProps {
   reset: () => void;
 }
 
-export function RouteError({ reset }: RouteErrorProps) {
+export function RouteError({ error, reset }: RouteErrorProps) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
   return (
     <div className={styles._}>
       <h2>Something went wrong</h2>
