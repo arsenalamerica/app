@@ -8,7 +8,7 @@ import { ICON_SIZES } from '../src/app/icon-sizes';
  * proxy does not rewrite them to a non-existent /[domain]/... route.
  *
  * Matcher exclusion list (src/proxy.ts):
- *   favicon.ico | icon | opengraph-image | sitemap.xml | robots.txt | manifest.webmanifest
+ *   favicon.ico | icon | opengraph-image | sitemap.xml | robots.txt | manifest.webmanifest | monitoring
  *
  * Icon coverage is driven by ICON_SIZES so it cannot drift from
  * src/app/manifest.ts, which emits one <link rel="icon"> per size.

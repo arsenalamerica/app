@@ -54,7 +54,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - _vercel (Vercel Analytics / Speed Insights beacons)
      * - favicon.ico, sitemap.xml, robots.txt, manifest.webmanifest (metadata files)
+     * - monitoring (Sentry tunnel route — must not be rewritten to /[domain]/monitoring)
      */
-    '/((?!api|_next/static|_next/image|_vercel|favicon.ico|icon|opengraph-image|sitemap.xml|robots.txt|manifest.webmanifest).*)',
+    '/((?!api|_next/static|_next/image|_vercel|favicon.ico|icon|opengraph-image|sitemap.xml|robots.txt|manifest.webmanifest|monitoring).*)',
   ],
 };
