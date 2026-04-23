@@ -18,8 +18,9 @@ Runs on push and pull request to `main`. Jobs:
 
 - **biome**, **knip**, **typecheck**, and **test** run in parallel on all events. **knip** detects unused files, exports, and dependencies; uses `--reporter github-actions` for inline PR annotations.
 - **build** runs after all four pass on all events — runs `vercel build`, then deploys to preview (on `pull_request`) or production (on push to `main`). Exposes `url` as a job output for downstream jobs.
-- **e2e** runs on `pull_request` only, after `build`. Runs Playwright tests against the Vercel preview URL via `PLAYWRIGHT_BASE_URL` (from the `build` job output) and `VERCEL_BYPASS_SECRET`. Installs Chromium only. Uploads `playwright-report/` as a CI artifact on every run.
-- **lighthouse** runs on `pull_request` only, after `build`. Matrix job auditing `/`, `/fixtures`, and `/table` against the Vercel preview URL using `treosh/lighthouse-ci-action`. Runs 3 audits per route and uploads artifacts (`lighthouse-root`, `lighthouse-fixtures`, `lighthouse-table`). Thresholds defined in `lighthouserc.json`. All three matrix checks are required in the `shared-ci` ruleset (`settings.yml`).
+- **e2e** and **lighthouse** both run on `pull_request` only, after `build`, and run in parallel with each other.
+  - **e2e**: Runs Playwright tests against the Vercel preview URL via `PLAYWRIGHT_BASE_URL` (from the `build` job output) and `VERCEL_BYPASS_SECRET`. Installs Chromium only. Uploads `playwright-report/` as a CI artifact on every run.
+  - **lighthouse**: Matrix job auditing `/`, `/fixtures`, and `/table` against the Vercel preview URL using `treosh/lighthouse-ci-action`. Runs 3 audits per route and uploads artifacts (`lighthouse-root`, `lighthouse-fixtures`, `lighthouse-table`). Thresholds defined in `lighthouserc.json`. All three matrix checks are required in the `shared-ci` ruleset (`settings.yml`).
 
 Concurrency is configured to cancel in-progress runs on PRs when new commits are pushed. Runs on `main` are never cancelled.
 
