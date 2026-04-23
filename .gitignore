@@ -50,3 +50,6 @@ next-env.d.ts
 !.yarn/sdks
 !.yarn/versions
 .env*.local
+
+# Sentry Config File
+.env.sentry-build-plugin
