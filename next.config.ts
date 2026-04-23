@@ -2,6 +2,19 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  async headers() {
+    return [
+      {
+        source: '/manifest.webmanifest',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=86400, stale-while-revalidate=3600',
+          },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
