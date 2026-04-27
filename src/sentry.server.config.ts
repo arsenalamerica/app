@@ -7,7 +7,7 @@ import * as Sentry from '@sentry/nextjs';
 Sentry.init({
   dsn: 'https://7baae90e741e2ddfbc9a504ddad08533@o4511266925969408.ingest.us.sentry.io/4511267016605696',
 
-  tracesSampleRate: 0.5,
+  tracesSampleRate: process.env.NODE_ENV === 'development' ? 1.0 : 0.1,
 
   // Enable logs to be sent to Sentry
   enableLogs: true,

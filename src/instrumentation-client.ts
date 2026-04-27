@@ -9,7 +9,7 @@ Sentry.init({
 
   integrations: [Sentry.replayIntegration()],
 
-  tracesSampleRate: 0.5,
+  tracesSampleRate: process.env.NODE_ENV === 'development' ? 1.0 : 0.1,
 
   // Enable logs to be sent to Sentry
   enableLogs: true,
