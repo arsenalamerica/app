@@ -41,6 +41,10 @@ export default withSentryConfig(nextConfig, {
 
   project: 'app',
 
+  // Auth token for source maps upload. Only present in CI; local builds skip
+  // the upload silently when this is undefined.
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
 
