@@ -14,6 +14,13 @@ const config: KnipConfig = {
     // Not installed as a project dependency — npx fetches it on demand.
     'sort-package-json',
   ],
+
+  ignoreDependencies: [
+    // Pinned in devDependencies so the version our build pipeline relies on is
+    // explicit, not transitive. Consumed at build time by @sentry/nextjs's
+    // Turbopack post-build hook to upload source maps; never imported directly.
+    '@sentry/cli',
+  ],
 };
 
 export default config;

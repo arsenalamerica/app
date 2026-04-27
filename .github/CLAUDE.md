@@ -36,10 +36,11 @@ Config: `lefthook.yml`
 
 ## Vercel Deployment
 
-The `build` job uses the Vercel CLI (`vercel` devDependency) with three required repository secrets:
+The `build` job uses the Vercel CLI (`vercel` devDependency) with these required repository secrets:
 - `VERCEL_TOKEN`
 - `VERCEL_ORG_ID`
 - `VERCEL_PROJECT_ID`
+- `SENTRY_AUTH_TOKEN` — consumed by the Sentry post-build hook during `vercel build` (which invokes Turbopack `next build`) to upload source maps to Sentry. Configured in `next.config.ts` via `withSentryConfig({ authToken: process.env.SENTRY_AUTH_TOKEN })`. Local builds work without it; upload is skipped silently when unset.
 
 Project IDs are sourced from `.vercel/project.json` (gitignored). Re-run `vercel link` locally to regenerate if needed.
 
