@@ -4115,7 +4115,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:4.0.18"
     clsx: "npm:2.1.1"
     happy-dom: "npm:20.9.0"
-    knip: "npm:6.6.2"
+    knip: "npm:6.7.0"
     lefthook: "npm:2.1.6"
     next: "npm:16.2.4"
     react: "npm:19.2.5"
@@ -5811,9 +5811,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"knip@npm:6.6.2":
-  version: 6.6.2
-  resolution: "knip@npm:6.6.2"
+"knip@npm:6.7.0":
+  version: 6.7.0
+  resolution: "knip@npm:6.7.0"
   dependencies:
     fdir: "npm:^6.5.0"
     formatly: "npm:^0.3.0"
@@ -5832,7 +5832,7 @@ __metadata:
   bin:
     knip: bin/knip.js
     knip-bun: bin/knip-bun.js
-  checksum: 10c0/632b4ed97f5ce1ded76bf00f36c6b434701e678128e22806019fe47b8c63835cfb3dfec3ad1ad24c640556ff1115ddcfd8d798b90fde5a0d65d292ba3a3415a4
+  checksum: 10c0/35c13edc66e48cb696c196d0acb4622954041b4b11393e897433cf493bf46c1a591d51ae10911252aebd6424a9ce255f4476dcd9e85b9214e927606669a769b0
   languageName: node
   linkType: hard
 
