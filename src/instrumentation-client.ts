@@ -9,6 +9,11 @@ Sentry.init({
 
   integrations: [Sentry.replayIntegration()],
 
+  // Map to GitHub deployment environments (production, preview) instead of
+  // the SDK's default `vercel-*` auto-detection. Client only sees
+  // NEXT_PUBLIC_* env vars, so use the public mirror of VERCEL_ENV.
+  environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV,
+
   tracesSampleRate: process.env.NODE_ENV === 'development' ? 1.0 : 0.1,
 
   // Enable logs to be sent to Sentry
