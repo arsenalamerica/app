@@ -2874,9 +2874,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/cli-darwin@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@sentry/cli-darwin@npm:3.4.0"
+  conditions: os=darwin
+  languageName: node
+  linkType: hard
+
 "@sentry/cli-linux-arm64@npm:2.58.5":
   version: 2.58.5
   resolution: "@sentry/cli-linux-arm64@npm:2.58.5"
+  conditions: (os=linux | os=freebsd | os=android) & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-linux-arm64@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@sentry/cli-linux-arm64@npm:3.4.0"
   conditions: (os=linux | os=freebsd | os=android) & cpu=arm64
   languageName: node
   linkType: hard
@@ -2888,9 +2902,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/cli-linux-arm@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@sentry/cli-linux-arm@npm:3.4.0"
+  conditions: (os=linux | os=freebsd | os=android) & cpu=arm
+  languageName: node
+  linkType: hard
+
 "@sentry/cli-linux-i686@npm:2.58.5":
   version: 2.58.5
   resolution: "@sentry/cli-linux-i686@npm:2.58.5"
+  conditions: (os=linux | os=freebsd | os=android) & (cpu=x86 | cpu=ia32)
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-linux-i686@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@sentry/cli-linux-i686@npm:3.4.0"
   conditions: (os=linux | os=freebsd | os=android) & (cpu=x86 | cpu=ia32)
   languageName: node
   linkType: hard
@@ -2902,9 +2930,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/cli-linux-x64@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@sentry/cli-linux-x64@npm:3.4.0"
+  conditions: (os=linux | os=freebsd | os=android) & cpu=x64
+  languageName: node
+  linkType: hard
+
 "@sentry/cli-win32-arm64@npm:2.58.5":
   version: 2.58.5
   resolution: "@sentry/cli-win32-arm64@npm:2.58.5"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-win32-arm64@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@sentry/cli-win32-arm64@npm:3.4.0"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
@@ -2916,9 +2958,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/cli-win32-i686@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@sentry/cli-win32-i686@npm:3.4.0"
+  conditions: os=win32 & (cpu=x86 | cpu=ia32)
+  languageName: node
+  linkType: hard
+
 "@sentry/cli-win32-x64@npm:2.58.5":
   version: 2.58.5
   resolution: "@sentry/cli-win32-x64@npm:2.58.5"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@sentry/cli-win32-x64@npm:3.4.0":
+  version: 3.4.0
+  resolution: "@sentry/cli-win32-x64@npm:3.4.0"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -2960,6 +3016,45 @@ __metadata:
   bin:
     sentry-cli: bin/sentry-cli
   checksum: 10c0/569a3750f6a21e235f8dd3506e38cec7282e82f1e313fc677eb62f2ab3a6f44bdad4e43cc8b73200ca24ea94946811cbd54c0f6adbc4b6ed86b15707bd13941e
+  languageName: node
+  linkType: hard
+
+"@sentry/cli@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "@sentry/cli@npm:3.4.0"
+  dependencies:
+    "@sentry/cli-darwin": "npm:3.4.0"
+    "@sentry/cli-linux-arm": "npm:3.4.0"
+    "@sentry/cli-linux-arm64": "npm:3.4.0"
+    "@sentry/cli-linux-i686": "npm:3.4.0"
+    "@sentry/cli-linux-x64": "npm:3.4.0"
+    "@sentry/cli-win32-arm64": "npm:3.4.0"
+    "@sentry/cli-win32-i686": "npm:3.4.0"
+    "@sentry/cli-win32-x64": "npm:3.4.0"
+    progress: "npm:^2.0.3"
+    proxy-from-env: "npm:^1.1.0"
+    undici: "npm:^6.22.0"
+    which: "npm:^2.0.2"
+  dependenciesMeta:
+    "@sentry/cli-darwin":
+      optional: true
+    "@sentry/cli-linux-arm":
+      optional: true
+    "@sentry/cli-linux-arm64":
+      optional: true
+    "@sentry/cli-linux-i686":
+      optional: true
+    "@sentry/cli-linux-x64":
+      optional: true
+    "@sentry/cli-win32-arm64":
+      optional: true
+    "@sentry/cli-win32-i686":
+      optional: true
+    "@sentry/cli-win32-x64":
+      optional: true
+  bin:
+    sentry-cli: bin/sentry-cli
+  checksum: 10c0/35f0b2268e9b70a93d5c2d1c001b7524da545512c887fceb79e93c04ca41886acb14007dc4a44f4e7d91c9a1ee6ce0e743b50c2a9ffd48c7ac7d8e2a4ab6f0d2
   languageName: node
   linkType: hard
 
@@ -4101,7 +4196,7 @@ __metadata:
     "@axe-core/playwright": "npm:4.11.2"
     "@biomejs/biome": "npm:2.4.13"
     "@playwright/test": "npm:1.59.1"
-    "@sentry/cli": "npm:^2.58.5"
+    "@sentry/cli": "npm:^3.4.0"
     "@sentry/nextjs": "npm:^10"
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/jest-dom": "npm:6.9.1"
@@ -8124,7 +8219,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^6.23.0, undici@npm:^6.24.0":
+"undici@npm:^6.22.0, undici@npm:^6.23.0, undici@npm:^6.24.0":
   version: 6.25.0
   resolution: "undici@npm:6.25.0"
   checksum: 10c0/2597cc6689bdb02c210c557b1f85febbfda65becae6e6fc1061508e2f33734d25207f81cd8af56ada9956329eb3a7bd7431e87dcfeceba20ee87059b57dcf985
