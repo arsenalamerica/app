@@ -4230,7 +4230,7 @@ __metadata:
     react-textfit: "npm:1.1.1"
     sass: "npm:1.99.0"
     typescript: "npm:5.9.3"
-    vercel: "npm:53.1.1"
+    vercel: "npm:53.2.0"
     vite: "npm:7.3.2"
     vitest: "npm:4.0.18"
   languageName: unknown
@@ -8288,9 +8288,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vercel@npm:53.1.1":
-  version: 53.1.1
-  resolution: "vercel@npm:53.1.1"
+"vercel@npm:53.2.0":
+  version: 53.2.0
+  resolution: "vercel@npm:53.2.0"
   dependencies:
     "@vercel/backends": "npm:0.3.0"
     "@vercel/blob": "npm:2.3.0"
@@ -8326,7 +8326,7 @@ __metadata:
   bin:
     vc: dist/vc.js
     vercel: dist/vc.js
-  checksum: 10c0/a565f6fbb5fdeed9cdb03b387a25d7df487cf4a1facce2dca7dec2676db1dca35befc8954ef12ca981c9145b4e974a35c035428778ac2b86071488c233434542
+  checksum: 10c0/60a9dc001ded69d191525519a7eccbb2e4c149270efb242f9a4386d7eb0a0fca1890065a247ba935c7867ee51f4d59fb075a0a2ada230e56e25e34ae17dc5457
   languageName: node
   linkType: hard
 
