@@ -48,7 +48,7 @@
     "next": "16.2.6",
     "react": "19.2.5",
     "react-dom": "19.2.5",
-    "react-error-boundary": "6.1.1",
+    "react-error-boundary": "6.1.2",
     "react-ios-pwa-prompt": "2.0.6",
     "react-textfit": "1.1.1"
   },
