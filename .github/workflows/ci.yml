@@ -17,28 +17,28 @@ jobs:
   biome:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
       - uses: ./.github/actions/setup
       - run: yarn biome ci .
 
   knip:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
       - uses: ./.github/actions/setup
       - run: yarn knip --reporter github-actions
 
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
       - uses: ./.github/actions/setup
       - run: yarn typecheck
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
       - uses: ./.github/actions/setup
       - run: yarn test
 
@@ -60,7 +60,7 @@ jobs:
       MONK_TOKEN: ${{ secrets.MONK_TOKEN }}
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
       - uses: ./.github/actions/setup
       - uses: brianespinosa/next-build-cache@main
       - run: yarn vercel pull --yes --token $VERCEL_TOKEN
@@ -82,7 +82,7 @@ jobs:
       PLAYWRIGHT_BASE_URL: ${{ needs.build.outputs.url }}
       VERCEL_BYPASS_SECRET: ${{ secrets.VERCEL_BYPASS_SECRET }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
       - uses: ./.github/actions/setup
       - name: Get Playwright version
         id: playwright-version
@@ -123,7 +123,7 @@ jobs:
           - path: /table
             name: table
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6.0.3
       - id: lighthouse
         uses: treosh/lighthouse-ci-action@12.6.2
         with:
