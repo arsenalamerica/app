@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
 import { GameCard } from '@/components';
 import { branchData } from '@/data';
@@ -18,6 +19,10 @@ export default async function GameCardPage(props: {
   const branch = branchData[params.domain];
 
   const [nextFixture] = await getNextFixture();
+
+  // Nothing to render between seasons; this route exists only to produce a
+  // shareable card for an actual fixture.
+  if (!nextFixture) notFound();
 
   return <GameCard {...nextFixture} branch={branch} />;
 }

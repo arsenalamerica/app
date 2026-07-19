@@ -55,6 +55,12 @@ export async function getUnsettledFixtureById(
   return fetchFixtureWithRewrite(id);
 }
 
+/**
+ * Returns the next active or upcoming fixture, or an empty array when there is
+ * none. An empty result is expected between seasons and while Sportmonks has
+ * yet to publish the next schedule, so callers must handle it rather than
+ * treating it as an error.
+ */
 export async function getNextFixture(): Promise<FixtureEntity[]> {
   cacheLife('minutes');
   cacheTag('next-fixture');
@@ -80,9 +86,7 @@ export async function getNextFixture(): Promise<FixtureEntity[]> {
   });
 
   if (data.length === 0) {
-    throw new Error(
-      'getNextFixture: no fixture matched active/upcoming state filter',
-    );
+    return [];
   }
 
   const settled = await Promise.allSettled(
