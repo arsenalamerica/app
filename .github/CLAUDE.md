@@ -21,6 +21,7 @@ Runs on push and pull request to `main`. Jobs:
 - **e2e** and **lighthouse** both run on `pull_request` only, after `build`, and run in parallel with each other.
   - **e2e**: Runs Playwright tests against the Vercel preview URL via `PLAYWRIGHT_BASE_URL` (from the `build` job output) and `VERCEL_BYPASS_SECRET`. Installs Chromium only. Uploads `playwright-report/` as a CI artifact on every run.
   - **lighthouse**: Matrix job auditing `/`, `/fixtures`, and `/table` against the Vercel preview URL using `treosh/lighthouse-ci-action`. Runs 3 audits per route and uploads artifacts (`lighthouse-root`, `lighthouse-fixtures`, `lighthouse-table`). Thresholds defined in `lighthouserc.json`. All three matrix checks are required in the `shared-ci` ruleset (`settings.yml`).
+    - **`categories:seo` is `off` and must stay off** while audits run against preview URLs. `is-crawlable` (weight 4.04 of 12.04) always scores 0 because Vercel serves previews with `x-robots-tag: noindex`, and `robots-txt` always fails because Lighthouse fetches `/robots.txt` without the protection-bypass param and gets a 302. Max achievable SEO on a preview is 0.581, so any `minScore` above that is unpassable by construction. Re-enable only if the job is pointed at production.
 
 Concurrency is configured to cancel in-progress runs on PRs when new commits are pushed. Runs on `main` are never cancelled.
 
