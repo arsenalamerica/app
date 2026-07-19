@@ -1,6 +1,6 @@
 import { Heading } from '@ariakit/react';
 import { Suspense } from 'react';
-import { FixtureCard, Main, NextGame } from '@/components';
+import { Card, FixtureCard, Main, NextGame } from '@/components';
 import { branchData, branchLogo } from '@/data';
 import { getNextFixture } from '@/lib/data/fixtures';
 
@@ -12,6 +12,22 @@ export default async function Home(props: {
   const Logo = branchLogo[branch.domain];
 
   const [nextFixture] = await getNextFixture();
+
+  if (!nextFixture) {
+    return (
+      <Main>
+        {Logo && <Logo title={branch.name} role='img' />}
+        <Heading>Next Match</Heading>
+        <Card as='div'>
+          <p>
+            No upcoming match scheduled. Check back once the next season&rsquo;s
+            fixtures are announced.
+          </p>
+        </Card>
+      </Main>
+    );
+  }
+
   const { id: _id, ...nextFixtureProps } = nextFixture;
 
   return (
