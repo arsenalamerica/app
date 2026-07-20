@@ -109,11 +109,18 @@ redaction, so `ENV` values print unmasked in test output. The redaction is worth
 difference.
 
 To keep tests offline, `.env.schema` resolves `MONK_TOKEN` to empty under `test` rather than calling
-`op()`, so the suite never touches 1Password and works in CI where no vault credential exists. Empty
-rather than a placeholder is deliberate: see the guard section below. Setting `test.env.MONK_TOKEN` in
-`vitest.config.ts` would also work now that auto-load exists (the CLI child process inherits it, and
+`op()`, so the suite makes no 1Password network call and works in CI where no vault credential exists.
+Empty rather than a placeholder is deliberate: see the guard section below. Setting `test.env.MONK_TOKEN`
+in `vitest.config.ts` would also work now that auto-load exists (the CLI child process inherits it, and
 `process.env` outranks the schema), but keeping the test contract in `.env.schema` leaves one source of
 truth that is visible in the generated `env.d.ts`.
+
+**Local caveat.** `@initOp(token=$OP_TOKEN)` makes varlock resolve `OP_TOKEN` when it initializes the
+plugin, whether or not any `op()` resolver actually runs. Locally that means decrypting `.env.local`
+through the Secure Enclave on every `yarn test`. With a warm biometric session this is invisible; on a
+cold one it prompts for Touch ID, and because auto-load spawns a varlock CLI per test *file*, a declined
+or slow prompt fails many workers at once — which reads as a mass test failure rather than an auth
+timeout. CI is unaffected: there is no `.env.local` and `OP_TOKEN` is unset.
 
 **`sportmonksFetch` keeps an explicit token guard.** Requiring the var makes `next build` and
 `varlock run` exit before reaching it, but `next dev` deliberately stays up on a config error so you can

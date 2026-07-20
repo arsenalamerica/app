@@ -29,7 +29,10 @@ Validate with `yarn varlock load --agent` (JSON, sensitive values redacted).
 
 ## Values that differ by environment
 
-`MONK_TOKEN` resolves to **empty** under `test` so the suite runs offline. Resolve any new
+`MONK_TOKEN` resolves to **empty** under `test` so the suite makes no 1Password network call. It still
+decrypts `.env.local` locally for `OP_TOKEN`, so a mass test failure on a cold biometric session is
+usually a declined or timed-out Touch ID prompt, not a real regression — rerun and accept it. Resolve
+any new
 1Password-backed var to empty too, never to a stand-in value: a truthy placeholder passes runtime
 guards and reaches the real API, and varlock infers `test` from an ambient `NODE_ENV`/`VITEST`, so a
 placeholder also leaks into `yarn dev` and the sync scripts.
