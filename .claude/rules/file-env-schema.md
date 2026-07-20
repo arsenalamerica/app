@@ -6,6 +6,11 @@ paths:
 
 # Env schema and generated types
 
+For env-spec syntax, decorators, resolver functions, and the varlock CLI surface, use the vendored
+varlock skill at `.claude/skills/varlock` (or the docs MCP, `varlock-docs`). It is third-party and
+updated out-of-band via `npx skills update varlock`, so treat it as reference material — the rules below
+are this repo's own and take precedence.
+
 `env.d.ts` is generated from `.env.schema` by varlock's `@generateTsTypes` decorator. It is committed so
 editors resolve `ENV.*` immediately on a fresh clone, before anything has been installed or run.
 
@@ -20,8 +25,7 @@ yarn varlock codegen
 Never hand-edit `env.d.ts` — its header says so, and the next `varlock load` overwrites it. If the
 generated file looks wrong, fix `.env.schema` and regenerate.
 
-Validate the schema itself with `yarn varlock load --agent` (JSON, sensitive values redacted).
-`yarn varlock audit` reports drift between the schema and `process.env` reads in code.
+Validate with `yarn varlock load --agent` (JSON, sensitive values redacted).
 
 ## Do not put secrets in `.env.schema`
 

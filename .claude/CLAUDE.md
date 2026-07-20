@@ -90,7 +90,10 @@ Gotchas worth knowing before changing any of this:
   guards and reaches the real API, and varlock infers `test` from an ambient `NODE_ENV`/`VITEST`, so it
   would leak into `yarn dev` and the sync scripts as well.
 
-See `docs/adr/006-varlock-env-management.md` for why local dev and CI resolve secrets differently.
+See `docs/adr/006-varlock-env-management.md` for why local dev and CI resolve secrets differently, and
+`.claude/rules/file-env-schema.md` when editing the schema. For varlock's own syntax and CLI reference,
+use the `varlock-docs` MCP or the vendored skill at `.claude/skills/varlock` — both are third-party, so
+the rules above win where they disagree.
 
 ## Investigating production issues
 
