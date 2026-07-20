@@ -18,3 +18,15 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+    groups:
+      # react and react-dom must resolve to the exact same version or React
+      # refuses to boot. The @types packages track that version. Listed by
+      # exact name, not a wildcard: "react*" would sweep in react-error-boundary,
+      # react-ios-pwa-prompt and react-textfit, and "@types/react*" would sweep
+      # in @types/react-textfit — all independently versioned.
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
