@@ -65,9 +65,12 @@ Config: `.github/workflows/pr-conflict-rebase.yml`, logic in `.github/scripts/pr
 
 Runs on every push to `main`. For open non-draft PRs targeting `main`: rebases `BEHIND` ones, labels `DIRTY` ones `conflicting`, and removes a stale `conflicting` label once a PR is clean. This is what clears the Dependabot queue — auto-merge lands one PR, leaving the rest `BEHIND`, and this rebases them so CI re-runs against the new base.
 
-Two things that will silently break it:
+PRs whose head-commit `statusCheckRollup` is `FAILURE`/`ERROR` are skipped — a rebase re-runs the full pipeline to reproduce a known failure. `PENDING` still rebases: a run against a stale base is already invalidated, so cancelling it is cheaper than letting it finish.
+
+Three things that will break it:
 
 - **Must use the App token, never `GITHUB_TOKEN`.** `github-actions[bot]` pushes do not trigger downstream workflows, so a `GITHUB_TOKEN` rebase would leave PRs green against a base they were never tested on. Uses `APP_ID`/`APP_PK` for the same reason `sync-fixtures.yml` does.
+- **PRs touching `.github/workflows/` are never rebased automatically.** Rebasing replays commits, and the App deliberately lacks `workflows: write` (that scope means arbitrary CI code execution in every repo the App is installed in — not worth it for ~1 action bump/month). These are reported as `Skipped (needs manual update)` and need one manual "Update branch" click. Detection matches GitHub's error text, so a reword upstream would make them fail loudly instead.
 - **Assumes the `conflicting` label exists.** It never creates it. Delete the label and every `DIRTY` PR turns the run red.
 
 See `docs/adr/007-pr-conflict-rebase-automation.md` for the full rationale.

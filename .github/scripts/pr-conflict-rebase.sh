@@ -7,7 +7,9 @@
 #   mergeStateStatus DIRTY    -> real conflicts, add the `conflicting` label.
 #   mergeStateStatus BEHIND   -> clean but stale, rebase via the GitHub API
 #                                (a failed rebase is re-checked below to tell
-#                                a new conflict apart from a transient error).
+#                                a new conflict apart from a transient error),
+#                                UNLESS the head commit's statusCheckRollup is
+#                                FAILURE/ERROR — see the skip rationale below.
 #   mergeStateStatus UNKNOWN  -> GitHub hasn't finished computing merge state
 #                                even after the delay below; skip WITHOUT
 #                                touching any existing label (this is not a
@@ -53,6 +55,7 @@ while :; do
           nodes{
             number title isDraft mergeStateStatus
             labels(first:20){ nodes{ name } }
+            commits(last:1){ nodes{ commit{ statusCheckRollup{ state } } } }
           }
         }
       }
@@ -90,6 +93,8 @@ unlabeled=0
 rebased=0
 failed=0
 skipped=0
+skipped_failing=0
+skipped_workflows=0
 unknown=0
 label_errors=0
 summary_rows=""
@@ -106,12 +111,15 @@ while IFS= read -r encoded; do
   title=$(jq -r '.title' <<<"$pr")
   is_draft=$(jq -r '.isDraft' <<<"$pr")
   state=$(jq -r '.mergeStateStatus' <<<"$pr")
+  # NONE when no checks have reported yet — jq would emit "null" otherwise,
+  # and a bare null must not read as a failure state.
+  rollup=$(jq -r '.commits.nodes[0].commit.statusCheckRollup.state // "NONE"' <<<"$pr")
   url="https://github.com/$REPO/pull/$number"
   result=""
 
   if has_label "$pr"; then currently_labeled=true; else currently_labeled=false; fi
 
-  echo "== PR #$number ($state, draft=$is_draft) =="
+  echo "== PR #$number ($state, draft=$is_draft, ci=$rollup) =="
 
   if [ "$is_draft" = "true" ]; then
     echo "  draft — skipping."
@@ -133,7 +141,22 @@ while IFS= read -r encoded; do
         fi
         ;;
       BEHIND)
-        if gh pr update-branch "$number" --repo "$REPO" --rebase; then
+        # A rebase does not fix a failing PR — it re-runs the whole pipeline
+        # (build + e2e + 3-way lighthouse matrix) to reproduce a failure that
+        # is already known. Skip those, for the same reason drafts are
+        # skipped: the CI spend has no near-term payoff. The PR stays BEHIND
+        # until someone fixes it, which is the correct end state.
+        #
+        # Only FAILURE/ERROR skip. PENDING must NOT: a run in flight against
+        # a stale base is already invalidated, so rebasing (and cancelling it)
+        # is strictly cheaper than letting it finish. A null rollup means no
+        # checks have reported yet, which is not a failure either.
+        if [ "$rollup" = "FAILURE" ] || [ "$rollup" = "ERROR" ]; then
+          echo "  CI is $rollup — skipping rebase until it is fixed."
+          skipped_failing=$((skipped_failing + 1))
+          result="Skipped (failing CI)"
+        elif rebase_output=$(gh pr update-branch "$number" --repo "$REPO" --rebase 2>&1); then
+          [ -n "$rebase_output" ] && echo "$rebase_output"
           echo "  rebased."
           rebased=$((rebased + 1))
           if [ "$currently_labeled" = "true" ]; then
@@ -147,7 +170,23 @@ while IFS= read -r encoded; do
           else
             result="Rebased"
           fi
+        elif grep -qF 'refusing to allow a GitHub App to create or update workflow' <<<"$rebase_output"; then
+          # Rebasing replays the PR's commits, so a PR that edits
+          # .github/workflows/ can only be rebased by an identity holding the
+          # `workflows` scope. This App deliberately does not have it: that
+          # scope allows writing workflow files — i.e. running arbitrary code
+          # with repo secrets — in every repo the App is installed in, which
+          # is far too broad to trade for the ~1 action bump per month this
+          # affects. Those PRs get a manual "Update branch" click instead.
+          #
+          # Reported as a skip, not a failure: the run must stay green, or a
+          # routine actions/* bump turns CI red for a known, accepted reason.
+          echo "$rebase_output"
+          echo "  touches .github/workflows/ — needs a manual update (see ADR-007)."
+          skipped_workflows=$((skipped_workflows + 1))
+          result="Skipped (needs manual update)"
         else
+          echo "$rebase_output"
           # A failed rebase is ambiguous: it could mean a new conflict landed
           # between the query above and this call (a race), or a transient
           # error. Re-query mergeStateStatus to tell those apart before
@@ -219,8 +258,8 @@ while IFS= read -r encoded; do
 done <<<"$prs"
 
 echo
-printf 'Labeled %d, unlabeled %d, rebased %d, failed %d, label errors %d, skipped %d draft(s), %d still unknown.\n' \
-  "$labeled" "$unlabeled" "$rebased" "$failed" "$label_errors" "$skipped" "$unknown"
+printf 'Labeled %d, unlabeled %d, rebased %d, failed %d, label errors %d, skipped %d draft(s), skipped %d failing CI, skipped %d workflow-file PR(s), %d still unknown.\n' \
+  "$labeled" "$unlabeled" "$rebased" "$failed" "$label_errors" "$skipped" "$skipped_failing" "$skipped_workflows" "$unknown"
 
 if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
   {
@@ -235,6 +274,8 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     echo "| Failed | $failed |"
     echo "| Label errors | $label_errors |"
     echo "| Skipped drafts | $skipped |"
+    echo "| Skipped (failing CI) | $skipped_failing |"
+    echo "| Skipped (needs manual update) | $skipped_workflows |"
     echo "| Still unknown | $unknown |"
   } >> "$GITHUB_STEP_SUMMARY"
 fi
