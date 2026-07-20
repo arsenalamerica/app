@@ -70,7 +70,7 @@ PRs whose head-commit `statusCheckRollup` is `FAILURE`/`ERROR` are skipped — a
 Three things that will break it:
 
 - **Must use the App token, never `GITHUB_TOKEN`.** `github-actions[bot]` pushes do not trigger downstream workflows, so a `GITHUB_TOKEN` rebase would leave PRs green against a base they were never tested on. Uses `APP_ID`/`APP_PK` for the same reason `sync-fixtures.yml` does.
-- **The App needs `workflows: write`.** Rebasing replays commits, so any PR touching `.github/workflows/` — i.e. every `github-actions` Dependabot PR — fails with `refusing to allow a GitHub App to create or update workflow ... without 'workflows' permission` unless the App holds that scope.
+- **PRs touching `.github/workflows/` are never rebased automatically.** Rebasing replays commits, and the App deliberately lacks `workflows: write` (that scope means arbitrary CI code execution in every repo the App is installed in — not worth it for ~1 action bump/month). These are reported as `Skipped (needs manual update)` and need one manual "Update branch" click. Detection matches GitHub's error text, so a reword upstream would make them fail loudly instead.
 - **Assumes the `conflicting` label exists.** It never creates it. Delete the label and every `DIRTY` PR turns the run red.
 
 See `docs/adr/007-pr-conflict-rebase-automation.md` for the full rationale.

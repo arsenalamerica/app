@@ -29,7 +29,17 @@ refusing to allow a GitHub App to create or update workflow
 .github/workflows/sync-fixtures.yml without `workflows` permission
 ```
 
-This is not an edge case: every `github-actions` ecosystem Dependabot PR edits `.github/workflows/`, so the workflow fails on each one until the scope is granted. The first run rebased 4 PRs successfully and failed exactly on the one bumping `actions/setup-node`. The `npm` PRs are unaffected.
+This is not an edge case: every `github-actions` ecosystem Dependabot PR edits `.github/workflows/`. The first run rebased 4 PRs successfully and failed exactly on the one bumping `actions/setup-node`. The `npm` PRs are unaffected — they only touch `package.json` and `yarn.lock`.
+
+Granting the App `workflows: write` would fix it, and was the initial instinct. Measured against actual frequency it is a bad trade. Merged PRs touching `.github/workflows/` over a 100-PR sample spanning roughly three months:
+
+| PR | Date |
+|---|---|
+| #190 `actions/cache` 5 → 6 | 2026-07-20 |
+| #185 `actions/checkout` 6.0.2 → 7.0.0 | 2026-07-20 |
+| #80 `actions/setup-node` 6.3.0 → 6.4.0 | 2026-04-21 |
+
+Roughly one per month. The scope being traded away is broad: `workflows: write` lets the App write workflow files — which is arbitrary code execution with repository secrets — in **every** repository the App is installed in, not just this one. Repo maintainers already hold the scope, so these PRs can be updated with a single click. Buying ~1 click/month with a permanent, repo-wide code-execution grant is not worth it.
 
 `mergeStateStatus` is computed asynchronously and its latency is unbounded in practice; flat sleeps of 8s and 30s both returned `UNKNOWN` for every PR in real runs, and one case took over four minutes. Any implementation must poll rather than sleep, and must treat `UNKNOWN` as "not yet known" rather than "clean".
 
@@ -37,7 +47,7 @@ This is not an edge case: every `github-actions` ecosystem Dependabot PR edits `
 
 1. Add `.github/workflows/pr-conflict-rebase.yml`, triggered `on: push` to `main`, with the decision logic in `.github/scripts/pr-conflict-rebase.sh`.
 2. Authenticate every write with the `gunnersaurus-bot` App token (`APP_ID` / `APP_PK`), never `GITHUB_TOKEN`. Grant the workflow only `permissions: contents: read`, which `actions/checkout` needs to fetch the script.
-3. Grant the `gunnersaurus-bot` App `workflows: write` at the App level, so it can replay commits that touch `.github/workflows/`. This is a one-time settings change on the App plus accepting the updated permissions on the installation — not a repo or code change.
+3. Do **not** grant the App `workflows: write`. Detect the resulting rebase failure by its distinctive error text, report it as `Skipped (needs manual update)`, and leave the PR `BEHIND` for a maintainer to update with one click. A skip is not an error — a routine `actions/*` bump must not turn CI red for a known, accepted reason.
 4. Act on `mergeStateStatus`, scoped to open non-draft PRs whose base is the pushed branch:
    - `BEHIND` → rebase via `gh pr update-branch --rebase`, **unless** the head commit's `statusCheckRollup` is `FAILURE` or `ERROR`
    - `DIRTY` → add the `conflicting` label
@@ -57,7 +67,8 @@ This is not an edge case: every `github-actions` ecosystem Dependabot PR edits `
 - **Conflicts surface immediately** via the `conflicting` label rather than on inspection.
 - **Hard dependency on the `conflicting` label existing.** If it is deleted, every `DIRTY` PR turns the run red. This is deliberate — silent failure is worse — but it is a footgun worth knowing about.
 - **Hard dependency on `APP_ID` / `APP_PK`.** If the App's key is rotated or its permissions narrowed, this workflow fails alongside `sync-fixtures` and `sync-seasons`. It shares their fate rather than adding a new failure mode.
-- **`workflows: write` widens the App's blast radius.** The App can now modify workflow files anywhere it is installed, not just in this repo. That is a real expansion of what a leaked key could do, accepted because `github-actions` Dependabot PRs are unrebasable without it. Worth reconsidering if the App is ever installed more broadly.
+- **`github-actions` bumps need a manual "Update branch" click.** Roughly one per month. Accepted deliberately: the alternative is a permanent repo-wide workflow-write grant to the App. Revisit only if action bumps become frequent enough that the toil outweighs the scope.
+- **The skip is detected by error-message matching** on `refusing to allow a GitHub App to create or update workflow`, which is inherently brittle — if GitHub rewords it, these PRs fall through to the ambiguous-failure path and start turning runs red again. The failure is loud rather than silent, so it would be noticed, but it is a known fragility.
 - **Failing PRs stay `BEHIND` indefinitely.** That is the intended end state — they need a human fix regardless — but they are invisible unless someone reads the step summary, which reports them as `Skipped (failing CI)`. A PR failing *because* its base is stale would be skipped when a rebase might have fixed it; if that pattern shows up in practice, the `FAILURE` gate needs revisiting.
 - **Bounded blast radius.** The workflow only ever touches PRs in its own repository, and only those targeting the pushed branch. It creates nothing and deletes nothing.
 - **A burst of merges cancels intermediate runs.** `cancel-in-progress` means only the last push's evaluation completes. This is correct — earlier evaluations are stale by definition — but a PR could briefly stay `BEHIND` until the next push if a run is cancelled mid-sweep.

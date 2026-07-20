@@ -94,6 +94,7 @@ rebased=0
 failed=0
 skipped=0
 skipped_failing=0
+skipped_workflows=0
 unknown=0
 label_errors=0
 summary_rows=""
@@ -154,7 +155,8 @@ while IFS= read -r encoded; do
           echo "  CI is $rollup — skipping rebase until it is fixed."
           skipped_failing=$((skipped_failing + 1))
           result="Skipped (failing CI)"
-        elif gh pr update-branch "$number" --repo "$REPO" --rebase; then
+        elif rebase_output=$(gh pr update-branch "$number" --repo "$REPO" --rebase 2>&1); then
+          [ -n "$rebase_output" ] && echo "$rebase_output"
           echo "  rebased."
           rebased=$((rebased + 1))
           if [ "$currently_labeled" = "true" ]; then
@@ -168,7 +170,23 @@ while IFS= read -r encoded; do
           else
             result="Rebased"
           fi
+        elif grep -qF 'refusing to allow a GitHub App to create or update workflow' <<<"$rebase_output"; then
+          # Rebasing replays the PR's commits, so a PR that edits
+          # .github/workflows/ can only be rebased by an identity holding the
+          # `workflows` scope. This App deliberately does not have it: that
+          # scope allows writing workflow files — i.e. running arbitrary code
+          # with repo secrets — in every repo the App is installed in, which
+          # is far too broad to trade for the ~1 action bump per month this
+          # affects. Those PRs get a manual "Update branch" click instead.
+          #
+          # Reported as a skip, not a failure: the run must stay green, or a
+          # routine actions/* bump turns CI red for a known, accepted reason.
+          echo "$rebase_output"
+          echo "  touches .github/workflows/ — needs a manual update (see ADR-007)."
+          skipped_workflows=$((skipped_workflows + 1))
+          result="Skipped (needs manual update)"
         else
+          echo "$rebase_output"
           # A failed rebase is ambiguous: it could mean a new conflict landed
           # between the query above and this call (a race), or a transient
           # error. Re-query mergeStateStatus to tell those apart before
@@ -240,8 +258,8 @@ while IFS= read -r encoded; do
 done <<<"$prs"
 
 echo
-printf 'Labeled %d, unlabeled %d, rebased %d, failed %d, label errors %d, skipped %d draft(s), skipped %d failing CI, %d still unknown.\n' \
-  "$labeled" "$unlabeled" "$rebased" "$failed" "$label_errors" "$skipped" "$skipped_failing" "$unknown"
+printf 'Labeled %d, unlabeled %d, rebased %d, failed %d, label errors %d, skipped %d draft(s), skipped %d failing CI, skipped %d workflow-file PR(s), %d still unknown.\n' \
+  "$labeled" "$unlabeled" "$rebased" "$failed" "$label_errors" "$skipped" "$skipped_failing" "$skipped_workflows" "$unknown"
 
 if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
   {
@@ -257,6 +275,7 @@ if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
     echo "| Label errors | $label_errors |"
     echo "| Skipped drafts | $skipped |"
     echo "| Skipped (failing CI) | $skipped_failing |"
+    echo "| Skipped (needs manual update) | $skipped_workflows |"
     echo "| Still unknown | $unknown |"
   } >> "$GITHUB_STEP_SUMMARY"
 fi
