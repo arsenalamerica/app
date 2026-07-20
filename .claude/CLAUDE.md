@@ -7,10 +7,21 @@ Tooling and infrastructure context for Claude sessions in this repo. For codebas
 - `settings.json` — shared settings committed to the repository
 - `settings.local.json` — local overrides, not committed (gitignored)
 
-## Rules
+## Settings rules
 
 - Destructive command permissions must **never** be added to `settings.json`. If a destructive action needs to be permitted, add it to `settings.local.json` only.
 - Permissions added to `settings.json` must be kept in alphabetical order.
+
+## `rules/`
+
+Topic files in `.claude/rules/`. The filename prefix determines when a rule loads:
+
+- `_<name>.md` — no `paths` frontmatter, loaded at launch in every session. Use for prohibitions and
+  invariants that must apply before anything opens a matching file.
+- `file-<name>.md` — `paths` frontmatter scoping it to specific files; loads only when Claude reads one.
+
+Put guidance at the narrowest scope that still fires when it is needed. A rule that must prevent an
+action cannot be path-scoped to the file it protects — nothing will have opened that file yet.
 
 ## Worktree workflow
 
@@ -46,31 +57,6 @@ These scenarios are unlikely in this repo today but will cause problems if they 
 - **Shared inodes across worktrees.** Editing a file inside `node_modules/foo/` in one worktree mutates the same inode in every other worktree. If you need to experiment-patch a dependency, delete and reinstall that package's subtree to unshare first.
 - **`patch-package` incompatibility.** Tools that mutate `node_modules/` files directly collide with the global store. `yarn patch` (Berry-native) is safe — it writes to `.yarn/patches/`. Classic `patch-package` is dangerous; audit before adopting. This repo uses neither today.
 - **Cross-volume worktrees fall back to copying.** The global store lives under `~/.yarn/berry/`. A worktree on a different filesystem (external drive, NFS mount) silently degrades to copying. Not broken, just not optimized.
-
-## Environment variables
-
-Managed by [varlock](https://varlock.dev). **There is no `.env` file in this repo and you must never
-create one.** `.env.schema` is committed, holds no plaintext values, and is safe to read and edit.
-Secrets are `op://` references resolved from the `arsenalamerica-app` 1Password vault in local dev only;
-CI and Vercel supply the same vars as real environment variables.
-
-These apply in every session, not just when editing env files:
-
-- **Never** `cat .env*`, `echo $SECRET`, or `printenv | grep`. Use `yarn varlock load` (masked) or
-  `yarn varlock load --agent` (JSON, redacted). If the user needs a real value, tell them to run
-  `yarn varlock reveal VAR_NAME` themselves.
-- **Never** read, print, or write `.env.local`. It holds `OP_TOKEN`, secret zero, encrypted at rest. If
-  someone needs to set it, tell them to follow the setup steps in `README.md`.
-- Never write a secret value into any file, including at a user's request. Adding a var means editing
-  `.env.schema` only; the value goes into 1Password, by the user.
-- `varlock scan --staged` runs as a lefthook pre-commit command and blocks a commit containing a
-  resolved secret. Do not bypass it.
-
-Details live where they apply: `.claude/rules/file-env-schema.md` for schema and generated types,
-`.claude/rules/file-varlock-wiring.md` for how the four entrypoints load env, and
-`docs/adr/006-varlock-env-management.md` for why local dev and CI resolve secrets differently. For
-varlock's own syntax and CLI reference use the `varlock-docs` MCP or the vendored skill at
-`.claude/skills/varlock` — both are third-party, so the rules above win where they disagree.
 
 ## Investigating production issues
 
