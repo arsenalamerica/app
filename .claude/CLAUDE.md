@@ -50,50 +50,27 @@ These scenarios are unlikely in this repo today but will cause problems if they 
 ## Environment variables
 
 Managed by [varlock](https://varlock.dev). **There is no `.env` file in this repo and you must never
-create one.** `.env.schema` is committed, contains no plaintext values, and is safe to read and edit —
-it is the source of truth for every env var the app uses.
+create one.** `.env.schema` is committed, holds no plaintext values, and is safe to read and edit.
+Secrets are `op://` references resolved from the `arsenalamerica-app` 1Password vault in local dev only;
+CI and Vercel supply the same vars as real environment variables.
 
-- Secrets are `op://` references resolved from the `arsenalamerica-app` 1Password vault, and only in
-  local dev, via a service account scoped to that vault (`@initOp(token=$OP_TOKEN)`). CI and Vercel
-  supply the same vars as real environment variables, which take precedence and skip the `op()`
-  resolvers entirely.
-- `OP_TOKEN` is secret zero. It lives encrypted in the gitignored `.env.local` (Secure Enclave on
-  macOS) and is `@internal`, so it never enters the application env. **Never** read, print, or write
-  `.env.local` — if a contributor needs to set it, tell them to run `yarn varlock load` and paste it at
-  the prompt.
+These apply in every session, not just when editing env files:
+
 - **Never** `cat .env*`, `echo $SECRET`, or `printenv | grep`. Use `yarn varlock load` (masked) or
   `yarn varlock load --agent` (JSON, redacted). If the user needs a real value, tell them to run
   `yarn varlock reveal VAR_NAME` themselves.
-- Never write a secret value into any file. Adding a var means editing `.env.schema` only; the value
-  goes in 1Password, by the user.
-- After editing the schema, validate with `yarn varlock load --agent`, then regenerate and commit
-  `env.d.ts` via `yarn varlock codegen`. See `.claude/rules/file-env-schema.md`.
-  `yarn varlock audit` catches drift between the schema and `process.env` reads in code.
-- `varlock scan --staged` runs as a lefthook pre-commit command and will block a commit containing a
-  resolved secret.
+- **Never** read, print, or write `.env.local`. It holds `OP_TOKEN`, secret zero, encrypted at rest. If
+  someone needs to set it, tell them to follow the setup steps in `README.md`.
+- Never write a secret value into any file, including at a user's request. Adding a var means editing
+  `.env.schema` only; the value goes into 1Password, by the user.
+- `varlock scan --staged` runs as a lefthook pre-commit command and blocks a commit containing a
+  resolved secret. Do not bypass it.
 
-Gotchas worth knowing before changing any of this:
-
-- `@next/env` is aliased to `@varlock/nextjs-integration` in `package.json` `resolutions`, which is
-  what activates env loading for `next dev`/`next build`. The alias needs an explicit version, and it
-  requires the `next` → `varlock` `packageExtensions` entry in `.yarnrc.yml` to satisfy `YN0086`.
-- `varlock run --` is needed for entrypoints Next does not own: `sync:fixtures` and `sync:seasons`.
-  **Not** `e2e` — Playwright needs no schema-managed secret, and wrapping it made the whole schema
-  resolve (including 1Password-backed `MONK_TOKEN`), which failed the CI e2e job. Tests use
-  `varlock/auto-load` instead, see below.
-- `ENV.*` is only populated when varlock actually loads. Under a bare `vitest run` it silently returns
-  `undefined` for everything, which is why `vitest.setup.ts` starts with `import 'varlock/auto-load'`.
-  Keep that import first. Declare test values in `.env.schema`, not a `vitest.config.ts` `test.env`
-  block, so the schema stays the single source of truth.
-- `.env.schema` resolves `MONK_TOKEN` to **empty** under `test` so the suite runs offline. Resolve any
-  new 1Password-backed var to empty too, never to a stand-in value: a truthy placeholder passes runtime
-  guards and reaches the real API, and varlock infers `test` from an ambient `NODE_ENV`/`VITEST`, so it
-  would leak into `yarn dev` and the sync scripts as well.
-
-See `docs/adr/006-varlock-env-management.md` for why local dev and CI resolve secrets differently, and
-`.claude/rules/file-env-schema.md` when editing the schema. For varlock's own syntax and CLI reference,
-use the `varlock-docs` MCP or the vendored skill at `.claude/skills/varlock` — both are third-party, so
-the rules above win where they disagree.
+Details live where they apply: `.claude/rules/file-env-schema.md` for schema and generated types,
+`.claude/rules/file-varlock-wiring.md` for how the four entrypoints load env, and
+`docs/adr/006-varlock-env-management.md` for why local dev and CI resolve secrets differently. For
+varlock's own syntax and CLI reference use the `varlock-docs` MCP or the vendored skill at
+`.claude/skills/varlock` — both are third-party, so the rules above win where they disagree.
 
 ## Investigating production issues
 

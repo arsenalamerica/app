@@ -1,6 +1,6 @@
 ---
 paths:
-  - "**/.env.schema"
+  - "**/.env*"
   - "**/env.d.ts"
 ---
 
@@ -26,6 +26,16 @@ Never hand-edit `env.d.ts` — its header says so, and the next `varlock load` o
 generated file looks wrong, fix `.env.schema` and regenerate.
 
 Validate with `yarn varlock load --agent` (JSON, sensitive values redacted).
+
+## Values that differ by environment
+
+`MONK_TOKEN` resolves to **empty** under `test` so the suite runs offline. Resolve any new
+1Password-backed var to empty too, never to a stand-in value: a truthy placeholder passes runtime
+guards and reaches the real API, and varlock infers `test` from an ambient `NODE_ENV`/`VITEST`, so a
+placeholder also leaks into `yarn dev` and the sync scripts.
+
+Declare test values here rather than in a `vitest.config.ts` `test.env` block, so the schema stays the
+single source of truth and shows up in the generated `env.d.ts`.
 
 ## Do not put secrets in `.env.schema`
 
