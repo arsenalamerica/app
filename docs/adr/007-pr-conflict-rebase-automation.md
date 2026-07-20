@@ -41,12 +41,23 @@ Granting the App `workflows: write` would fix it, and was the initial instinct. 
 
 Roughly one per month. The scope being traded away is broad: `workflows: write` lets the App write workflow files — which is arbitrary code execution with repository secrets — in **every** repository the App is installed in, not just this one. Repo maintainers already hold the scope, so these PRs can be updated with a single click. Buying ~1 click/month with a permanent, repo-wide code-execution grant is not worth it.
 
+**Second correction (added after the first production run).** The loop-prevention rule cuts both ways, and the original decision only accounted for one side of it. Using the App token for *pushes* is necessary so rebased branches re-run CI. But the same rule governs whether this workflow is *triggered at all*: GitHub does not create workflow runs from events triggered by `GITHUB_TOKEN`. `dependabot-auto-merge.yml` originally enabled auto-merge with `GITHUB_TOKEN`, so the resulting merge commit landed on `main` and triggered nothing — including this workflow.
+
+The observed evidence:
+
+| Merge | Enabled by | Triggered a run? |
+|---|---|---|
+| #207 `c1e5870` | a user | yes |
+| #184 `0023d7d` | `dependabot-auto-merge.yml` via `GITHUB_TOKEN` | no |
+
+That is the primary use case failing silently: the workflow exists to clear the queue after a Dependabot auto-merge, and a Dependabot auto-merge was the one thing that could not trigger it. `dependabot-auto-merge.yml` therefore enables auto-merge with the App token too, for exactly the same identity reason.
+
 `mergeStateStatus` is computed asynchronously and its latency is unbounded in practice; flat sleeps of 8s and 30s both returned `UNKNOWN` for every PR in real runs, and one case took over four minutes. Any implementation must poll rather than sleep, and must treat `UNKNOWN` as "not yet known" rather than "clean".
 
 ## Decision
 
 1. Add `.github/workflows/pr-conflict-rebase.yml`, triggered `on: push` to `main`, with the decision logic in `.github/scripts/pr-conflict-rebase.sh`.
-2. Authenticate every write with the `gunnersaurus-bot` App token (`APP_ID` / `APP_PK`), never `GITHUB_TOKEN`. Grant the workflow only `permissions: contents: read`, which `actions/checkout` needs to fetch the script.
+2. Authenticate every write with the `gunnersaurus-bot` App token (`APP_ID` / `APP_PK`), never `GITHUB_TOKEN`. Grant the workflow only `permissions: contents: read`, which `actions/checkout` needs to fetch the script. The same applies to `dependabot-auto-merge.yml`: it must enable auto-merge with the App token, or the merges it produces trigger nothing and this workflow never runs.
 3. Do **not** grant the App `workflows: write`. Detect the resulting rebase failure by its distinctive error text, report it as `Skipped (needs manual update)`, and leave the PR `BEHIND` for a maintainer to update with one click. A skip is not an error — a routine `actions/*` bump must not turn CI red for a known, accepted reason.
 4. Act on `mergeStateStatus`, scoped to open non-draft PRs whose base is the pushed branch:
    - `BEHIND` → rebase via `gh pr update-branch --rebase`, **unless** the head commit's `statusCheckRollup` is `FAILURE` or `ERROR`
@@ -63,7 +74,7 @@ Roughly one per month. The scope being traded away is broad: `workflows: write` 
 ## Consequences
 
 - **CI spend shifts from wasted to useful.** Runs against stale bases are cancelled by the rebase instead of running to completion. Net effect on a merge cascade is fewer total runs, not more, because the invalidated runs would have been re-run anyway.
-- **The queue self-clears.** Each merge triggers a rebase of everything still open, which re-triggers CI, which lets auto-merge land the next one. No manual `update-branch` passes.
+- **The queue self-clears — but only because auto-merge uses the App token.** Each merge triggers a rebase of everything still open, which re-triggers CI, which lets auto-merge land the next one. This entire chain depends on `dependabot-auto-merge.yml` not using `GITHUB_TOKEN`; reverting that one line silently breaks the automation with no error anywhere, because the workflow simply never runs.
 - **Conflicts surface immediately** via the `conflicting` label rather than on inspection.
 - **Hard dependency on the `conflicting` label existing.** If it is deleted, every `DIRTY` PR turns the run red. This is deliberate — silent failure is worse — but it is a footgun worth knowing about.
 - **Hard dependency on `APP_ID` / `APP_PK`.** If the App's key is rotated or its permissions narrowed, this workflow fails alongside `sync-fixtures` and `sync-seasons`. It shares their fate rather than adding a new failure mode.

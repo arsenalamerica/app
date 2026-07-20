@@ -1,16 +1,47 @@
 name: Dependabot Auto-merge
 
+# Enables auto-merge on Dependabot PRs. Runs in base-branch context via
+# pull_request_target, which is safe here because no PR code is checked out
+# or executed.
+#
+# Uses the gunnersaurus-bot App token (APP_ID/APP_PK), NOT GITHUB_TOKEN.
+# GitHub does not create workflow runs from events triggered by GITHUB_TOKEN,
+# so an auto-merge enabled with it lands a commit on main that triggers
+# nothing downstream — including pr-conflict-rebase.yml, whose whole purpose
+# is to rebase the remaining queue once a merge lands. The App is a distinct
+# identity, so merges it enables do trigger on:push workflows.
+#
+# Approves before enabling auto-merge. No ruleset on this repo currently
+# requires approving reviews, so today this is a no-op — it is here so the
+# workflow keeps working unchanged if a `pull_request` rule with
+# `required_approving_review_count` is ever added, and to stay consistent
+# with the same workflow in other repos.
+
 on: pull_request_target
+
+# contents:read only — the merge below uses the App token, never GITHUB_TOKEN,
+# and nothing here checks out or executes PR code.
+permissions:
+  contents: read
 
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
+      - name: Generate gunnersaurus-bot token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PK }}
+
+      - run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
       - run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
