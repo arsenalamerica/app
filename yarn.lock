@@ -12,84 +12,84 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ariakit/components@npm:0.1.1":
-  version: 0.1.1
-  resolution: "@ariakit/components@npm:0.1.1"
+"@ariakit/components@npm:0.1.7":
+  version: 0.1.7
+  resolution: "@ariakit/components@npm:0.1.7"
   dependencies:
-    "@ariakit/store": "npm:0.1.1"
-    "@ariakit/utils": "npm:0.1.1"
-  checksum: 10c0/de51c3825d15f31b951760cea34f5e8f33523222c728fae8ef27224811c567e96d59a69169135b29dc0aec49ad63c5438470cabd14565ceadb19130f3f49df1c
+    "@ariakit/store": "npm:0.1.6"
+    "@ariakit/utils": "npm:0.1.4"
+  checksum: 10c0/05e875c787e071d1060d5680952e9efb738febef19ca285cf9da4ae2bc7359a5a3ba21bf3986c1d9c6b5656dfcc7c3f2a9f0a586f4d25e7253fa36055119d565
   languageName: node
   linkType: hard
 
-"@ariakit/react-components@npm:0.1.1":
-  version: 0.1.1
-  resolution: "@ariakit/react-components@npm:0.1.1"
+"@ariakit/react-components@npm:0.3.3":
+  version: 0.3.3
+  resolution: "@ariakit/react-components@npm:0.3.3"
   dependencies:
-    "@ariakit/components": "npm:0.1.1"
-    "@ariakit/react-store": "npm:0.1.1"
-    "@ariakit/react-utils": "npm:0.1.1"
-    "@ariakit/store": "npm:0.1.1"
-    "@ariakit/utils": "npm:0.1.1"
+    "@ariakit/components": "npm:0.1.7"
+    "@ariakit/react-store": "npm:0.1.7"
+    "@ariakit/react-utils": "npm:0.2.2"
+    "@ariakit/store": "npm:0.1.6"
+    "@ariakit/utils": "npm:0.1.4"
     "@floating-ui/dom": "npm:^1.0.0"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/f923775e17f57ef7be74cbcd8e455a1b58588f918bff061658005f943ab2588e7dbaebd06474b9abd6d0f83d6321204ceba840be0b6d2f386ce424870a59d3cc
+  checksum: 10c0/7c3dd9d5dc67060f2d12713b6351f5e3e59c14998d5d0684cbd026b7aa15cc13448ede5980a5a8534a8f0af5bf62f999a594d94857171de31858f7f2f29a81e8
   languageName: node
   linkType: hard
 
-"@ariakit/react-store@npm:0.1.1":
-  version: 0.1.1
-  resolution: "@ariakit/react-store@npm:0.1.1"
+"@ariakit/react-store@npm:0.1.7":
+  version: 0.1.7
+  resolution: "@ariakit/react-store@npm:0.1.7"
   dependencies:
-    "@ariakit/react-utils": "npm:0.1.1"
-    "@ariakit/store": "npm:0.1.1"
-    "@ariakit/utils": "npm:0.1.1"
+    "@ariakit/react-utils": "npm:0.2.2"
+    "@ariakit/store": "npm:0.1.6"
+    "@ariakit/utils": "npm:0.1.4"
     use-sync-external-store: "npm:^1.6.0"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/275894eec1872705c82eede4c3f9ea8ce69705499a50d5f33e250dee63632bb644c7dfa40db9cdd877fbe08ec132c7445f735dfd15e09a71bec987456125230b
+  checksum: 10c0/0649c26f4c7d5e1213d1c9985978345b8735f3fe7597dae342c28b4b0739536c37511890b78a6cba70364f274a84fc48a020acecede1fe79a99808bd77328d55
   languageName: node
   linkType: hard
 
-"@ariakit/react-utils@npm:0.1.1":
-  version: 0.1.1
-  resolution: "@ariakit/react-utils@npm:0.1.1"
+"@ariakit/react-utils@npm:0.2.2":
+  version: 0.2.2
+  resolution: "@ariakit/react-utils@npm:0.2.2"
   dependencies:
-    "@ariakit/store": "npm:0.1.1"
-    "@ariakit/utils": "npm:0.1.1"
+    "@ariakit/store": "npm:0.1.6"
+    "@ariakit/utils": "npm:0.1.4"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/4e86dca2a92fcc6beb073245954292b015b8c65d8d0d92f6d3e0ee3cc78146dd94f9d338cfd4c15b6884f4ac9c5ac1849a2d9c22d79db02c562a2798a5f06e06
+  checksum: 10c0/12d136449cb8e12ec13f880398a087bf48c4d8079bca700711cd827480cbdc95b9de426dbba37e35c6679bb14582a443f1b7508652701e114ad5506e7de680f2
   languageName: node
   linkType: hard
 
-"@ariakit/react@npm:0.4.28":
-  version: 0.4.28
-  resolution: "@ariakit/react@npm:0.4.28"
+"@ariakit/react@npm:0.4.34":
+  version: 0.4.34
+  resolution: "@ariakit/react@npm:0.4.34"
   dependencies:
-    "@ariakit/react-components": "npm:0.1.1"
+    "@ariakit/react-components": "npm:0.3.3"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/4eaa2c3fc5a05003b5572e0b948444ab573ba0f65d6c28a8294da419e2ccede3679d71e6f729d6278f2f6aaf97d178262e45a5e0f1add7b66fed15fc41f26231
+  checksum: 10c0/4a55fc7e99e214d21ad298e43a8f5a92855a13c7bd02567d20c49029e5980fe38d245ec5b9706ca13b559f359a1669999bcb61df7a61e7bfc9771903d154303f
   languageName: node
   linkType: hard
 
-"@ariakit/store@npm:0.1.1":
-  version: 0.1.1
-  resolution: "@ariakit/store@npm:0.1.1"
+"@ariakit/store@npm:0.1.6":
+  version: 0.1.6
+  resolution: "@ariakit/store@npm:0.1.6"
   dependencies:
-    "@ariakit/utils": "npm:0.1.1"
-  checksum: 10c0/275f656d52f41de6bd5e483d42dce4bf89d26b7c92a7064175558e16a0b2f6b05207d0d27e5fd2ed8c7040221f2aa57bff91af96953a6bff7eec71f6cc578068
+    "@ariakit/utils": "npm:0.1.4"
+  checksum: 10c0/a26aa53e801bcac997f50822cdeecc9ba66842bb26ebf242a621be88e491221289e50a4f9109072ff2ed11afe5e6d1adaec7f17e51ebf0907b6b124cbfa49c46
   languageName: node
   linkType: hard
 
-"@ariakit/utils@npm:0.1.1":
-  version: 0.1.1
-  resolution: "@ariakit/utils@npm:0.1.1"
-  checksum: 10c0/cb9815daae95aeabbee0339a0d54d21a9607727be0c82e4205798646ef758b7b4d975c4d53f0b22bc5ee346a043edf15a092e2316a3d6e5614c1aa00303ad293
+"@ariakit/utils@npm:0.1.4":
+  version: 0.1.4
+  resolution: "@ariakit/utils@npm:0.1.4"
+  checksum: 10c0/068f5f884a5ea92d34ccfce328940728bc6c0bdfc6e4319532b78ee72ce614d50eae5037f3fdc71f77f147a8435f6add18d50f16a304edac8d529d63df5bb345
   languageName: node
   linkType: hard
 
@@ -3894,7 +3894,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "app@workspace:."
   dependencies:
-    "@ariakit/react": "npm:0.4.28"
+    "@ariakit/react": "npm:0.4.34"
     "@axe-core/playwright": "npm:4.11.3"
     "@biomejs/biome": "npm:2.4.16"
     "@playwright/test": "npm:1.60.0"
