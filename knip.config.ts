@@ -3,7 +3,15 @@ import type { KnipConfig } from 'knip';
 const config: KnipConfig = {
   ignore: [
     // Git worktrees used by Claude Code are checked out under .claude/worktrees/.
-    // Knip would otherwise scan them and report false positives.
+    // Each is a full duplicate checkout (src/, package.json, node_modules), so
+    // without this knip would scan them and report every file twice.
+    //
+    // Knip reports `.claude/** — Remove from ignore` as a configuration hint
+    // whenever no worktree is present: in CI, in a fresh clone, and from inside
+    // a worktree (which has no nested .claude/worktrees/ of its own). That hint
+    // is expected and wrong — the ignore only does its job in the root checkout
+    // when a worktree exists. Do not remove it. It is a hint, not an error, and
+    // knip still exits 0.
     '.claude/**',
   ],
 
