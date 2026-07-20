@@ -1,0 +1,60 @@
+name: PR conflict check & auto-rebase
+
+# On every push that lands on main, re-check ONLY the open PRs whose base is
+# that branch and either rebase them (clean, just behind) or label them
+# conflicting (real conflicts). Logic lives in
+# .github/scripts/pr-conflict-rebase.sh.
+#
+# This matters most for the Dependabot queue: auto-merge lands one PR, which
+# leaves every other open PR BEHIND. Without this, each is rebased by hand and
+# CI burns runs on branches that are already stale before they finish.
+#
+# The `conflicting` label is NOT managed here — it's created once via a
+# manual CLI sweep, not by this workflow. This action never touches any
+# repo other than its own and never creates/verifies labels; it assumes
+# `conflicting` already exists.
+#
+# Uses the gunnersaurus-bot App token (APP_ID/APP_PK — the same App that
+# sync-fixtures.yml and sync-seasons.yml use) rather than GITHUB_TOKEN for
+# every write: GITHUB_TOKEN pushes run as github-actions[bot], and GitHub's
+# loop-prevention rules mean that actor's pushes do NOT trigger downstream
+# on:push/on:pull_request workflow runs — so CI would never re-run against a
+# rebased branch. The App is a distinct identity, so its pushes DO trigger CI.
+on:
+  push:
+    branches: [main]
+
+# contents:read only — actions/checkout needs it to pull these scripts onto
+# the runner. Every gh/API write below uses the App token, never GITHUB_TOKEN.
+permissions:
+  contents: read
+
+# cancel-in-progress: a rebase/label decision is only meaningful against the
+# latest branch tip. Without this, a burst of pushes queues stale runs that
+# act on merge state GitHub already recomputed away — cancelling is safe
+# since gh pr update-branch --rebase is a single atomic API call per PR, not
+# a multi-step local git operation that could be left half-done.
+concurrency:
+  group: pr-conflict-rebase-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  check-and-fix:
+    name: Check PRs targeting ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Generate gunnersaurus-bot token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PK }}
+
+      - name: Check PR conflicts / rebase behind PRs
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: .github/scripts/pr-conflict-rebase.sh "${{ github.ref_name }}"
