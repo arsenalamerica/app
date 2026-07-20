@@ -3,6 +3,10 @@
     "sentry": {
       "type": "http",
       "url": "https://mcp.sentry.dev/mcp/arsenal-america/app"
+    },
+    "varlock-docs": {
+      "type": "http",
+      "url": "https://docs.mcp.varlock.dev/mcp"
     }
   }
 }

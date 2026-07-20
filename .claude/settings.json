@@ -20,6 +20,7 @@
       "Skill(pr-review-toolkit:review-pr)",
       "WebFetch(domain:docs.slack.dev)",
       "WebFetch(domain:github.com)",
+      "WebFetch(domain:varlock.dev)",
       "WebFetch(domain:www.npmjs.com)",
       "WebSearch"
     ]
