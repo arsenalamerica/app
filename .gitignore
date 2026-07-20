@@ -30,8 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files — .env.schema is committed (no plaintext secrets); everything else
+# may hold resolved values and must never be committed. See docs/adr/006.
 .env*
+!.env.schema
 
 # vercel
 .vercel
@@ -49,7 +51,3 @@ next-env.d.ts
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
-.env*.local
-
-# Sentry Config File
-.env.sentry-build-plugin

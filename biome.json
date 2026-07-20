@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!.claude", "!.next", "!node_modules"]
+    "includes": ["**", "!.claude", "!.next", "!node_modules", "!env.d.ts"]
   },
   "formatter": {
     "enabled": true,

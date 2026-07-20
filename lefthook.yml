@@ -1,5 +1,7 @@
 pre-commit:
   commands:
+    varlock-scan:
+      run: yarn varlock scan --staged
     biome:
       glob: "*.{js,jsx,ts,tsx,json,css,scss,sass}"
       exclude: ".claude/**"

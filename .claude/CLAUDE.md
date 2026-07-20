@@ -11,6 +11,7 @@ Tooling and infrastructure context for Claude sessions in this repo. For codebas
 
 - Destructive command permissions must **never** be added to `settings.json`. If a destructive action needs to be permitted, add it to `settings.local.json` only.
 - Permissions added to `settings.json` must be kept in alphabetical order.
+- Topic-specific instructions live in `.claude/rules/`. See `.claude/rules/path-claude-rules.md` for the filename prefix convention that determines when each rule loads.
 
 ## Worktree workflow
 

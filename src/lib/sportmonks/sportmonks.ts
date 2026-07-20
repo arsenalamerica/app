@@ -1,3 +1,5 @@
+import { ENV } from 'varlock/env';
+
 export type Sportmonks = {
   subscription: [];
   rate_limit: {
@@ -29,8 +31,19 @@ export async function sportmonksFetch<T>(
   path: string,
   params: Record<string, string> = {},
 ): Promise<T> {
-  const token = process.env.MONK_TOKEN;
-  if (!token) throw new Error('MONK_TOKEN is not set');
+  // MONK_TOKEN is required outside tests, so `next build` and `varlock run` exit
+  // before reaching this. `next dev` deliberately stays up on a config error
+  // though, and ENV then yields undefined — which Headers would stringify to the
+  // literal "undefined" and Sportmonks would reject as an opaque 401. It is also
+  // empty under `test`, so this is what stops a test reaching the real API.
+  const token = ENV.MONK_TOKEN;
+  if (!token) {
+    throw new Error(
+      'MONK_TOKEN is not set. It resolves from 1Password in local dev — check ' +
+        'OP_TOKEN is set in .env.local (see README.md) and read the varlock errors ' +
+        'above. In tests it is empty by design; mock the calling module instead.',
+    );
+  }
 
   const url = new URL(`${SPORTMONKS_BASE}${path}`);
   for (const [k, v] of Object.entries(params)) {

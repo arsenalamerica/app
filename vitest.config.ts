@@ -14,6 +14,10 @@ export default defineConfig({
     },
   },
   test: {
+    // Env comes from varlock, loaded by `import 'varlock/auto-load'` at the top of
+    // vitest.setup.ts. Prefer declaring test values in .env.schema over adding a
+    // `test.env` block here, so the schema stays the single source of truth and
+    // shows up in the generated env.d.ts.
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],

@@ -7,10 +7,11 @@
     "check": "biome check --write .",
     "dev": "next dev",
     "e2e": "playwright test",
+    "postinstall": "varlock codegen",
     "knip": "knip",
     "start": "next start",
-    "sync:fixtures": "node scripts/sync-fixtures.mjs",
-    "sync:seasons": "node scripts/sync-seasons.mjs",
+    "sync:fixtures": "varlock run -- node scripts/sync-fixtures.mjs",
+    "sync:seasons": "varlock run -- node scripts/sync-seasons.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
@@ -31,6 +32,7 @@
     ]
   },
   "resolutions": {
+    "@next/env": "npm:@varlock/nextjs-integration@1.1.6",
     "@vercel/backends/srvx": "^0.11.13",
     "@vercel/fastify/@tootallnate/once": "^3.0.1",
     "@vercel/fun/@tootallnate/once": "^3.0.1",
@@ -42,6 +44,8 @@
   "dependencies": {
     "@ariakit/react": "0.4.28",
     "@sentry/nextjs": "^10",
+    "@varlock/1password-plugin": "2.0.0",
+    "@varlock/nextjs-integration": "1.1.6",
     "@vercel/analytics": "2.0.1",
     "@vercel/speed-insights": "2.0.0",
     "clsx": "2.1.1",
@@ -50,7 +54,8 @@
     "react-dom": "19.2.5",
     "react-error-boundary": "6.1.2",
     "react-ios-pwa-prompt": "2.0.6",
-    "react-textfit": "1.1.1"
+    "react-textfit": "1.1.1",
+    "varlock": "1.11.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.3",
