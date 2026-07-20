@@ -31,15 +31,17 @@ export async function sportmonksFetch<T>(
   path: string,
   params: Record<string, string> = {},
 ): Promise<T> {
-  // MONK_TOKEN is @required, so `next build` and `varlock run` both exit before
-  // reaching this. `next dev` deliberately stays up on a config error though, and
-  // ENV then yields undefined — which Headers would stringify to the literal
-  // "undefined" and Sportmonks would reject as an opaque 401. Fail clearly instead.
+  // MONK_TOKEN is required outside tests, so `next build` and `varlock run` exit
+  // before reaching this. `next dev` deliberately stays up on a config error
+  // though, and ENV then yields undefined — which Headers would stringify to the
+  // literal "undefined" and Sportmonks would reject as an opaque 401. It is also
+  // empty under `test`, so this is what stops a test reaching the real API.
   const token = ENV.MONK_TOKEN;
   if (!token) {
     throw new Error(
-      'MONK_TOKEN is not set. Locally it resolves from 1Password — check the op ' +
-        'CLI is installed, the desktop app is unlocked, and the varlock errors above.',
+      'MONK_TOKEN is not set. It resolves from 1Password in local dev — check ' +
+        'OP_TOKEN is set in .env.local (see README.md) and read the varlock errors ' +
+        'above. In tests it is empty by design; mock the calling module instead.',
     );
   }
 

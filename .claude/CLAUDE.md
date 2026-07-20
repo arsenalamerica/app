@@ -83,10 +83,12 @@ Gotchas worth knowing before changing any of this:
   `varlock/auto-load` instead, see below.
 - `ENV.*` is only populated when varlock actually loads. Under a bare `vitest run` it silently returns
   `undefined` for everything, which is why `vitest.setup.ts` starts with `import 'varlock/auto-load'`.
-  Keep that import first. Never set env vars in `vitest.config.ts` `test.env` — that reaches
-  `process.env` only, and `ENV` does not read it.
-- `.env.schema` short-circuits `MONK_TOKEN` under `test` so the suite runs offline with no Touch ID
-  prompt. Keep any new 1Password-backed var doing the same if tests touch it.
+  Keep that import first. Declare test values in `.env.schema`, not a `vitest.config.ts` `test.env`
+  block, so the schema stays the single source of truth.
+- `.env.schema` resolves `MONK_TOKEN` to **empty** under `test` so the suite runs offline. Resolve any
+  new 1Password-backed var to empty too, never to a stand-in value: a truthy placeholder passes runtime
+  guards and reaches the real API, and varlock infers `test` from an ambient `NODE_ENV`/`VITEST`, so it
+  would leak into `yarn dev` and the sync scripts as well.
 
 See `docs/adr/006-varlock-env-management.md` for why local dev and CI resolve secrets differently.
 

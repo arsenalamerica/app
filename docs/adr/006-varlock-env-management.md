@@ -13,7 +13,7 @@ example was impossible without a negation. The practical consequences:
   `throw new Error('MONK_TOKEN is not set')` from `src/lib/sportmonks/sportmonks.ts` with no pointer to
   where the token comes from. The only record of it lived in `scripts/CLAUDE.md`, as a
   `MONK_TOKEN=<token> yarn sync:seasons` example.
-- **No validation.** Nine distinct env vars read across ~20 sites in app code, build config, scripts,
+- **No validation.** Nine distinct env vars read across ~35 sites in app code, build config, scripts,
   and Playwright, with four different failure modes: `throw`, `process.exit(1)`, silent fallback, and `?? ''`. A missing
   `VERCEL_BYPASS_SECRET` coerced to `''` and surfaced as a confusing 401 rather than a clear error.
 - **Plaintext secrets on disk are an LLM exposure risk.** The motivating concern in issue #86: any
@@ -86,8 +86,11 @@ those vars are platform-injected and already optional.
 
 **New prerequisite for local development.** Contributors need the `arsenalamerica-app` service account
 token from a maintainer, entered once at the `yarn varlock load` prompt. No `op` CLI, desktop app, or
-personal vault access is required. Without the token `yarn dev` fails at load with a varlock error
-naming the missing credential. Documented in `README.md`.
+personal vault access is required. Creating the `.env.local` line that triggers the prompt is a manual
+first step — `varlock load` does not prompt for empty values on its own. Without a valid token,
+`yarn dev` prints a varlock error and **stays up anyway** (see the guard section below); a rotated or
+malformed token surfaces as a raw plugin stack trace rather than a tidy message. Documented in
+`README.md`.
 
 **Tests load varlock in-process.** `ENV` is populated only when varlock actually loads, and a bare
 `vitest run` does not load it — happy-dom makes varlock take a browser branch that initializes with an
@@ -95,30 +98,46 @@ empty value map, so every `ENV.*` read silently returns `undefined`. `vitest.set
 with `import 'varlock/auto-load'`, varlock's documented entry point for plain Node and test runners.
 
 Loading in-process was chosen over wrapping the script in `varlock run`, because varlock can then
-auto-detect the `test` environment from `NODE_ENV` — which test runners set only after startup, too
-late for a wrapper, forcing an explicit `VARLOCK_ENV=test` prefix in `package.json`. Keeping that out
-of the script means the test commands stay plain `vitest`. It costs ~1s on the suite, since auto-load
-shells out once per worker. Doing it in `globalSetup` instead pays that cost once, but workers then
-receive the env blob without varlock's log-redaction patching, so `ENV` values print unmasked in test
-output; ~0.2s was not worth losing that.
+auto-detect the `test` environment from `NODE_ENV=test` / `VITEST` / `VITEST_POOL_ID` — which test
+runners set only after startup, too late for a wrapper, forcing an explicit `VARLOCK_ENV=test` prefix
+in `package.json`. Keeping that out of the script means the test commands stay plain `vitest`.
 
-To keep tests offline, `.env.schema` short-circuits `MONK_TOKEN` under `test` via
-`if(forEnv(test), …, op(…))`, so `yarn test` never calls 1Password, never prompts for Touch ID, and
-works in CI where no vault credential exists. An earlier attempt set `test.env.MONK_TOKEN` in
-`vitest.config.ts` instead; that was ineffective, because `ENV` reads varlock's internal value map and
-never consults `process.env`.
+It costs roughly a second of wall clock, because auto-load shells out to the varlock CLI once per test
+*file* (~600ms each, largely hidden by parallelism). Doing it in `globalSetup` pays that once and
+measured slightly faster, but workers then receive the env blob without varlock's `patchGlobalConsole`
+redaction, so `ENV` values print unmasked in test output. The redaction is worth more than the
+difference.
 
-**`sportmonksFetch` keeps an explicit token guard.** `@required` makes `next build` and `varlock run`
-exit before reaching it, but `next dev` deliberately stays up on a config error so you can fix and
-hot-reload — and `ENV` then returns `undefined`. `Headers` stringifies that to the literal
+To keep tests offline, `.env.schema` resolves `MONK_TOKEN` to empty under `test` rather than calling
+`op()`, so the suite never touches 1Password and works in CI where no vault credential exists. Empty
+rather than a placeholder is deliberate: see the guard section below. Setting `test.env.MONK_TOKEN` in
+`vitest.config.ts` would also work now that auto-load exists (the CLI child process inherits it, and
+`process.env` outranks the schema), but keeping the test contract in `.env.schema` leaves one source of
+truth that is visible in the generated `env.d.ts`.
+
+**`sportmonksFetch` keeps an explicit token guard.** Requiring the var makes `next build` and
+`varlock run` exit before reaching it, but `next dev` deliberately stays up on a config error so you can
+fix and hot-reload — and `ENV` then returns `undefined`. `Headers` stringifies that to the literal
 `"undefined"`, which Sportmonks rejects as an opaque 401. So the guard the schema was supposed to
-replace still earns its place for the most common local failure (Touch ID declined, app locked, wrong
-account). Schema validation and the guard cover different runtimes; neither is redundant.
+replace still earns its place, for the most common local failures: `OP_TOKEN` missing from
+`.env.local`, or revoked. Schema validation and the guard cover different runtimes; neither is
+redundant.
+
+This is also why `test` resolves `MONK_TOKEN` to empty rather than to a stand-in token. A placeholder
+is truthy, so it would pass the guard and reach the real API. Worse, varlock infers `test` from an
+ambient `NODE_ENV`/`VITEST`, so a placeholder would also be handed to `yarn dev` and to the sync
+scripts — the data-writing entrypoints — for anyone with those exported in their shell, producing
+exactly the opaque 401 the guard exists to prevent. Empty makes the guard fire instead.
 
 **`e2e` is deliberately not wrapped in `varlock run`.** Playwright needs no schema-managed secret — CI
 supplies `PLAYWRIGHT_BASE_URL` and `VERCEL_BYPASS_SECRET` directly as job env, and
-`playwright.config.ts` defaults both. Wrapping it made the whole schema resolve, including the
-1Password-backed `MONK_TOKEN`, which failed the CI e2e job outright.
+`playwright.config.ts` supplies its own fallbacks. Wrapping it made the whole schema resolve, including
+the 1Password-backed `MONK_TOKEN`, which failed the CI e2e job outright.
+
+The cost is that Playwright stays outside schema validation, so the `?? ''` on `VERCEL_BYPASS_SECRET`
+at `playwright.config.ts:13` — one of the motivating problems listed above — is *not* fixed by this
+change. A missing bypass secret still coerces to an empty header and surfaces as a confusing 401 rather
+than a named error. Worth a follow-up.
 
 **Leak scanning at commit time.** `varlock scan --staged` runs in `lefthook.yml`, resolving `@sensitive`
 values and blocking a commit that contains one. This is what actually enforces the issue's "no plaintext

@@ -17,12 +17,20 @@ One-time setup — ask a maintainer for the `arsenalamerica-app` service account
 
 ```sh
 yarn install
-yarn varlock load          # prompts for the token, encrypts it into .env.local
+echo 'OP_TOKEN=varlock(prompt)' > .env.local   # creates the gitignored file
+yarn varlock load                              # prompts, then encrypts it in place
 yarn dev
 ```
 
-`.env.local` is gitignored, and the token is encrypted at rest (hardware-backed via the Secure Enclave
-on macOS), so it is never stored in plaintext. You are prompted only once.
+The `varlock(prompt)` line is what triggers the prompt — `varlock load` does not ask for empty values
+on its own, so without it you get `op(): Unable to authenticate with 1Password` instead.
+
+`.env.local` is gitignored, and varlock rewrites that line as an encrypted value (hardware-backed via
+the Secure Enclave on macOS), so the token is never stored in plaintext. You are prompted only once.
+
+If your token is later rotated or revoked, varlock fails with a `invalid service account token` stack
+trace from the plugin rather than a tidy message, and `next dev` still reports `✓ Ready` afterwards —
+re-run the two commands above to replace it.
 
 The dev server prints `✨ loaded by varlock ✨` when env loading is wired up correctly.
 

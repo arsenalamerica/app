@@ -46,8 +46,10 @@ export default withVarlock(
     project: 'app',
 
     // Auth token for source maps upload. Only set in CI and on Vercel; local
-    // builds skip the upload silently when this is undefined.
-    authToken: process.env.SENTRY_AUTH_TOKEN,
+    // builds skip the upload silently without it. varlock materializes unset
+    // optional vars as '' on this path, so normalize back to undefined rather
+    // than handing Sentry an empty string.
+    authToken: process.env.SENTRY_AUTH_TOKEN || undefined,
 
     // Only print logs for uploading source maps in CI
     silent: !process.env.CI,
