@@ -28,20 +28,37 @@ Adopt varlock with `.env.schema` as the committed contract for every environment
 
 ### 1Password resolution is scoped to local development
 
-`@initOp(allowAppAuth=forEnv(development), account=my.1password.com)`. Local dev authenticates through the
-1Password desktop app over the `op` CLI (Touch ID). CI and Vercel are unchanged: `MONK_TOKEN`,
-`SENTRY_AUTH_TOKEN`, and `VERCEL_BYPASS_SECRET` continue to come from GitHub secrets and Vercel project
-env.
+`@initOp(token=$OP_TOKEN)`, where `OP_TOKEN` is a service account scoped to the `arsenalamerica-app`
+vault and nothing else. CI and Vercel are unchanged: `MONK_TOKEN`, `SENTRY_AUTH_TOKEN`, and
+`VERCEL_BYPASS_SECRET` continue to come from GitHub secrets and Vercel project env.
 
 This works because varlock gives `process.env` the highest precedence and **skips a resolver entirely
 when it is overridden**. In CI the `op()` call is never evaluated, so no 1Password credential exists in
-the deploy path and a 1Password outage cannot break a deployment.
+the deploy path and a 1Password outage cannot break a deployment. `OP_TOKEN` is `@optional` and unset
+there; it is also `@internal`, so it never enters the application environment.
 
-The rejected alternative was a 1Password service account whose token becomes the single `OP_TOKEN`
-secret in GitHub and Vercel, with every secret resolved from the vault in all environments. It is a
-cleaner single source of truth, but it makes 1Password a hard runtime dependency of every build and
-deploy, and it trades N low-risk secrets for one high-value one. Revisit if the secret count grows
-enough that drift between Vercel and 1Password becomes a real maintenance cost.
+Two alternatives were rejected:
+
+**Desktop-app auth** (`allowAppAuth`) was implemented first and then replaced. It authenticates as the
+developer's personal 1Password account, which grants the whole app access to every vault that account
+can see — far more than it needs. It also drags in real prerequisites: the `op` CLI at v2.33+, the
+1Password 8 desktop app (v7 lacks the Developer settings pane entirely and fails with an error that
+never names the version as the cause), the CLI integration toggle, and an `account=` pin on machines
+signed in to more than one account. A scoped service account has none of that: the SDK is bundled, so
+there is no CLI or desktop app requirement, and the credential can only ever read one vault.
+
+**A service account used in CI and production too** — one `OP_TOKEN` secret in GitHub and Vercel, every
+secret resolved from the vault everywhere. Cleaner as a single source of truth, but it makes 1Password
+a hard runtime dependency of every build and deploy, and trades N low-risk secrets for one high-value
+one. Revisit if drift between Vercel and 1Password becomes a real maintenance cost.
+
+### Secret zero lives in an encrypted, gitignored file
+
+The service account token is itself a secret, so it cannot go in the committed schema. It sits in
+`.env.local` as `varlock(prompt)`: on first `varlock load` the developer is prompted once, and varlock
+writes the value back encrypted, hardware-backed via the Secure Enclave on macOS. So the trade is one
+locally-encrypted, single-vault credential in place of ambient access to a personal account — and still
+no plaintext secret anywhere on disk, which was the point of issue #86.
 
 ### Next.js integrates by replacing `@next/env`
 
@@ -67,10 +84,10 @@ those vars are platform-injected and already optional.
 
 ## Consequences
 
-**New prerequisite for local development.** Contributors need the `op` CLI installed and "Integrate
-with 1Password CLI" enabled in the desktop app, plus access to the `arsenalamerica-app` vault. Without
-it `yarn dev` fails at load with a varlock error naming the missing CLI. This is a real onboarding cost
-and is documented in `README.md`.
+**New prerequisite for local development.** Contributors need the `arsenalamerica-app` service account
+token from a maintainer, entered once at the `yarn varlock load` prompt. No `op` CLI, desktop app, or
+personal vault access is required. Without the token `yarn dev` fails at load with a varlock error
+naming the missing credential. Documented in `README.md`.
 
 **Tests load varlock in-process.** `ENV` is populated only when varlock actually loads, and a bare
 `vitest run` does not load it — happy-dom makes varlock take a browser branch that initializes with an

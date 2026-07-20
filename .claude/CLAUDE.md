@@ -54,8 +54,13 @@ create one.** `.env.schema` is committed, contains no plaintext values, and is s
 it is the source of truth for every env var the app uses.
 
 - Secrets are `op://` references resolved from the `arsenalamerica-app` 1Password vault, and only in
-  local dev (`allowAppAuth=forEnv(development)`). CI and Vercel supply the same vars as real
-  environment variables, which take precedence and skip the `op()` resolvers entirely.
+  local dev, via a service account scoped to that vault (`@initOp(token=$OP_TOKEN)`). CI and Vercel
+  supply the same vars as real environment variables, which take precedence and skip the `op()`
+  resolvers entirely.
+- `OP_TOKEN` is secret zero. It lives encrypted in the gitignored `.env.local` (Secure Enclave on
+  macOS) and is `@internal`, so it never enters the application env. **Never** read, print, or write
+  `.env.local` — if a contributor needs to set it, tell them to run `yarn varlock load` and paste it at
+  the prompt.
 - **Never** `cat .env*`, `echo $SECRET`, or `printenv | grep`. Use `yarn varlock load` (masked) or
   `yarn varlock load --agent` (JSON, redacted). If the user needs a real value, tell them to run
   `yarn varlock reveal VAR_NAME` themselves.

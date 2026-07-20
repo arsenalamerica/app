@@ -10,27 +10,21 @@ Environment variables are managed by [varlock](https://varlock.dev). `.env.schem
 holds no secret values — secrets are `op://` references resolved from the `arsenalamerica-app`
 1Password vault at load time. **Do not create a `.env` file.**
 
-One-time prerequisites:
+Secrets resolve through a 1Password **service account** scoped to the `arsenalamerica-app` vault. It
+uses a bundled SDK, so there is no `op` CLI or 1Password desktop app to install.
 
-1. Install the 1Password CLI — `brew install 1password-cli` (needs v2.33+)
-2. Use the **1Password 8** desktop app. CLI app integration depends on the Developer settings pane,
-   which v7 does not have — on v7, `op` fails with a `connecting to desktop app` error that does not
-   mention the version as the cause.
-3. Enable **1Password → Settings → Developer → Integrate with 1Password CLI**
-4. Make sure your account has access to the `arsenalamerica-app` vault
-
-If you are signed in to more than one 1Password account, note that `.env.schema` pins resolution to
-the personal account via `account=my.1password.com`.
-
-Then:
+One-time setup — ask a maintainer for the `arsenalamerica-app` service account token, then:
 
 ```sh
 yarn install
+yarn varlock load          # prompts for the token, encrypts it into .env.local
 yarn dev
 ```
 
-The dev server prints `✨ loaded by varlock ✨` when env loading is wired up correctly. The first run
-prompts for Touch ID to unlock 1Password.
+`.env.local` is gitignored, and the token is encrypted at rest (hardware-backed via the Secure Enclave
+on macOS), so it is never stored in plaintext. You are prompted only once.
+
+The dev server prints `✨ loaded by varlock ✨` when env loading is wired up correctly.
 
 Useful commands:
 
