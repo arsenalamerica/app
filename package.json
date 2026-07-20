@@ -13,7 +13,7 @@
     "sync:seasons": "varlock run -- node scripts/sync-seasons.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "varlock codegen && tsc --noEmit"
   },
   "browserslist": {
     "development": [
