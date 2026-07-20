@@ -87,3 +87,14 @@ secrets" goal — the `.gitignore` change alone would not catch a secret pasted 
 
 **Schema drift is now detectable.** `varlock audit` reports env vars used in code but absent from the
 schema, and vice versa — a check that did not previously exist.
+
+**`env.d.ts` is generated but committed.** It holds only type declarations and doc comments derived
+from the schema — no values — so it is safe to commit, and doing so means a fresh clone typechecks and
+editors resolve `ENV.*` without running anything first. `postinstall` also runs `varlock codegen`, so
+CI regenerates from the schema regardless and stays correct even if a stale copy is committed. The
+consequence is that forgetting to regenerate does not fail CI; the committed file just rots quietly.
+`.claude/rules/file-env-schema.md` is what guards that, and biome excludes the file so formatting does
+not fight codegen.
+
+Coupling codegen to the `typecheck` script was tried first and rejected: it paid the generation cost on
+every typecheck while other consumers of the types still got nothing.

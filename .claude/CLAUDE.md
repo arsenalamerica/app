@@ -61,8 +61,9 @@ it is the source of truth for every env var the app uses.
   `yarn varlock reveal VAR_NAME` themselves.
 - Never write a secret value into any file. Adding a var means editing `.env.schema` only; the value
   goes in 1Password, by the user.
-- After editing the schema, validate with `yarn varlock load --agent`. `yarn varlock audit` catches
-  drift between the schema and `process.env` reads in code.
+- After editing the schema, validate with `yarn varlock load --agent`, then regenerate and commit
+  `env.d.ts` via `yarn varlock codegen`. See `.claude/rules/file-env-schema.md`.
+  `yarn varlock audit` catches drift between the schema and `process.env` reads in code.
 - `varlock scan --staged` runs as a lefthook pre-commit command and will block a commit containing a
   resolved secret.
 
