@@ -6,8 +6,10 @@ paths:
 
 # Env schema and generated types
 
-`env.d.ts` is generated from `.env.schema` by varlock's `@generateTsTypes` decorator. It is committed
-so a fresh clone typechecks without running anything first, and so editors resolve `ENV.*` immediately.
+`env.d.ts` is generated from `.env.schema` by varlock's `@generateTsTypes` decorator. It is committed so
+editors resolve `ENV.*` immediately on a fresh clone, before anything has been installed or run.
+(`postinstall` regenerates it too, so the typecheck job would pass either way — editor resolution is
+the reason that actually depends on it being committed.)
 
 ## After editing `.env.schema`
 

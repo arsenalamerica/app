@@ -31,8 +31,17 @@ export async function sportmonksFetch<T>(
   path: string,
   params: Record<string, string> = {},
 ): Promise<T> {
-  // @required in .env.schema, so varlock fails at load if it is missing.
+  // MONK_TOKEN is @required, so `next build` and `varlock run` both exit before
+  // reaching this. `next dev` deliberately stays up on a config error though, and
+  // ENV then yields undefined — which Headers would stringify to the literal
+  // "undefined" and Sportmonks would reject as an opaque 401. Fail clearly instead.
   const token = ENV.MONK_TOKEN;
+  if (!token) {
+    throw new Error(
+      'MONK_TOKEN is not set. Locally it resolves from 1Password — check the op ' +
+        'CLI is installed, the desktop app is unlocked, and the varlock errors above.',
+    );
+  }
 
   const url = new URL(`${SPORTMONKS_BASE}${path}`);
   for (const [k, v] of Object.entries(params)) {

@@ -13,8 +13,9 @@ holds no secret values — secrets are `op://` references resolved from the `ars
 One-time prerequisites:
 
 1. Install the 1Password CLI — `brew install 1password-cli` (needs v2.33+)
-2. Use the **1Password 8** desktop app. Version 7 has no Developer settings and cannot do CLI
-   app integration at all, so `op` will fail with a `connecting to desktop app` error.
+2. Use the **1Password 8** desktop app. CLI app integration depends on the Developer settings pane,
+   which v7 does not have — on v7, `op` fails with a `connecting to desktop app` error that does not
+   mention the version as the cause.
 3. Enable **1Password → Settings → Developer → Integrate with 1Password CLI**
 4. Make sure your account has access to the `arsenalamerica-app` vault
 

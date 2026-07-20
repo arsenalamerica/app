@@ -6,7 +6,7 @@
     "build": "next build",
     "check": "biome check --write .",
     "dev": "next dev",
-    "e2e": "varlock run -- playwright test",
+    "e2e": "playwright test",
     "postinstall": "varlock codegen",
     "knip": "knip",
     "start": "next start",

@@ -1,3 +1,10 @@
+// Loads and validates .env.schema so `ENV.*` is populated in tests. Without it a
+// bare `vitest run` never initializes varlock and every `ENV.*` read silently
+// returns undefined. Loading in-process (rather than wrapping the test script in
+// `varlock run`) lets varlock auto-detect the `test` environment from NODE_ENV,
+// which test runners only set after startup. Must stay first — it has to run
+// before any module that reads ENV at import time.
+import 'varlock/auto-load';
 import '@testing-library/jest-dom';
 import { afterEach, beforeEach, vi } from 'vitest';
 

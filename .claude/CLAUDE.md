@@ -72,10 +72,16 @@ Gotchas worth knowing before changing any of this:
 - `@next/env` is aliased to `@varlock/nextjs-integration` in `package.json` `resolutions`, which is
   what activates env loading for `next dev`/`next build`. The alias needs an explicit version, and it
   requires the `next` → `varlock` `packageExtensions` entry in `.yarnrc.yml` to satisfy `YN0086`.
-- `varlock run --` is only needed for entrypoints Next does not own: `sync:fixtures`, `sync:seasons`,
-  and `e2e`.
-- `vitest.config.ts` sets a placeholder `test.env.MONK_TOKEN`. Removing it makes `yarn test` hit
-  1Password and prompt for Touch ID, because `fixtures.spec.ts` loads the real sportmonks module.
+- `varlock run --` is needed for entrypoints Next does not own: `sync:fixtures` and `sync:seasons`.
+  **Not** `e2e` — Playwright needs no schema-managed secret, and wrapping it made the whole schema
+  resolve (including 1Password-backed `MONK_TOKEN`), which failed the CI e2e job. Tests use
+  `varlock/auto-load` instead, see below.
+- `ENV.*` is only populated when varlock actually loads. Under a bare `vitest run` it silently returns
+  `undefined` for everything, which is why `vitest.setup.ts` starts with `import 'varlock/auto-load'`.
+  Keep that import first. Never set env vars in `vitest.config.ts` `test.env` — that reaches
+  `process.env` only, and `ENV` does not read it.
+- `.env.schema` short-circuits `MONK_TOKEN` under `test` so the suite runs offline with no Touch ID
+  prompt. Keep any new 1Password-backed var doing the same if tests touch it.
 
 See `docs/adr/006-varlock-env-management.md` for why local dev and CI resolve secrets differently.
 

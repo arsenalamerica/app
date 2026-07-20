@@ -14,12 +14,9 @@ export default defineConfig({
     },
   },
   test: {
-    // varlock resolves MONK_TOKEN from 1Password. process.env wins over schema
-    // resolvers, so this placeholder stops `op()` from firing (and prompting for
-    // Touch ID) whenever a test transitively imports @/lib/sportmonks.
-    env: {
-      MONK_TOKEN: 'test-token',
-    },
+    // Env comes from varlock, loaded by `import 'varlock/auto-load'` at the top
+    // of vitest.setup.ts. Do not set env vars in a `test.env` block here — that
+    // reaches process.env only, and `ENV` reads varlock's own value map.
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
