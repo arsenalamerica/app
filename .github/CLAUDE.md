@@ -49,13 +49,28 @@ Project IDs are sourced from `.vercel/project.json` (gitignored). Re-run `vercel
 
 Config: `.github/dependabot.yml`
 
-Monitors `npm` dependencies weekly, targeting `main`. Commit messages use `chore(deps):` prefix via the `commit-message` config.
+Monitors `npm` and `github-actions` dependencies daily, targeting `main`. Commit messages use `chore(deps):` prefix via the `commit-message` config.
+
+The `react` group keeps `react`, `react-dom`, `@types/react`, and `@types/react-dom` in one PR — `react` and `react-dom` must resolve to the exact same version or React refuses to boot. Group patterns are exact names, never wildcards: `react*` would sweep in `react-error-boundary`, `react-ios-pwa-prompt`, and `react-textfit`, and `@types/react*` would sweep in `@types/react-textfit` — all independently versioned.
 
 ## Dependabot Auto-merge
 
 Config: `.github/workflows/dependabot-auto-merge.yml`
 
 Triggers on `pull_request_target` (runs in base branch context so `GITHUB_TOKEN` has full permissions). Checks `github.actor == 'dependabot[bot]'` and enables auto-merge via squash. `pull_request_target` is safe here because no PR code is checked out or executed.
+
+## PR Conflict Check & Auto-rebase
+
+Config: `.github/workflows/pr-conflict-rebase.yml`, logic in `.github/scripts/pr-conflict-rebase.sh`
+
+Runs on every push to `main`. For open non-draft PRs targeting `main`: rebases `BEHIND` ones, labels `DIRTY` ones `conflicting`, and removes a stale `conflicting` label once a PR is clean. This is what clears the Dependabot queue — auto-merge lands one PR, leaving the rest `BEHIND`, and this rebases them so CI re-runs against the new base.
+
+Two things that will silently break it:
+
+- **Must use the App token, never `GITHUB_TOKEN`.** `github-actions[bot]` pushes do not trigger downstream workflows, so a `GITHUB_TOKEN` rebase would leave PRs green against a base they were never tested on. Uses `APP_ID`/`APP_PK` for the same reason `sync-fixtures.yml` does.
+- **Assumes the `conflicting` label exists.** It never creates it. Delete the label and every `DIRTY` PR turns the run red.
+
+See `docs/adr/007-pr-conflict-rebase-automation.md` for the full rationale.
 
 ## Sync Seasons Workflow
 
