@@ -7,21 +7,11 @@ Tooling and infrastructure context for Claude sessions in this repo. For codebas
 - `settings.json` — shared settings committed to the repository
 - `settings.local.json` — local overrides, not committed (gitignored)
 
-## Settings rules
+## Rules
 
 - Destructive command permissions must **never** be added to `settings.json`. If a destructive action needs to be permitted, add it to `settings.local.json` only.
 - Permissions added to `settings.json` must be kept in alphabetical order.
-
-## `rules/`
-
-Topic files in `.claude/rules/`. The filename prefix determines when a rule loads:
-
-- `_<name>.md` — no `paths` frontmatter, loaded at launch in every session. Use for prohibitions and
-  invariants that must apply before anything opens a matching file.
-- `file-<name>.md` — `paths` frontmatter scoping it to specific files; loads only when Claude reads one.
-
-Put guidance at the narrowest scope that still fires when it is needed. A rule that must prevent an
-action cannot be path-scoped to the file it protects — nothing will have opened that file yet.
+- Topic-specific instructions live in `.claude/rules/`. See `.claude/rules/path-claude-rules.md` for the filename prefix convention that determines when each rule loads.
 
 ## Worktree workflow
 
