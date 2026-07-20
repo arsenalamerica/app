@@ -12,9 +12,14 @@ holds no secret values — secrets are `op://` references resolved from the `ars
 
 One-time prerequisites:
 
-1. Install the 1Password CLI — `brew install 1password-cli`
-2. In the 1Password desktop app, enable **Settings → Developer → Integrate with 1Password CLI**
-3. Make sure your account has access to the `arsenalamerica-app` vault
+1. Install the 1Password CLI — `brew install 1password-cli` (needs v2.33+)
+2. Use the **1Password 8** desktop app. Version 7 has no Developer settings and cannot do CLI
+   app integration at all, so `op` will fail with a `connecting to desktop app` error.
+3. Enable **1Password → Settings → Developer → Integrate with 1Password CLI**
+4. Make sure your account has access to the `arsenalamerica-app` vault
+
+If you are signed in to more than one 1Password account, note that `.env.schema` pins resolution to
+the personal account via `account=my.1password.com`.
 
 Then:
 
