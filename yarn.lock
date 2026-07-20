@@ -1258,10 +1258,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/env@npm:16.2.6":
-  version: 16.2.6
-  resolution: "@next/env@npm:16.2.6"
-  checksum: 10c0/466722ce30a9561d29c08a7ba78091a47fef3644f422d04751c7124a24457ffe11eb25bb6c59c1e1d57735d9c68c58d185cc19ea58befd7a9c5b81dc05ca550d
+"@next/env@npm:@varlock/nextjs-integration@1.1.6, @varlock/nextjs-integration@npm:1.1.6":
+  version: 1.1.6
+  resolution: "@varlock/nextjs-integration@npm:1.1.6"
+  peerDependencies:
+    next: ">=14"
+    varlock: ^1.11.0
+  checksum: 10c0/b380ac841c41d53111a2f2980a569517b6f5fe6bec86c71c9157302b0525f4b4e0599621121d4379de80ea86bf7ca188b67e83821734ed19c6b8ce0a269fb24a
   languageName: node
   linkType: hard
 
@@ -3193,6 +3196,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@varlock/1password-plugin@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@varlock/1password-plugin@npm:2.0.0"
+  peerDependencies:
+    varlock: ^1.8.0
+  checksum: 10c0/b056cf3c477ae1eeda40404808d43327e9ab3a1f889e6abc2244d3581b10eb40f3ddd44e121d9c3a970f45ec0c26950a8198c7fe1ea92c952a038bd6ae3c9e28
+  languageName: node
+  linkType: hard
+
 "@vercel/analytics@npm:2.0.1":
   version: 2.0.1
   resolution: "@vercel/analytics@npm:2.0.1"
@@ -3881,6 +3893,8 @@ __metadata:
     "@types/react": "npm:19.2.14"
     "@types/react-dom": "npm:19.2.3"
     "@types/react-textfit": "npm:1.1.4"
+    "@varlock/1password-plugin": "npm:2.0.0"
+    "@varlock/nextjs-integration": "npm:1.1.6"
     "@vercel/analytics": "npm:2.0.1"
     "@vercel/speed-insights": "npm:2.0.0"
     "@vitejs/plugin-react": "npm:5.1.4"
@@ -3897,6 +3911,7 @@ __metadata:
     react-textfit: "npm:1.1.1"
     sass: "npm:1.100.0"
     typescript: "npm:6.0.3"
+    varlock: "npm:1.11.0"
     vercel: "npm:54.6.1"
     vite: "npm:7.3.2"
     vitest: "npm:4.0.18"
@@ -7898,6 +7913,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: 10c0/35e1179f872a53227bdf8a827f7911da4c37c0f4091c29b76b1e32473d1670ebe7bcd880b808b7549ba9a5605c233350f800ffab963ee4a4ee346ee983b6019b
+  languageName: node
+  linkType: hard
+
+"varlock@npm:1.11.0, varlock@npm:^1.11.0":
+  version: 1.11.0
+  resolution: "varlock@npm:1.11.0"
+  bin:
+    varlock: bin/cli.js
+  checksum: 10c0/cc88b621438fff0f2ce42f8d44584081447fcb6053da4fb8a757a91f34f588bc1cf1de34b3db072e01b481b746a6b06f651886f37c5d4d31ad24b1db6a5b6b56
   languageName: node
   linkType: hard
 

@@ -1,3 +1,5 @@
+import { ENV } from 'varlock/env';
+
 export type Sportmonks = {
   subscription: [];
   rate_limit: {
@@ -29,8 +31,8 @@ export async function sportmonksFetch<T>(
   path: string,
   params: Record<string, string> = {},
 ): Promise<T> {
-  const token = process.env.MONK_TOKEN;
-  if (!token) throw new Error('MONK_TOKEN is not set');
+  // @required in .env.schema, so varlock fails at load if it is missing.
+  const token = ENV.MONK_TOKEN;
 
   const url = new URL(`${SPORTMONKS_BASE}${path}`);
   for (const [k, v] of Object.entries(params)) {

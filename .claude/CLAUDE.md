@@ -47,6 +47,37 @@ These scenarios are unlikely in this repo today but will cause problems if they 
 - **`patch-package` incompatibility.** Tools that mutate `node_modules/` files directly collide with the global store. `yarn patch` (Berry-native) is safe — it writes to `.yarn/patches/`. Classic `patch-package` is dangerous; audit before adopting. This repo uses neither today.
 - **Cross-volume worktrees fall back to copying.** The global store lives under `~/.yarn/berry/`. A worktree on a different filesystem (external drive, NFS mount) silently degrades to copying. Not broken, just not optimized.
 
+## Environment variables
+
+Managed by [varlock](https://varlock.dev). **There is no `.env` file in this repo and you must never
+create one.** `.env.schema` is committed, contains no plaintext values, and is safe to read and edit —
+it is the source of truth for every env var the app uses.
+
+- Secrets are `op://` references resolved from the `arsenalamerica-app` 1Password vault, and only in
+  local dev (`allowAppAuth=forEnv(development)`). CI and Vercel supply the same vars as real
+  environment variables, which take precedence and skip the `op()` resolvers entirely.
+- **Never** `cat .env*`, `echo $SECRET`, or `printenv | grep`. Use `yarn varlock load` (masked) or
+  `yarn varlock load --agent` (JSON, redacted). If the user needs a real value, tell them to run
+  `yarn varlock reveal VAR_NAME` themselves.
+- Never write a secret value into any file. Adding a var means editing `.env.schema` only; the value
+  goes in 1Password, by the user.
+- After editing the schema, validate with `yarn varlock load --agent`. `yarn varlock audit` catches
+  drift between the schema and `process.env` reads in code.
+- `varlock scan --staged` runs as a lefthook pre-commit command and will block a commit containing a
+  resolved secret.
+
+Gotchas worth knowing before changing any of this:
+
+- `@next/env` is aliased to `@varlock/nextjs-integration` in `package.json` `resolutions`, which is
+  what activates env loading for `next dev`/`next build`. The alias needs an explicit version, and it
+  requires the `next` → `varlock` `packageExtensions` entry in `.yarnrc.yml` to satisfy `YN0086`.
+- `varlock run --` is only needed for entrypoints Next does not own: `sync:fixtures`, `sync:seasons`,
+  and `e2e`.
+- `vitest.config.ts` sets a placeholder `test.env.MONK_TOKEN`. Removing it makes `yarn test` hit
+  1Password and prompt for Touch ID, because `fixtures.spec.ts` loads the real sportmonks module.
+
+See `docs/adr/006-varlock-env-management.md` for why local dev and CI resolve secrets differently.
+
 ## Investigating production issues
 
 Prefer real runtime data over inferring from source. The **Vercel MCP** (`mcp__vercel__*` tools) is the canonical source of truth for deployed state:

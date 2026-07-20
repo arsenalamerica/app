@@ -20,6 +20,10 @@ const config: KnipConfig = {
     // explicit, not transitive. Consumed at build time by @sentry/nextjs's
     // Turbopack post-build hook to upload source maps; never imported directly.
     '@sentry/cli',
+
+    // Loaded by varlock at env-load time via `@plugin()` in .env.schema, which
+    // knip does not parse. Never imported from TypeScript.
+    '@varlock/1password-plugin',
   ],
 };
 
