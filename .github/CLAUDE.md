@@ -57,7 +57,9 @@ The `react` group keeps `react`, `react-dom`, `@types/react`, and `@types/react-
 
 Config: `.github/workflows/dependabot-auto-merge.yml`
 
-Triggers on `pull_request_target` (base branch context). Checks `github.actor == 'dependabot[bot]'`, approves, then enables auto-merge via squash. `pull_request_target` is safe here because no PR code is checked out or executed.
+Triggers on `pull_request_target` (base branch context). Gates on `github.event.pull_request.user.login == 'dependabot[bot]'`, approves, then enables auto-merge via squash. `pull_request_target` is safe here because no PR code is checked out or executed.
+
+**Gate on PR author, never `github.actor`.** `actor` is whoever triggered the event, so a human pushing to a Dependabot branch (fixing a lockfile conflict, say) becomes the actor and skips the job — the PR then silently drops out of auto-merge management with no error. The author is a stable, unforgeable property of the PR.
 
 **Must use the App token (`APP_ID`/`APP_PK`), never `GITHUB_TOKEN`.** GitHub does not create workflow runs from `GITHUB_TOKEN`-triggered events, so an auto-merge enabled with it lands a commit on `main` that triggers nothing downstream — including `pr-conflict-rebase.yml`. Switching this one line back to `GITHUB_TOKEN` silently disables the auto-rebase chain with no error anywhere.
 
