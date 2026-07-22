@@ -71,7 +71,7 @@
     "@types/react-textfit": "1.1.4",
     "@vitejs/plugin-react": "5.1.4",
     "@vitest/coverage-v8": "4.0.18",
-    "happy-dom": "20.9.0",
+    "happy-dom": "20.11.0",
     "knip": "6.27.0",
     "lefthook": "2.1.9",
     "sass": "1.101.0",
