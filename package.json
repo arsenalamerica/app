@@ -42,7 +42,7 @@
     "@vercel/python-analysis/minimatch": "^10.2.3"
   },
   "dependencies": {
-    "@ariakit/react": "0.4.34",
+    "@ariakit/react": "0.4.35",
     "@sentry/nextjs": "^10",
     "@varlock/1password-plugin": "2.0.0",
     "@varlock/nextjs-integration": "1.1.6",
