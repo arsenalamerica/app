@@ -70,7 +70,7 @@
     "@types/react-dom": "19.2.3",
     "@types/react-textfit": "1.1.4",
     "@vitejs/plugin-react": "5.1.4",
-    "@vitest/coverage-v8": "4.0.18",
+    "@vitest/coverage-v8": "4.1.0",
     "happy-dom": "20.11.1",
     "knip": "6.27.0",
     "lefthook": "2.1.9",
@@ -78,7 +78,7 @@
     "typescript": "6.0.3",
     "vercel": "56.5.0",
     "vite": "7.3.5",
-    "vitest": "4.0.18"
+    "vitest": "4.1.0"
   },
   "packageManager": "yarn@4.13.0",
   "engines": {
