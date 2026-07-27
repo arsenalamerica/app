@@ -20,8 +20,17 @@ import { afterEach, beforeEach, vi } from 'vitest';
 //
 // Throws synchronously rather than returning a rejected promise: unlike real
 // fetch, but a floating `.catch()` cannot quietly swallow it.
+// Captured before any spy replaces it, so the `data:` passthrough below reaches
+// the real implementation instead of recursing into the spy.
+const realFetch = globalThis.fetch;
+
 beforeEach(() => {
-  vi.spyOn(globalThis, 'fetch').mockImplementation((input) => {
+  vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
+    // `data:` URIs resolve in-process with no DNS/TCP/TLS, so they were never
+    // in scope for this guard. next/og loads its resvg WASM module and any
+    // data-URI <img> source through fetch, so rendering an ImageResponse in a
+    // test hits this path.
+    if (String(input).startsWith('data:')) return realFetch(input, init);
     throw new Error(`Unmocked network request in test: ${String(input)}`);
   });
 });
