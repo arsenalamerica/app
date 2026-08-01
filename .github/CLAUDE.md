@@ -69,17 +69,20 @@ The approve step is a no-op today (no ruleset requires approving reviews) and ex
 
 Config: `.github/workflows/pr-conflict-rebase.yml`, logic in `.github/scripts/pr-conflict-rebase.sh`
 
-Runs on every push to `main`. For open non-draft PRs targeting `main`: rebases `BEHIND` ones, labels `DIRTY` ones `conflicting`, and removes a stale `conflicting` label once a PR is clean. This is what clears the Dependabot queue — auto-merge lands one PR, leaving the rest `BEHIND`, and this rebases them so CI re-runs against the new base.
+Runs on every push to `main`. For open non-draft PRs targeting `main`: rebases `BEHIND` ones, attempts a Mergiraf auto-resolution on `DIRTY` ones and labels them `conflicting` if that fails, and removes a stale `conflicting` label once a PR is clean. This is what clears the Dependabot queue — auto-merge lands one PR, leaving the rest `BEHIND`, and this rebases them so CI re-runs against the new base.
 
-PRs whose head-commit `statusCheckRollup` is `FAILURE`/`ERROR` are skipped — a rebase re-runs the full pipeline to reproduce a known failure. `PENDING` still rebases: a run against a stale base is already invalidated, so cancelling it is cheaper than letting it finish.
+PRs whose head-commit `statusCheckRollup` is `FAILURE`/`ERROR` are skipped on both the rebase and auto-resolve paths — either one re-runs the full pipeline to reproduce a known failure. `PENDING` still rebases: a run against a stale base is already invalidated, so cancelling it is cheaper than letting it finish.
 
-Three things that will break it:
+Four things that will break it:
 
 - **Must use the App token, never `GITHUB_TOKEN`.** `github-actions[bot]` pushes do not trigger downstream workflows, so a `GITHUB_TOKEN` rebase would leave PRs green against a base they were never tested on. Uses `APP_ID`/`APP_PK` for the same reason `sync-fixtures.yml` does.
-- **PRs touching `.github/workflows/` are never rebased automatically.** Rebasing replays commits, and the App deliberately lacks `workflows: write` (that scope means arbitrary CI code execution in every repo the App is installed in — not worth it for ~1 action bump/month). These are reported as `Skipped (needs manual update)` and need one manual "Update branch" click. Detection matches GitHub's error text, so a reword upstream would make them fail loudly instead.
+- **PRs touching `.github/workflows/` are never rebased or auto-resolved automatically.** Both paths replay base's workflow-file edits, and the App deliberately lacks `workflows: write` (that scope means arbitrary CI code execution in every repo the App is installed in — not worth it for ~1 action bump/month). These are reported as `Skipped (needs manual update)` and need a manual "Update branch" click or conflict resolution. Detection matches GitHub's error text, so a reword upstream would make them fail loudly instead.
 - **Assumes the `conflicting` label exists.** It never creates it. Delete the label and every `DIRTY` PR turns the run red.
+- **The `mergiraf` version and its SHA-256 are pinned by hand in the workflow.** Dependabot cannot see a raw Codeberg `curl`, so nothing will ever open a bump PR. When bumping, update both values together and check the release notes against the merge-driver flag line in the script.
 
-See `docs/adr/007-pr-conflict-rebase-automation.md` for the full rationale.
+Auto-resolution is deterministic (tree-sitter based, no model). It pushes a merge commit only when every conflict resolves and no markers remain; `yarn.lock`, `skills-lock.json`, and the two `src/lib/sportmonks/*.json` files are opted out via `-merge` so they always conflict rather than being spliced. Note that this makes the most common Dependabot conflict — the lockfile — still a manual fix.
+
+See `docs/adr/007-pr-conflict-rebase-automation.md` and `docs/adr/008-mergiraf-conflict-auto-resolution.md` for the full rationale.
 
 ## Sync Seasons Workflow
 
