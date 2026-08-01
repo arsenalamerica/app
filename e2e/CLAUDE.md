@@ -52,3 +52,9 @@ await expect(page.getByRole('button', { name: 'Some Action' })).toBeVisible();
 ```
 
 No explicit `waitForSelector` or `waitFor` wrapper is needed.
+
+## Streamed Suspense Content
+
+Never assert element **order** against the raw response body from `request.get()`. Suspense boundaries that resolve late are flushed at the end of the stream and repositioned by React's inline scripts, so byte order in the HTML is not document order. Navigate with `page.goto()` and read the DOM instead — see `e2e/fixtures.spec.ts:47`.
+
+Counting occurrences in the raw body is still valid, since counts are order-independent (`e2e/fixtures.spec.ts:16`).

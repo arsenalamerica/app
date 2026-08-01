@@ -45,23 +45,29 @@ test('windowed settled fixtures stream real card markup into the /fixtures respo
 });
 
 test('all fixture cards render in ascending kickoff order', async ({
-  request,
+  page,
 }) => {
-  const response = await request.get('/fixtures');
-  const html = await response.text();
+  await page.goto('/fixtures');
 
   // Every card slot — real (SettledFixtureCard / UnsettledFixtureCard) and
-  // deferred (DeferredFixtureCard skeleton) — emits data-id. Extracting them
-  // in document order gives the full rendered sequence; mapping to kickoff
-  // timestamps lets us assert the entire list is a single ascending timeline.
+  // deferred (DeferredFixtureCard skeleton) — emits data-id. Reading them from
+  // the DOM gives the full rendered sequence; mapping to kickoff timestamps
+  // lets us assert the entire list is a single ascending timeline.
+  //
+  // Read the DOM, not the raw response body: Suspense boundaries that resolve
+  // late are flushed at the end of the stream and repositioned by React's
+  // inline scripts, so byte order in the HTML is not document order. The real
+  // cards are the ones inside Suspense (fixtures/page.tsx), which means byte
+  // order breaks precisely when they are not already last chronologically —
+  // e.g. at the start of a season, when every fixture is upcoming.
   const kickoffById = new Map(fixtures.map(({ id, kickoff }) => [id, kickoff]));
-  const ids = [...html.matchAll(/data-id="(\d+)"/g)].map(([, id]) =>
-    Number(id),
-  );
+  const ids = await page
+    .locator('[data-id]')
+    .evaluateAll((els) => els.map((el) => Number(el.getAttribute('data-id'))));
 
   test.skip(
     ids.length === 0,
-    'no fixture cards in initial HTML — cannot verify order',
+    'no fixture cards rendered — cannot verify order',
   );
 
   const kickoffs = ids.map((id) => kickoffById.get(id) ?? -1);
