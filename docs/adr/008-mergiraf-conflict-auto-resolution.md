@@ -27,7 +27,7 @@ Measured against this repo's actual file types, verified locally against `v0.18.
 
 The second row matters as much as the first: a merge tool that guesses at genuine ambiguity is worse than no tool. Mergiraf declining ordering ambiguity is the behavior that makes an unattended push defensible.
 
-`@sm-incubator/beta-recognition` runs this same extension in production against the fork of this repo's script, which is where the pattern comes from.
+This extension is not novel here: it already runs in production in a sibling repository, against a fork of this repo's script, which is where the pattern comes from.
 
 ### Constraints specific to this repo
 
