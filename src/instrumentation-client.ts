@@ -9,19 +9,23 @@ Sentry.init({
 
   integrations: [Sentry.replayIntegration()],
 
+  // Off outside a real build — see the comment in `sentry.server.config.ts`.
+  // NODE_ENV rather than the NEXT_PUBLIC_VERCEL_ENV used below: Next inlines
+  // NODE_ENV into the client bundle unconditionally, so this cannot silently
+  // disable production reporting if Vercel stops exposing system env vars.
+  enabled: process.env.NODE_ENV === 'production',
+
   // Map to GitHub deployment environments (production, preview) instead of
   // the SDK's default `vercel-*` auto-detection. Client only sees
   // NEXT_PUBLIC_* env vars, so use the public mirror of VERCEL_ENV.
   environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV,
 
-  tracesSampleRate: process.env.NODE_ENV === 'development' ? 1.0 : 0.1,
+  tracesSampleRate: 0.1,
 
   // Enable logs to be sent to Sentry
   enableLogs: true,
 
   // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
   replaysSessionSampleRate: 0.1,
 
   // Define how likely Replay events are sampled when an error occurs.
