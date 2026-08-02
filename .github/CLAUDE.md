@@ -57,13 +57,15 @@ The `react` group keeps `react`, `react-dom`, `@types/react`, and `@types/react-
 
 Config: `.github/workflows/dependabot-auto-merge.yml`
 
-Triggers on `pull_request_target` (base branch context). Gates on `github.event.pull_request.user.login == 'dependabot[bot]'`, approves, then enables auto-merge via squash. `pull_request_target` is safe here because no PR code is checked out or executed.
+Triggers on `pull_request_target` (base branch context). Gates on `github.event.pull_request.user.login == 'dependabot[bot]'`, approves if not already approved, then enables auto-merge via squash. `pull_request_target` is safe here because no PR code is checked out or executed.
 
 **Gate on PR author, never `github.actor`.** `actor` is whoever triggered the event, so a human pushing to a Dependabot branch (fixing a lockfile conflict, say) becomes the actor and skips the job — the PR then silently drops out of auto-merge management with no error. The author is a stable, unforgeable property of the PR.
 
 **Must use the App token (`APP_ID`/`APP_PK`), never `GITHUB_TOKEN`.** GitHub does not create workflow runs from `GITHUB_TOKEN`-triggered events, so an auto-merge enabled with it lands a commit on `main` that triggers nothing downstream — including `pr-conflict-rebase.yml`. Switching this one line back to `GITHUB_TOKEN` silently disables the auto-rebase chain with no error anywhere.
 
 The approve step is a no-op today (no ruleset requires approving reviews) and exists so the workflow keeps working if that changes.
+
+**The approve step is guarded by a `latestReviews` check.** `pull_request_target` fires on every push, so an unconditional approve stacks a duplicate review each time (PR #240 collected eight). The guard matches on `steps.app-token.outputs.app-slug` — App-authored reviews use the bare slug, not the `[bot]`-suffixed login the REST API returns, so hardcoding either form is a silent mismatch. Use `latestReviews`, not `reviews`: it returns one entry per author and reports a dismissed approval as `DISMISSED`, so a re-approve still happens if the approval goes stale.
 
 ## PR Conflict Check & Auto-rebase
 

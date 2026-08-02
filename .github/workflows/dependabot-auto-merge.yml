@@ -11,7 +11,7 @@ name: Dependabot Auto-merge
 # is to rebase the remaining queue once a merge lands. The App is a distinct
 # identity, so merges it enables do trigger on:push workflows.
 #
-# Approves before enabling auto-merge. No ruleset on this repo currently
+# Approves once before enabling auto-merge. No ruleset on this repo currently
 # requires approving reviews, so today this is a no-op — it is here so the
 # workflow keeps working unchanged if a `pull_request` rule with
 # `required_approving_review_count` is ever added, and to stay consistent
@@ -42,7 +42,26 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PK }}
 
-      - run: gh pr review --approve "$PR_URL"
+      # pull_request_target fires on every push to the branch, so an
+      # unconditional approve stacks a duplicate review on each one (PR #240
+      # collected eight). `latestReviews` returns at most one review per
+      # author and reports a dismissed approval as DISMISSED, so an APPROVED
+      # entry for the App is exactly "still approved by us".
+      - name: Check for an existing approval
+        id: approval
+        run: |
+          approved=$(gh pr view "$PR_URL" --json latestReviews \
+            --jq 'any(.latestReviews[]; .author.login == env.APP_SLUG and .state == "APPROVED")')
+          echo "approved=$approved" >>"$GITHUB_OUTPUT"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          # Reviews from an App are authored by its slug, without the [bot]
+          # suffix the REST API adds.
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - if: steps.approval.outputs.approved != 'true'
+        run: gh pr review --approve "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
