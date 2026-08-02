@@ -54,29 +54,44 @@ jobs:
           # into PR heads, which need actual merge bases, not a depth-1 tip.
           fetch-depth: 0
 
-      # Pinned mergiraf release for structural conflict resolution (ADR-008).
-      # Static musl build; the tarball contains the bare `mergiraf` binary.
-      # Bump manually — Dependabot's github-actions ecosystem does not see a
-      # raw Codeberg curl, so nothing will open a PR for this. Update the SHA
-      # alongside the version, and check the release notes for merge-driver
-      # flag changes against the driver line in pr-conflict-rebase.sh.
-      - name: Install mergiraf
-        env:
-          MERGIRAF_VERSION: v0.18.0
-          MERGIRAF_SHA256: fcc1688a8ad073c132c90847321786f79ef7e23aed8d104c25edd122c38457e7
-        run: |
-          curl -sSfL "https://codeberg.org/mergiraf/mergiraf/releases/download/${MERGIRAF_VERSION}/mergiraf_x86_64-unknown-linux-musl.tar.gz" -o "$RUNNER_TEMP/mergiraf.tar.gz"
-          echo "${MERGIRAF_SHA256}  $RUNNER_TEMP/mergiraf.tar.gz" | sha256sum -c -
-          mkdir -p "$RUNNER_TEMP/bin"
-          tar -xzf "$RUNNER_TEMP/mergiraf.tar.gz" -C "$RUNNER_TEMP/bin" mergiraf
-          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
-
       - name: Generate gunnersaurus-bot token
         id: app-token
         uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PK }}
+
+      # Pinned mergiraf release for structural conflict resolution (ADR-008).
+      # Static musl build; the tarball contains the bare `mergiraf` binary.
+      # Bump manually — Dependabot's github-actions ecosystem does not see a
+      # raw Codeberg curl, so nothing will open a PR for this. Update the SHA
+      # alongside the version, and check the release notes for merge-driver
+      # flag changes against the driver line in pr-conflict-rebase.sh.
+      #
+      # continue-on-error is deliberate. Auto-resolution is an ENHANCEMENT on
+      # top of the rebase/label automation, which predates it and needs no
+      # binary at all. Letting a third-party host outage fail this step hard
+      # would take the whole Dependabot queue-clearing job offline — nothing
+      # rebased, nothing labeled — over a feature that is merely unavailable.
+      # The script detects a missing binary and degrades to label-only.
+      - name: Install mergiraf
+        id: mergiraf
+        continue-on-error: true
+        env:
+          MERGIRAF_VERSION: v0.18.0
+          MERGIRAF_SHA256: fcc1688a8ad073c132c90847321786f79ef7e23aed8d104c25edd122c38457e7
+        run: |
+          curl -sSfL --retry 3 --retry-delay 2 --max-time 120 \
+            "https://codeberg.org/mergiraf/mergiraf/releases/download/${MERGIRAF_VERSION}/mergiraf_x86_64-unknown-linux-musl.tar.gz" \
+            -o "$RUNNER_TEMP/mergiraf.tar.gz"
+          echo "${MERGIRAF_SHA256}  $RUNNER_TEMP/mergiraf.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/bin"
+          tar -xzf "$RUNNER_TEMP/mergiraf.tar.gz" -C "$RUNNER_TEMP/bin" mergiraf
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Note degraded mode
+        if: steps.mergiraf.outcome == 'failure'
+        run: echo "::warning::mergiraf unavailable — running label-only; the rebase/label automation is unaffected."
 
       - name: Check PR conflicts / rebase behind PRs
         env:
