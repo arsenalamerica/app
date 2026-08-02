@@ -22,12 +22,12 @@ describe('Icon route handler', () => {
 
   it.each(
     domains.flatMap((domain) => ICON_SIZES.map((size) => ({ domain, size }))),
-  )('returns a Response for domain=$domain size=$size', async ({
-    domain,
-    size,
-  }) => {
-    mockHost(domain);
-    const response = await Icon({ id: Promise.resolve(String(size)) });
-    expect(response).toBeInstanceOf(Response);
-  });
+  )(
+    'returns a Response for domain=$domain size=$size',
+    async ({ domain, size }) => {
+      mockHost(domain);
+      const response = await Icon({ id: Promise.resolve(String(size)) });
+      expect(response).toBeInstanceOf(Response);
+    },
+  );
 });
