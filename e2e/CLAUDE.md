@@ -55,6 +55,8 @@ No explicit `waitForSelector` or `waitFor` wrapper is needed.
 
 ## Streamed Suspense Content
 
-Never assert element **order** against the raw response body from `request.get()`. Suspense boundaries that resolve late are flushed at the end of the stream and repositioned by React's inline scripts, so byte order in the HTML is not document order. Navigate with `page.goto()` and read the DOM instead — see `e2e/fixtures.spec.ts:47`.
+Never assert element **order** against the raw response body from `request.get()`. Suspense boundaries that resolve late are flushed at the end of the stream, so byte order in the HTML is not document order.
+
+Reading the DOM is not enough on its own: streamed content sits in a `<div hidden>` staging container in stream order until React moves it into place, and that move can happen after both `domcontentloaded` and `load`. A one-shot read (`evaluateAll`, `textContent`, `$$eval`) at either load state can therefore return stream order. Scope the locator to a landmark role so staged content is out of the accessibility tree and cannot match, then let an auto-waiting matcher (`toHaveCount`, `toHaveText`) do the waiting — see `e2e/fixtures.spec.ts:47`.
 
 Counting occurrences in the raw body is still valid, since counts are order-independent (`e2e/fixtures.spec.ts:16`).
