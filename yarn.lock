@@ -4349,7 +4349,7 @@ __metadata:
     react-textfit: "npm:1.1.1"
     sass: "npm:1.102.0"
     typescript: "npm:6.0.3"
-    varlock: "npm:1.13.0"
+    varlock: "npm:1.14.1"
     vercel: "npm:58.4.0"
     vite: "npm:7.3.5"
     vitest: "npm:4.1.0"
@@ -8326,12 +8326,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"varlock@npm:1.13.0":
-  version: 1.13.0
-  resolution: "varlock@npm:1.13.0"
+"varlock@npm:1.14.1":
+  version: 1.14.1
+  resolution: "varlock@npm:1.14.1"
   bin:
     varlock: bin/cli.js
-  checksum: 10c0/5b4430d5c5b25007a74a715bd426dbaeed23341ea06519ce3f80eb6b5e3682444f728c478420e136d4d371803ee5c6cb3ea060e5f0e2f04cc177fcddc2b30894
+  checksum: 10c0/26ed527d45ea9a6dcfda68306fd4b234ac37ecf9d3ff35501b82d1a6f189c07a418620219102cefa4a2651bf997c266002ff4d76c701a571d1f28c06a9dfb7b9
   languageName: node
   linkType: hard
 
