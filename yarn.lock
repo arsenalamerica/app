@@ -1452,7 +1452,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/env@npm:@varlock/nextjs-integration@1.1.6, @varlock/nextjs-integration@npm:1.1.6":
+"@next/env@npm:@varlock/nextjs-integration@1.1.6":
   version: 1.1.6
   resolution: "@varlock/nextjs-integration@npm:1.1.6"
   peerDependencies:
@@ -3574,6 +3574,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@varlock/nextjs-integration@npm:1.2.0":
+  version: 1.2.0
+  resolution: "@varlock/nextjs-integration@npm:1.2.0"
+  peerDependencies:
+    next: ">=14"
+    varlock: ^1.14.0
+  checksum: 10c0/693d4f6c6f6451cae06686aeca14e5a33e336753e7dac9a5fe932ecce7c2a7982f7c0ed0061377892dcf921aded2610cf4ff590592da772d94e286c7f7b377ec
+  languageName: node
+  linkType: hard
+
 "@vercel/analytics@npm:2.0.1":
   version: 2.0.1
   resolution: "@vercel/analytics@npm:2.0.1"
@@ -4332,7 +4342,7 @@ __metadata:
     "@types/react-dom": "npm:19.2.4"
     "@types/react-textfit": "npm:1.1.4"
     "@varlock/1password-plugin": "npm:2.0.0"
-    "@varlock/nextjs-integration": "npm:1.1.6"
+    "@varlock/nextjs-integration": "npm:1.2.0"
     "@vercel/analytics": "npm:2.0.1"
     "@vercel/speed-insights": "npm:2.0.0"
     "@vitejs/plugin-react": "npm:5.1.4"

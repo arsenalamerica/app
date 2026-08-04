@@ -45,7 +45,7 @@
     "@ariakit/react": "0.4.35",
     "@sentry/nextjs": "^10",
     "@varlock/1password-plugin": "2.0.0",
-    "@varlock/nextjs-integration": "1.1.6",
+    "@varlock/nextjs-integration": "1.2.0",
     "@vercel/analytics": "2.0.1",
     "@vercel/speed-insights": "2.0.0",
     "clsx": "2.1.1",
