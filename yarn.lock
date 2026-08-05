@@ -3565,12 +3565,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@varlock/1password-plugin@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@varlock/1password-plugin@npm:2.0.0"
+"@varlock/1password-plugin@npm:2.0.3":
+  version: 2.0.3
+  resolution: "@varlock/1password-plugin@npm:2.0.3"
   peerDependencies:
-    varlock: ^1.8.0
-  checksum: 10c0/b056cf3c477ae1eeda40404808d43327e9ab3a1f889e6abc2244d3581b10eb40f3ddd44e121d9c3a970f45ec0c26950a8198c7fe1ea92c952a038bd6ae3c9e28
+    varlock: ^1.15.0
+  checksum: 10c0/65eb4f7c1b9501ca3accc3b116fba5c2680b7130bd5cae306ec5fc7e95535f68f9cc534457f3be64305bf0666f54121d636204c98cf488fb7585507a947e4ae9
   languageName: node
   linkType: hard
 
@@ -4341,7 +4341,7 @@ __metadata:
     "@types/react": "npm:19.2.18"
     "@types/react-dom": "npm:19.2.4"
     "@types/react-textfit": "npm:1.1.4"
-    "@varlock/1password-plugin": "npm:2.0.0"
+    "@varlock/1password-plugin": "npm:2.0.3"
     "@varlock/nextjs-integration": "npm:1.2.0"
     "@vercel/analytics": "npm:2.0.1"
     "@vercel/speed-insights": "npm:2.0.0"
