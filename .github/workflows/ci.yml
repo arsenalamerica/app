@@ -163,4 +163,7 @@ jobs:
         with:
           name: "lighthouse-${{ matrix.name }}"
           path: .lighthouseci/
+          # .lighthouseci is a dotfile directory and upload-artifact skips
+          # hidden paths by default, silently uploading nothing.
+          include-hidden-files: true
           retention-days: 30
