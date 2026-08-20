@@ -1,890 +1,1068 @@
 {
   "1-fc-koln": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/1-fc-koln-white-logo-footylogos.svg"
   },
   "ac-milan": {
+    "country": "it",
     "leagues": ["europa-league", "serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/ac-milan-white-logo-footylogos.svg"
   },
   "ac-monza": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/ac-monza-white-logo-footylogos.svg"
   },
   "accrington-stanley": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "afc-bournemouth": {
+    "country": "gb",
     "leagues": ["premier-league", "europa-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/afc-bournemouth-white-logo-footylogos.svg"
   },
   "afc-wimbledon": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "aj-auxerre": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/aj-auxerre-white-logo-footylogos.svg"
   },
   "angers-sco": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/angers-sco-white-logo-footylogos.svg"
   },
   "arsenal": {
+    "country": "gb",
     "leagues": ["premier-league", "uefa-champions-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/arsenal-white-logo-footylogos.svg"
   },
   "as-monaco": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/as-monaco-white-logo-footylogos.svg"
   },
   "aston-villa": {
+    "country": "gb",
     "leagues": ["premier-league", "uefa-champions-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/aston-villa-white-logo-footylogos.svg"
   },
   "atalanta": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/atalanta-white-logo-footylogos.svg"
   },
   "athletic-club-bilbao": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/athletic-club-bilbao-white-logo-footylogos.svg"
   },
   "atletico-madrid": {
+    "country": "es",
     "leagues": ["uefa-champions-league", "laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/atletico-madrid-white-logo-footylogos.svg"
   },
   "az-alkmaar": {
+    "country": "nl",
     "leagues": ["europa-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/az-alkmaar-white-logo-footylogos.svg"
   },
   "barnet": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "barnsley": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "bayer-leverkusen": {
+    "country": "de",
     "leagues": ["europa-league", "bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/bayer-leverkusen-white-logo-footylogos.svg"
   },
   "bayern-munich": {
+    "country": "de",
     "leagues": ["uefa-champions-league", "bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/bayern-munich-white-logo-footylogos.svg"
   },
   "birmingham-city": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/birmingham-city-white-logo-footylogos.svg"
   },
   "blackburn-rovers": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/blackburn-rovers-white-logo-footylogos.svg"
   },
   "blackpool": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "bologna": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/bologna-white-logo-footylogos.svg"
   },
   "bolton-wanderers": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/bolton-wanderers-white-logo-footylogos.svg"
   },
   "borussia-dortmund": {
+    "country": "de",
     "leagues": ["uefa-champions-league", "bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/borussia-dortmund-white-logo-footylogos.svg"
   },
   "borussia-monchengladbach": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/borussia-monchengladbach-white-logo-footylogos.svg"
   },
   "bradford-city": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "brentford": {
+    "country": "gb",
     "leagues": ["premier-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/brentford-white-logo-footylogos.svg"
   },
   "brighton-and-hove-albion": {
+    "country": "gb",
     "leagues": ["premier-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/brighton-and-hove-albion-white-logo-footylogos.svg"
   },
   "bristol-city": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/bristol-city-white-logo-footylogos.svg"
   },
   "bristol-rovers": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "bromley": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "burnley": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/burnley-white-logo-footylogos.svg"
   },
   "burton-albion": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/burton-albion-white-logo-footylogos.svg"
   },
   "cagliari": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/cagliari-white-logo-footylogos.svg"
   },
   "cambridge-united": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "cardiff-city": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/cardiff-city-white-logo-footylogos.svg"
   },
   "celta-vigo": {
+    "country": "es",
     "leagues": ["europa-league", "laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/celta-vigo-white-logo-footylogos.svg"
   },
   "charlton-athletic": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/charlton-athletic-white-logo-footylogos.svg"
   },
   "chelsea": {
+    "country": "gb",
     "leagues": ["premier-league"],
     "status": "OK",
     "url": "https://assets.footylogos.com/logos/chelsea/chelsea-fc-white-logo-footylogos.svg"
   },
   "cheltenham-town": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "chesterfield": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "club-brugge": {
+    "country": "be",
     "leagues": ["uefa-champions-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/club-brugge-white-logo-footylogos.svg"
   },
   "colchester-united": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "como-1907": {
+    "country": "it",
     "leagues": ["uefa-champions-league", "serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/como-1907-white-logo-footylogos.svg"
   },
   "coventry-city": {
+    "country": "gb",
     "leagues": ["premier-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/coventry-city-white-logo-footylogos.svg"
   },
   "crawley-town": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "crewe-alexandra": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "crystal-palace": {
+    "country": "gb",
     "leagues": ["premier-league", "europa-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/crystal-palace-white-logo-footylogos.svg"
   },
   "deportivo-alaves": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/deportivo-alaves-white-logo-footylogos.svg"
   },
   "deportivo-la-coruna": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/deportivo-la-coruna-white-logo-footylogos.svg"
   },
   "derby-county": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "doncaster-rovers": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "eintracht-frankfurt": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/eintracht-frankfurt-white-logo-footylogos.svg"
   },
   "elche-cf": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/elche-cf-white-logo-footylogos.svg"
   },
   "everton": {
+    "country": "gb",
     "leagues": ["premier-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/everton-white-logo-footylogos.svg"
   },
   "exeter-city": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "fc-augsburg": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/fc-augsburg-white-logo-footylogos.svg"
   },
   "fc-barcelona": {
+    "country": "es",
     "leagues": ["uefa-champions-league", "laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/fc-barcelona-white-logo-footylogos.svg"
   },
   "fc-lorient": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/fc-lorient-white-logo-footylogos.svg"
   },
   "fc-porto": {
+    "country": "pt",
     "leagues": ["uefa-champions-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/fc-porto-white-logo-footylogos.svg"
   },
   "feyenoord": {
+    "country": "nl",
     "leagues": ["uefa-champions-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/feyenoord-white-logo-footylogos.svg"
   },
   "fiorentina": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/fiorentina-white-logo-footylogos.svg"
   },
   "fleetwood-town": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "frosinone-calcio": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/frosinone-calcio-white-logo-footylogos.svg"
   },
   "fulham": {
+    "country": "gb",
     "leagues": ["premier-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/fulham-white-logo-footylogos.svg"
   },
   "galatasaray": {
+    "country": "tr",
     "leagues": ["uefa-champions-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/galatasaray-white-logo-footylogos.svg"
   },
   "genoa": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/genoa-white-logo-footylogos.svg"
   },
   "getafe-cf": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/getafe-cf-white-logo-footylogos.svg"
   },
   "gillingham": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "grimsby-town": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "hamburger-sv": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/hamburger-sv-white-logo-footylogos.svg"
   },
   "huddersfield-town": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "hull-city": {
+    "country": "gb",
     "leagues": ["premier-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/hull-city-white-logo-footylogos.svg"
   },
   "inter-milan": {
+    "country": "it",
     "leagues": ["uefa-champions-league", "serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/inter-milan-white-logo-footylogos.svg"
   },
   "ipswich-town": {
+    "country": "gb",
     "leagues": ["premier-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/ipswich-town-white-logo-footylogos.svg"
   },
   "juventus": {
+    "country": "it",
     "leagues": ["europa-league", "serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/juventus-white-logo-footylogos.svg"
   },
   "lazio": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/lazio-white-logo-footylogos.svg"
   },
   "le-havre-ac": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/le-havre-ac-white-logo-footylogos.svg"
   },
   "le-mans-fc": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "lecce": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/lecce-white-logo-footylogos.svg"
   },
   "leeds-united": {
+    "country": "gb",
     "leagues": ["premier-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/leeds-united-white-logo-footylogos.svg"
   },
   "leicester": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/leicester-white-logo-footylogos.svg"
   },
   "levante-ud": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/levante-ud-white-logo-footylogos.svg"
   },
   "leyton-orient": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "lincoln-city": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "liverpool-fc": {
+    "country": "gb",
     "leagues": ["premier-league", "uefa-champions-league"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "losc-lille": {
+    "country": "fr",
     "leagues": ["uefa-champions-league", "ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/losc-lille-white-logo-footylogos.svg"
   },
   "luton-town": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "mainz-05": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/mainz-05-white-logo-footylogos.svg"
   },
   "malaga-cf": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/malaga-cf-white-logo-footylogos.svg"
   },
   "manchester-city": {
+    "country": null,
     "leagues": ["premier-league", "uefa-champions-league"],
     "status": "EXCLUDED_CUSTOM_LOGO",
     "url": null
   },
   "manchester-united": {
+    "country": "gb",
     "leagues": ["premier-league", "uefa-champions-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/manchester-united-white-logo-footylogos.svg"
   },
   "mansfield-town": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "middlesbrough": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/middlesbrough-white-logo-footylogos.svg"
   },
   "millwall": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/millwall-white-logo-footylogos.svg"
   },
   "milton-keynes-dons": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "napoli": {
+    "country": "it",
     "leagues": ["uefa-champions-league", "serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/napoli-white-logo-footylogos.svg"
   },
   "newcastle-united": {
+    "country": "gb",
     "leagues": ["premier-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/newcastle-united-white-logo-footylogos.svg"
   },
   "newport-county": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "northampton-town": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "norwich-city": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/norwich-city-white-logo-footylogos.svg"
   },
   "nottingham-forest": {
+    "country": "gb",
     "leagues": ["premier-league"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "notts-county": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "ogc-nice": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/ogc-nice-white-logo-footylogos.svg"
   },
   "oldham-athletic": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "olympique-de-marseille-om": {
+    "country": "fr",
     "leagues": ["europa-league", "ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/olympique-de-marseille-om-white-logo-footylogos.svg"
   },
   "olympique-lyonnais": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/olympique-lyonnais-white-logo-footylogos.svg"
   },
   "osasuna": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/osasuna-white-logo-footylogos.svg"
   },
   "oxford-united": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/oxford-united-white-logo-footylogos.svg"
   },
   "paris-fc": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/paris-fc-white-logo-footylogos.svg"
   },
   "paris-saint-germain-psg": {
+    "country": "fr",
     "leagues": ["uefa-champions-league", "ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/paris-saint-germain-psg-white-logo-footylogos.svg"
   },
   "parma": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/parma-white-logo-footylogos.svg"
   },
   "peterborough-united": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "plymouth-argyle": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "port-vale-fc": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "portsmouth": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/portsmouth-white-logo-footylogos.svg"
   },
   "preston-north-end": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/preston-north-end-white-logo-footylogos.svg"
   },
   "psv-eindhoven": {
+    "country": "nl",
     "leagues": ["uefa-champions-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/psv-eindhoven-white-logo-footylogos.svg"
   },
   "queens-park-rangers": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/queens-park-rangers-white-logo-footylogos.svg"
   },
   "racing-santander": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/racing-santander-white-logo-footylogos.svg"
   },
   "rayo-vallecano": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/rayo-vallecano-white-logo-footylogos.svg"
   },
   "rb-leipzig": {
+    "country": "de",
     "leagues": ["uefa-champions-league", "bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/rb-leipzig-white-logo-footylogos.svg"
   },
   "rc-lens": {
+    "country": "fr",
     "leagues": ["uefa-champions-league", "ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/rc-lens-white-logo-footylogos.svg"
   },
   "rc-strasbourg-alsace": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/rc-strasbourg-alsace-white-logo-footylogos.svg"
   },
   "rcd-espanyol-barcelona": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/rcd-espanyol-barcelona-white-logo-footylogos.svg"
   },
   "reading-fc": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "real-betis-balompie": {
+    "country": "es",
     "leagues": ["uefa-champions-league", "laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/real-betis-balompie-white-logo-footylogos.svg"
   },
   "real-madrid": {
+    "country": "es",
     "leagues": ["uefa-champions-league", "laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/real-madrid-white-logo-footylogos.svg"
   },
   "real-sociedad": {
+    "country": "es",
     "leagues": ["europa-league", "laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/real-sociedad-white-logo-footylogos.svg"
   },
   "rochdale": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "roma": {
+    "country": "it",
     "leagues": ["uefa-champions-league", "serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/roma-white-logo-footylogos.svg"
   },
   "rotherham-united": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "salford-city": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "sassuolo": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/sassuolo-white-logo-footylogos.svg"
   },
   "sc-freiburg": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/sc-freiburg-white-logo-footylogos.svg"
   },
   "sc-paderborn-07": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/sc-paderborn-07-white-logo-footylogos.svg"
   },
   "schalke-04": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/schalke-04-white-logo-footylogos.svg"
   },
   "scu-torreense": {
+    "country": "pt",
     "leagues": ["europa-league"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "sevilla-fc": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/sevilla-fc-white-logo-footylogos.svg"
   },
   "shakhtar-donetsk": {
+    "country": "ua",
     "leagues": ["uefa-champions-league"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "sheffield-united": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/sheffield-united-white-logo-footylogos.svg"
   },
   "sheffield-wednesday": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "shrewsbury-town": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "slavia-praha": {
+    "country": "cz",
     "leagues": ["uefa-champions-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/slavia-praha-white-logo-footylogos.svg"
   },
   "southampton": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/southampton-white-logo-footylogos.svg"
   },
   "sporting-cp": {
+    "country": "pt",
     "leagues": ["uefa-champions-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/sporting-cp-white-logo-footylogos.svg"
   },
   "stade-brestois-29": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/stade-brestois-29-white-logo-footylogos.svg"
   },
   "stade-rennais": {
+    "country": "fr",
     "leagues": ["europa-league", "ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/stade-rennais-white-logo-footylogos.svg"
   },
   "stevenage": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "stockport-county": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "stoke-city": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/stoke-city-white-logo-footylogos.svg"
   },
   "sunderland": {
+    "country": "gb",
     "leagues": ["premier-league", "europa-league"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/sunderland-white-logo-footylogos.svg"
   },
   "sv-elversberg": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/sv-elversberg-white-logo-footylogos.svg"
   },
   "swansea-city": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "swindon-town": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "torino": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/torino-white-logo-footylogos.svg"
   },
   "tottenham-hotspur": {
+    "country": null,
     "leagues": ["premier-league"],
     "status": "EXCLUDED_CUSTOM_LOGO",
     "url": null
   },
   "toulouse-fc": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/toulouse-fc-white-logo-footylogos.svg"
   },
   "tranmere-rovers": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "troyes": {
+    "country": "fr",
     "leagues": ["ligue-1"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/troyes-white-logo-footylogos.svg"
   },
   "tsg-hoffenheim": {
+    "country": "de",
     "leagues": ["europa-league", "bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/tsg-hoffenheim-white-logo-footylogos.svg"
   },
   "udinese": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/udinese-white-logo-footylogos.svg"
   },
   "union-berlin": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/union-berlin-white-logo-footylogos.svg"
   },
   "valencia-cf": {
+    "country": "es",
     "leagues": ["laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/valencia-cf-white-logo-footylogos.svg"
   },
   "venezia-fc": {
+    "country": "it",
     "leagues": ["serie-a"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/venezia-fc-white-logo-footylogos.svg"
   },
   "vfb-stuttgart": {
+    "country": "de",
     "leagues": ["uefa-champions-league", "bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/vfb-stuttgart-white-logo-footylogos.svg"
   },
   "villarreal-cf": {
+    "country": "es",
     "leagues": ["uefa-champions-league", "laliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/villarreal-cf-white-logo-footylogos.svg"
   },
   "walsall": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "watford": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/watford-white-logo-footylogos.svg"
   },
   "werder-bremen": {
+    "country": "de",
     "leagues": ["bundesliga"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/werder-bremen-white-logo-footylogos.svg"
   },
   "west-bromwich-albion": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/west-bromwich-albion-white-logo-footylogos.svg"
   },
   "west-ham-united": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/west-ham-united-white-logo-footylogos.svg"
   },
   "wigan-athletic": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "wolverhampton-wanderers": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "OK",
     "url": "https://www.footylogos.com/downloads/monochrome/wolverhampton-wanderers-white-logo-footylogos.svg"
   },
   "wrexham-afc": {
+    "country": "gb",
     "leagues": ["efl-championship"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "wycombe-wanderers": {
+    "country": "gb",
     "leagues": ["efl-league-one"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null
   },
   "york-city": {
+    "country": "gb",
     "leagues": ["efl-league-two"],
     "status": "NO_MONOCHROME_PUBLISHED",
     "url": null

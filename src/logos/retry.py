@@ -8,15 +8,13 @@ leaving already-downloaded logos untouched, and updates `results.json` in place.
 """
 
 import json
-import os
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 
-from scrape import RESULTS, WHITE, fetch_club
+from scrape import RESULTS, fetch_club
 
 
 def main():
-    os.makedirs(WHITE, exist_ok=True)
     with open(RESULTS) as handle:
         results = json.load(handle)
 
@@ -27,9 +25,10 @@ def main():
     print(f"re-checking {len(pending)} clubs\n")
 
     with ThreadPoolExecutor(max_workers=6) as pool:
-        for slug, status, url in pool.map(fetch_club, pending):
+        for slug, status, url, country in pool.map(fetch_club, pending):
             results[slug]["status"] = status
             results[slug]["url"] = url
+            results[slug]["country"] = country
             if status == "OK":
                 print(f"  RECOVERED  {slug} -> {url}")
 

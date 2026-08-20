@@ -9,7 +9,7 @@
     "e2e": "playwright test",
     "postinstall": "varlock codegen",
     "knip": "knip",
-    "logos:optimize": "svgo --config svgo.config.mjs -f src/logos/white",
+    "logos:optimize": "svgo --config svgo.config.mjs -f src/logos -r",
     "start": "next start",
     "sync:fixtures": "varlock run -- node scripts/sync-fixtures.mjs",
     "sync:seasons": "varlock run -- node scripts/sync-seasons.mjs",

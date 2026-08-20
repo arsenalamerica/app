@@ -26,8 +26,11 @@ UA = {
     )
 }
 HERE = os.path.dirname(os.path.abspath(__file__))
-WHITE = os.path.join(HERE, "white")
 RESULTS = os.path.join(HERE, "results.json")
+
+# flagcdn labels the home nations with ISO 3166-2 subdivisions. Logos are filed
+# by ISO 3166-1 alpha-2 country, so those fold to "gb".
+COUNTRY_FOLD = {"gb-eng": "gb", "gb-sct": "gb", "gb-wls": "gb", "gb-nir": "gb"}
 
 # Clubs we deliberately do not source from footylogos — we ship our own
 # custom logos for these. fetch_club() skips them so a re-run cannot re-add them.
@@ -92,45 +95,55 @@ def white_svg_urls(html):
     return urls
 
 
+def club_country(html):
+    """ISO 3166-1 alpha-2 for a club, read from the flag on its page."""
+    match = re.search(r"flagcdn\.com/([a-z-]+)\.svg", html)
+    if not match:
+        return None
+    return COUNTRY_FOLD.get(match.group(1), match.group(1))
+
+
 def fetch_club(slug):
-    """Return (slug, status, url). Writes `white/<slug>.svg` on success."""
+    """Return (slug, status, url, country). Writes `<country>/<slug>.svg`."""
     if slug in EXCLUDED:
-        return slug, "EXCLUDED_CUSTOM_LOGO", None
+        return slug, "EXCLUDED_CUSTOM_LOGO", None, None
+
+    # The club page carries both the country flag and the monochrome link, and
+    # the monochrome slug is not always `<slug>-monochrome` (chelsea -> chelsea-fc).
     try:
-        html = get(f"{BASE}/logos/{slug}-monochrome")
-    except Exception:
-        # Some clubs use a different monochrome slug (chelsea -> chelsea-fc).
-        # Ask the club page rather than guessing.
-        try:
-            club_page = get(f"{BASE}/logos/{slug}")
-        except Exception as error:
-            return slug, f"CLUB_PAGE_ERR {error}", None
-        match = re.search(r'href="(/logos/[^"]*-monochrome)"', club_page)
-        if not match:
-            return slug, "NO_MONOCHROME_PUBLISHED", None
-        try:
-            html = get(BASE + match.group(1))
-        except Exception as error:
-            return slug, f"MONO_PAGE_ERR {error}", None
+        club_page = get(f"{BASE}/logos/{slug}")
+    except Exception as error:
+        return slug, f"CLUB_PAGE_ERR {error}", None, None
+
+    country = club_country(club_page)
+    match = re.search(r'href="(/logos/[^"]*-monochrome)"', club_page)
+    if not match:
+        return slug, "NO_MONOCHROME_PUBLISHED", None, country
+    try:
+        html = get(BASE + match.group(1))
+    except Exception as error:
+        return slug, f"MONO_PAGE_ERR {error}", None, country
 
     urls = white_svg_urls(html)
     if not urls:
-        return slug, "NO_WHITE_SVG", None
+        return slug, "NO_WHITE_SVG", None, country
+    if not country:
+        return slug, "NO_COUNTRY", urls[0], None
+
     for url in urls:
         try:
             data = get(url, binary=True)
         except Exception:
             continue
         if b"<svg" in data[:500]:
-            with open(os.path.join(WHITE, f"{slug}.svg"), "wb") as handle:
+            os.makedirs(os.path.join(HERE, country), exist_ok=True)
+            with open(os.path.join(HERE, country, f"{slug}.svg"), "wb") as handle:
                 handle.write(data)
-            return slug, "OK", url
-    return slug, "ALL_URLS_FAILED", urls[0]
+            return slug, "OK", url, country
+    return slug, "ALL_URLS_FAILED", urls[0], country
 
 
 def main():
-    os.makedirs(WHITE, exist_ok=True)
-
     clubs = {}  # slug -> [league, ...]
     for league in LEAGUES:
         try:
@@ -147,8 +160,13 @@ def main():
 
     results = {}
     with ThreadPoolExecutor(max_workers=6) as pool:
-        for slug, status, url in pool.map(fetch_club, sorted(clubs)):
-            results[slug] = {"status": status, "url": url, "leagues": clubs[slug]}
+        for slug, status, url, country in pool.map(fetch_club, sorted(clubs)):
+            results[slug] = {
+                "status": status,
+                "url": url,
+                "country": country,
+                "leagues": clubs[slug],
+            }
             if status != "OK":
                 print(f"  {status:<24} {slug}")
 
