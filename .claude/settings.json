@@ -1,8 +1,10 @@
 {
   "attribution": {
     "commit": "",
-    "pr": ""
+    "pr": "",
+    "session": false
   },
+  "autoMemoryEnabled": false,
   "permissions": {
     "allow": [
       "Bash(gh issue:*)",
