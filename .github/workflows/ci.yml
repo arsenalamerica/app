@@ -131,6 +131,36 @@ jobs:
         with:
           urls: "${{ needs.build.outputs.url }}${{ matrix.path }}"
           runs: 3
-          uploadArtifacts: true
-          artifactName: "lighthouse-${{ matrix.name }}"
+          # Reports are uploaded by the steps below instead, so the bypass
+          # secret can be scrubbed out of them first.
+          uploadArtifacts: false
           configPath: ./lighthouserc.js
+      # Lighthouse copies its resolved settings into every report verbatim
+      # (configSettings.extraHeaders), and this repository is public, so an
+      # unscrubbed report would publish the bypass secret to anyone who
+      # downloads the artifact.
+      - name: Redact bypass secret from reports
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os
+          import pathlib
+
+          secret = os.environ['VERCEL_BYPASS_SECRET'].encode()
+          if not secret:
+              raise SystemExit('VERCEL_BYPASS_SECRET is empty; refusing to upload unscrubbed reports.')
+
+          for path in pathlib.Path('.lighthouseci').rglob('*'):
+              if not path.is_file():
+                  continue
+              data = path.read_bytes()
+              if secret in data:
+                  path.write_bytes(data.replace(secret, b'[REDACTED]'))
+                  print(f'redacted {path}')
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: "lighthouse-${{ matrix.name }}"
+          path: .lighthouseci/
+          retention-days: 30
