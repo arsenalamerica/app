@@ -32,6 +32,7 @@ RESULTS = os.path.join(HERE, "results.json")
 # Clubs we deliberately do not source from footylogos — we ship our own
 # custom logos for these. fetch_club() skips them so a re-run cannot re-add them.
 EXCLUDED = {
+    "arsenal",
     "manchester-city",
     "tottenham-hotspur",
 }

@@ -48,10 +48,10 @@
     "url": "https://www.footylogos.com/downloads/monochrome/angers-sco-white-logo-footylogos.svg"
   },
   "arsenal": {
-    "country": "gb-eng",
+    "country": null,
     "leagues": ["premier-league", "uefa-champions-league"],
-    "status": "OK",
-    "url": "https://www.footylogos.com/downloads/monochrome/arsenal-white-logo-footylogos.svg"
+    "status": "EXCLUDED_CUSTOM_LOGO",
+    "url": null
   },
   "as-monaco": {
     "country": "fr",
