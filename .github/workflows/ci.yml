@@ -127,7 +127,7 @@ jobs:
       - id: lighthouse
         uses: treosh/lighthouse-ci-action@12.6.2
         with:
-          urls: "${{ needs.build.outputs.url }}${{ matrix.path }}?x-vercel-protection-bypass=${{ secrets.VERCEL_BYPASS_SECRET }}"
+          urls: "${{ needs.build.outputs.url }}${{ matrix.path }}?x-vercel-protection-bypass=${{ secrets.VERCEL_BYPASS_SECRET }}&x-vercel-set-bypass-cookie=samesitenone"
           runs: 3
           uploadArtifacts: true
           artifactName: "lighthouse-${{ matrix.name }}"
