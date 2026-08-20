@@ -9,7 +9,7 @@ To run against a deployed Vercel preview instead, set:
 - `PLAYWRIGHT_BASE_URL` — target URL (e.g. a Vercel preview deployment URL)
 - `VERCEL_BYPASS_SECRET` — Vercel protection bypass token
 
-CI sets these on the `e2e` job only; no other job (biome, knip, typecheck, test, build, lighthouse) needs them.
+CI sets `PLAYWRIGHT_BASE_URL` on the `e2e` job only. `VERCEL_BYPASS_SECRET` is also set on the `lighthouse` job, which needs it to reach the same protected preview; no other job (biome, knip, typecheck, test, build) needs either.
 
 ## Selector Strategy
 
