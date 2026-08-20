@@ -6,11 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Distributed Documentation Structure
 
-This repository **REQUIRES** distributed CLAUDE.md files throughout the directory tree. Each subdirectory with significant functionality must have its own CLAUDE.md file:
-
-- `.claude/CLAUDE.md` — Claude Code configuration and settings documentation
-- `.github/CLAUDE.md` — GitHub Actions workflow documentation
-- `e2e/CLAUDE.md` — e2e testing patterns and conventions
+This repository **REQUIRES** distributed CLAUDE.md files throughout the directory tree. Each subdirectory with significant functionality must have its own CLAUDE.md file.
 
 **When adding new features or directories:**
 
@@ -45,13 +41,7 @@ Do not wait for the user to ask about documentation. Identify when your changes 
 
 **REQUIRED**: All issue work MUST be done in a git worktree, not on the main working tree.
 
-Start a worktree session using Claude's built-in flag:
-
-```
-claude --worktree <issue-name>
-```
-
-This creates an isolated checkout at `.claude/worktrees/<issue-name>` on its own branch, so multiple issues can be worked in parallel without conflict. Claude will prompt to keep or clean up the worktree on exit.
+See `.claude/CLAUDE.md` for the worktree workflow, branch naming convention, and per-worktree dependency rules.
 
 ### Git Workflow
 
@@ -78,22 +68,6 @@ Common types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `ci`
 
 - Keep PR descriptions focused on technical changes, testing, and references
 
-### File Operations and Repository Root
-
-**CRITICAL**: All file creation and modification operations MUST be relative to the git repository root.
-
-- Before creating files or directories, identify the repository root with `git rev-parse --show-toplevel`
-- NEVER create files outside the repository boundary — they will not be version controlled
-- Use `git status` to confirm new files will be tracked by git
-- If `git status` shows files as untracked, they are correctly within the repository
-- If files don't appear in `git status`, they are outside the repository boundary
-
-**Verification workflow:**
-
-1. Run `git rev-parse --show-toplevel` to identify repository root
-2. Create files/directories relative to that root
-3. Run `git status` to confirm files are detected by git
-
 ### Architecture Decision Records (ADRs)
 
 ADRs are stored in `docs/adr/` and follow the naming convention `NNN-descriptive-slug.md`.
@@ -110,15 +84,3 @@ ADRs are stored in `docs/adr/` and follow the naming convention `NNN-descriptive
 
 `yarn install` may produce warnings. All warnings MUST be resolved before closing any PR — investigate the cause and fix it (e.g. add or remove a `packageExtensions` entry in `.yarnrc.yml`, pin a transitive dependency, or update the offending package).
 
-### Technical Review Standards
-
-Always fully evaluate the technical merits of questions and suggestions against relevant sources of truth and documentation.
-
-**Do NOT** use validating phrases like "you're absolutely right" or similar affirmations. Instead:
-
-- Verify claims against actual code, configuration files, and documentation
-- Challenge suggestions when they conflict with established patterns or best practices
-- Provide objective, evidence-based responses
-- Respectfully disagree when warranted, citing specific technical reasons
-
-Technical accuracy and honest assessment are more valuable than agreement.
