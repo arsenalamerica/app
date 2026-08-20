@@ -28,9 +28,6 @@ UA = {
 HERE = os.path.dirname(os.path.abspath(__file__))
 RESULTS = os.path.join(HERE, "results.json")
 
-# flagcdn labels the home nations with ISO 3166-2 subdivisions. Logos are filed
-# by ISO 3166-1 alpha-2 country, so those fold to "gb".
-COUNTRY_FOLD = {"gb-eng": "gb", "gb-sct": "gb", "gb-wls": "gb", "gb-nir": "gb"}
 
 # Clubs we deliberately do not source from footylogos — we ship our own
 # custom logos for these. fetch_club() skips them so a re-run cannot re-add them.
@@ -96,11 +93,15 @@ def white_svg_urls(html):
 
 
 def club_country(html):
-    """ISO 3166-1 alpha-2 for a club, read from the flag on its page."""
+    """Country code for a club, read from the flag on its page.
+
+    ISO 3166-1 alpha-2 ("es", "de") except for the UK home nations, which keep
+    their ISO 3166-2 subdivision codes ("gb-eng", "gb-sct", "gb-wls", "gb-nir").
+    Football treats them as separate associations with separate league systems,
+    so folding them to "gb" would put clubs that never meet in one directory.
+    """
     match = re.search(r"flagcdn\.com/([a-z-]+)\.svg", html)
-    if not match:
-        return None
-    return COUNTRY_FOLD.get(match.group(1), match.group(1))
+    return match.group(1) if match else None
 
 
 def fetch_club(slug):
