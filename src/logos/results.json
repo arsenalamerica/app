@@ -48,7 +48,7 @@
     "url": "https://www.footylogos.com/downloads/monochrome/angers-sco-white-logo-footylogos.svg"
   },
   "arsenal": {
-    "country": null,
+    "country": "gb-eng",
     "leagues": ["premier-league", "uefa-champions-league"],
     "status": "EXCLUDED_CUSTOM_LOGO",
     "url": null
@@ -546,7 +546,7 @@
     "url": "https://www.footylogos.com/downloads/monochrome/malaga-cf-white-logo-footylogos.svg"
   },
   "manchester-city": {
-    "country": null,
+    "country": "gb-eng",
     "leagues": ["premier-league", "uefa-champions-league"],
     "status": "EXCLUDED_CUSTOM_LOGO",
     "url": null
@@ -942,7 +942,7 @@
     "url": "https://www.footylogos.com/downloads/monochrome/torino-white-logo-footylogos.svg"
   },
   "tottenham-hotspur": {
-    "country": null,
+    "country": "gb-eng",
     "leagues": ["premier-league"],
     "status": "EXCLUDED_CUSTOM_LOGO",
     "url": null

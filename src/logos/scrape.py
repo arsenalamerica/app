@@ -29,12 +29,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 RESULTS = os.path.join(HERE, "results.json")
 
 
-# Clubs we deliberately do not source from footylogos — we ship our own
-# custom logos for these. fetch_club() skips them so a re-run cannot re-add them.
+# Clubs we deliberately do not source from footylogos — we ship our own custom
+# logos for these, hand-authored from the path data in
+# src/components/TeamLogo/teams.tsx. fetch_club() skips them before any network
+# request, so a re-run cannot overwrite them. Mapped to their country so the
+# manifest still records where each file lives.
 EXCLUDED = {
-    "arsenal",
-    "manchester-city",
-    "tottenham-hotspur",
+    "arsenal": "gb-eng",
+    "manchester-city": "gb-eng",
+    "tottenham-hotspur": "gb-eng",
 }
 
 LEAGUES = [
@@ -108,7 +111,7 @@ def club_country(html):
 def fetch_club(slug):
     """Return (slug, status, url, country). Writes `<country>/<slug>.svg`."""
     if slug in EXCLUDED:
-        return slug, "EXCLUDED_CUSTOM_LOGO", None, None
+        return slug, "EXCLUDED_CUSTOM_LOGO", None, EXCLUDED[slug]
 
     # The club page carries both the country flag and the monochrome link, and
     # the monochrome slug is not always `<slug>-monochrome` (chelsea -> chelsea-fc).
