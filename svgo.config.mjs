@@ -1,5 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { basename } from 'node:path';
 import { svgPathBbox } from 'svg-path-bbox';
 import svgpath from 'svgpath';
+
+const manifest = JSON.parse(
+  readFileSync(new URL('./src/logos/results.json', import.meta.url), 'utf8'),
+);
 
 /**
  * Normalizes club logos in src/logos/ to the shape TeamLogo.tsx expects:
@@ -51,7 +57,10 @@ const fitToSquare = {
         const unsupported = new Set();
         const check = (n) => {
           for (const child of n.children ?? []) {
-            if (child.type === 'element' && child.name !== 'path') {
+            if (
+              child.type === 'element' &&
+              !['path', 'title'].includes(child.name)
+            ) {
               unsupported.add(`<${child.name}>`);
             }
             if (child.attributes?.transform)
@@ -115,9 +124,46 @@ const fitToSquare = {
   }),
 };
 
+/**
+ * Gives every logo a <title> holding the club name, so the file is accessible
+ * on its own rather than relying on whatever renders it. Names come from
+ * src/logos/results.json, which the scrapers populate.
+ */
+const ensureTitle = {
+  name: 'ensureTitle',
+  fn: (_root, _params, info) => ({
+    element: {
+      enter: (node, parent) => {
+        if (node.name !== 'svg' || parent.type !== 'root') return;
+
+        const slug = basename(info.path ?? '', '.svg');
+        const name = manifest[slug]?.name;
+        if (!name) {
+          throw new Error(
+            `ensureTitle: no name for "${slug}" in src/logos/results.json. ` +
+              'Run src/logos/scrape.py (or retry.py) to populate it.',
+          );
+        }
+
+        const title = {
+          type: 'element',
+          name: 'title',
+          attributes: {},
+          children: [{ type: 'text', value: name }],
+        };
+        node.children = [
+          title,
+          ...node.children.filter((c) => c.name !== 'title'),
+        ];
+      },
+    },
+  }),
+};
+
 export default {
   plugins: [
     fitToSquare,
+    ensureTitle,
     { name: 'preset-default', params: { overrides: { removeViewBox: false } } },
     { name: 'convertColors', params: { currentColor: true } },
     'removeDimensions',

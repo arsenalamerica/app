@@ -15,6 +15,7 @@ import json
 import os
 import re
 import urllib.request
+from html import unescape
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 
@@ -35,9 +36,9 @@ RESULTS = os.path.join(HERE, "results.json")
 # request, so a re-run cannot overwrite them. Mapped to their country so the
 # manifest still records where each file lives.
 EXCLUDED = {
-    "arsenal": "gb-eng",
-    "manchester-city": "gb-eng",
-    "tottenham-hotspur": "gb-eng",
+    "arsenal": ("gb-eng", "Arsenal"),
+    "manchester-city": ("gb-eng", "Manchester City"),
+    "tottenham-hotspur": ("gb-eng", "Tottenham Hotspur"),
 }
 
 LEAGUES = [
@@ -96,6 +97,19 @@ def white_svg_urls(html):
     return urls
 
 
+def club_name(html):
+    """Display name for a club, from its page heading.
+
+    Used as the <title> of the generated SVG, which is what makes the file
+    accessible on its own and satisfies biome's noSvgWithoutTitle.
+    """
+    match = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.S)
+    if not match:
+        return None
+    text = unescape(re.sub(r"<[^>]+>", "", match.group(1))).strip()
+    return re.sub(r"\s+logo in SVG and PNG$", "", text)
+
+
 def club_country(html):
     """Country code for a club, read from the flag on its page.
 
@@ -109,31 +123,33 @@ def club_country(html):
 
 
 def fetch_club(slug):
-    """Return (slug, status, url, country). Writes `<country>/<slug>.svg`."""
+    """Return (slug, status, url, country, name). Writes `<country>/<slug>.svg`."""
     if slug in EXCLUDED:
-        return slug, "EXCLUDED_CUSTOM_LOGO", None, EXCLUDED[slug]
+        country, name = EXCLUDED[slug]
+        return slug, "EXCLUDED_CUSTOM_LOGO", None, country, name
 
     # The club page carries both the country flag and the monochrome link, and
     # the monochrome slug is not always `<slug>-monochrome` (chelsea -> chelsea-fc).
     try:
         club_page = get(f"{BASE}/logos/{slug}")
     except Exception as error:
-        return slug, f"CLUB_PAGE_ERR {error}", None, None
+        return slug, f"CLUB_PAGE_ERR {error}", None, None, None
 
     country = club_country(club_page)
+    name = club_name(club_page)
     match = re.search(r'href="(/logos/[^"]*-monochrome)"', club_page)
     if not match:
-        return slug, "NO_MONOCHROME_PUBLISHED", None, country
+        return slug, "NO_MONOCHROME_PUBLISHED", None, country, name
     try:
         html = get(BASE + match.group(1))
     except Exception as error:
-        return slug, f"MONO_PAGE_ERR {error}", None, country
+        return slug, f"MONO_PAGE_ERR {error}", None, country, name
 
     urls = white_svg_urls(html)
     if not urls:
-        return slug, "NO_WHITE_SVG", None, country
+        return slug, "NO_WHITE_SVG", None, country, name
     if not country:
-        return slug, "NO_COUNTRY", urls[0], None
+        return slug, "NO_COUNTRY", urls[0], None, name
 
     for url in urls:
         try:
@@ -144,8 +160,8 @@ def fetch_club(slug):
             os.makedirs(os.path.join(HERE, country), exist_ok=True)
             with open(os.path.join(HERE, country, f"{slug}.svg"), "wb") as handle:
                 handle.write(data)
-            return slug, "OK", url, country
-    return slug, "ALL_URLS_FAILED", urls[0], country
+            return slug, "OK", url, country, name
+    return slug, "ALL_URLS_FAILED", urls[0], country, name
 
 
 def main():
@@ -165,11 +181,12 @@ def main():
 
     results = {}
     with ThreadPoolExecutor(max_workers=6) as pool:
-        for slug, status, url, country in pool.map(fetch_club, sorted(clubs)):
+        for slug, status, url, country, name in pool.map(fetch_club, sorted(clubs)):
             results[slug] = {
                 "status": status,
                 "url": url,
                 "country": country,
+                "name": name,
                 "leagues": clubs[slug],
             }
             if status != "OK":

@@ -57,13 +57,9 @@
       }
     },
     {
-      "includes": ["src/logos/**/*.svg"],
-      "linter": {
-        "rules": {
-          "a11y": {
-            "noSvgWithoutTitle": "off"
-          }
-        }
+      "includes": ["src/logos/results.json"],
+      "formatter": {
+        "enabled": false
       }
     }
   ],

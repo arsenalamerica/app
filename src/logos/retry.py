@@ -25,10 +25,11 @@ def main():
     print(f"re-checking {len(pending)} clubs\n")
 
     with ThreadPoolExecutor(max_workers=6) as pool:
-        for slug, status, url, country in pool.map(fetch_club, pending):
+        for slug, status, url, country, name in pool.map(fetch_club, pending):
             results[slug]["status"] = status
             results[slug]["url"] = url
             results[slug]["country"] = country
+            results[slug]["name"] = name
             if status == "OK":
                 print(f"  RECOVERED  {slug} -> {url}")
 
