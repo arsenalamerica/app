@@ -55,6 +55,12 @@
           }
         }
       }
+    },
+    {
+      "includes": ["src/logos/results.json"],
+      "formatter": {
+        "enabled": false
+      }
     }
   ],
   "javascript": {

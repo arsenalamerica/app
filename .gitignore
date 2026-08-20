@@ -51,3 +51,7 @@ next-env.d.ts
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Python bytecode (src/logos scrapers)
+__pycache__/
+*.pyc
