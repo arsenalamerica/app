@@ -3,7 +3,7 @@ pre-commit:
     varlock-scan:
       run: yarn varlock scan --staged
     biome:
-      glob: "*.{js,jsx,ts,tsx,json,css,scss,sass}"
+      glob: "*.{js,jsx,mjs,cjs,ts,tsx,json,css,scss,sass}"
       exclude: ".claude/**"
       run: yarn biome check --write {staged_files}
       stage_fixed: true

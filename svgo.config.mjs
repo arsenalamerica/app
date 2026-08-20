@@ -54,8 +54,12 @@ const fitToSquare = {
             if (child.type === 'element' && child.name !== 'path') {
               unsupported.add(`<${child.name}>`);
             }
-            if (child.attributes?.transform) unsupported.add(`transform on <${child.name}>`);
-            if (child.attributes?.stroke && child.attributes.stroke !== 'none') {
+            if (child.attributes?.transform)
+              unsupported.add(`transform on <${child.name}>`);
+            if (
+              child.attributes?.stroke &&
+              child.attributes.stroke !== 'none'
+            ) {
               unsupported.add(`stroke on <${child.name}>`);
             }
             check(child);
@@ -63,7 +67,9 @@ const fitToSquare = {
         };
         check(node);
         if (unsupported.size > 0) {
-          throw new Error(`fitToSquare: unsupported content: ${[...unsupported].join(', ')}`);
+          throw new Error(
+            `fitToSquare: unsupported content: ${[...unsupported].join(', ')}`,
+          );
         }
 
         const boxes = paths.map((p) => svgPathBbox(p.node.attributes.d));
@@ -78,7 +84,9 @@ const fitToSquare = {
         const dy = (SIZE - (maxY - minY) * scale) / 2 - minY * scale;
 
         const alreadyFitted =
-          Math.abs(dx) < EPSILON && Math.abs(dy) < EPSILON && Math.abs(scale - 1) < 0.001;
+          Math.abs(dx) < EPSILON &&
+          Math.abs(dy) < EPSILON &&
+          Math.abs(scale - 1) < 0.001;
 
         for (const p of alreadyFitted ? [] : paths) {
           p.node.attributes.d = svgpath(p.node.attributes.d)

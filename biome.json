@@ -55,6 +55,16 @@
           }
         }
       }
+    },
+    {
+      "includes": ["src/logos/**/*.svg"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noSvgWithoutTitle": "off"
+          }
+        }
+      }
     }
   ],
   "javascript": {
