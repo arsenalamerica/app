@@ -1,6 +1,10 @@
 import type { KnipConfig } from 'knip';
 
 const config: KnipConfig = {
+  // Consumed by treosh/lighthouse-ci-action via its configPath input, never
+  // imported from application code. See .github/workflows/ci.yml.
+  entry: ['lighthouserc.js'],
+
   ignore: [
     // Git worktrees used by Claude Code are checked out under .claude/worktrees/.
     // Each is a full duplicate checkout (src/, package.json, node_modules), so

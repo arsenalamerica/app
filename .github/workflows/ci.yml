@@ -112,6 +112,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     if: github.event_name == 'pull_request'
+    env:
+      VERCEL_BYPASS_SECRET: ${{ secrets.VERCEL_BYPASS_SECRET }}
     strategy:
       fail-fast: false
       matrix:
@@ -127,8 +129,8 @@ jobs:
       - id: lighthouse
         uses: treosh/lighthouse-ci-action@12.6.2
         with:
-          urls: "${{ needs.build.outputs.url }}${{ matrix.path }}?x-vercel-protection-bypass=${{ secrets.VERCEL_BYPASS_SECRET }}&x-vercel-set-bypass-cookie=samesitenone"
+          urls: "${{ needs.build.outputs.url }}${{ matrix.path }}"
           runs: 3
           uploadArtifacts: true
           artifactName: "lighthouse-${{ matrix.name }}"
-          configPath: ./lighthouserc.json
+          configPath: ./lighthouserc.js
