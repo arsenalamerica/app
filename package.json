@@ -40,7 +40,8 @@
     "@vercel/fun/tar": ">=7.5.11",
     "@vercel/node/undici": "^6.24.0",
     "@vercel/prepare-flags-definitions/minimatch": "^10.2.3",
-    "@vercel/python-analysis/minimatch": "^10.2.3"
+    "@vercel/python-analysis/minimatch": "^10.2.3",
+    "minimatch/brace-expansion": ">=5.0.9 <6"
   },
   "dependencies": {
     "@ariakit/react": "0.4.37",
