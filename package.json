@@ -34,12 +34,9 @@
   },
   "resolutions": {
     "@next/env": "npm:@varlock/nextjs-integration@1.1.6",
-    "@vercel/backends/srvx": "^0.11.13",
-    "@vercel/fastify/@tootallnate/once": "^3.0.1",
     "@vercel/fun/@tootallnate/once": "^3.0.1",
     "@vercel/fun/tar": ">=7.5.11",
     "@vercel/node/undici": "^6.24.0",
-    "@vercel/prepare-flags-definitions/minimatch": "^10.2.3",
     "@vercel/python-analysis/minimatch": "^10.2.3"
   },
   "dependencies": {
