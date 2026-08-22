@@ -38,9 +38,14 @@
     "@vercel/fastify/@tootallnate/once": "^3.0.1",
     "@vercel/fun/@tootallnate/once": "^3.0.1",
     "@vercel/fun/tar": ">=7.5.11",
+    "@vercel/gatsby-plugin-vercel-builder/esbuild": ">=0.28.1 <1",
+    "@vercel/node/esbuild": ">=0.28.1 <1",
     "@vercel/node/undici": "^6.24.0",
     "@vercel/prepare-flags-definitions/minimatch": "^10.2.3",
-    "@vercel/python-analysis/minimatch": "^10.2.3"
+    "@vercel/python-analysis/minimatch": "^10.2.3",
+    "tsx/esbuild": ">=0.28.1 <1",
+    "vercel/esbuild": ">=0.28.1 <1",
+    "vite/esbuild": ">=0.28.1 <1"
   },
   "dependencies": {
     "@ariakit/react": "0.4.37",
