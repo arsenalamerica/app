@@ -30,14 +30,14 @@ try {
 
   const { data } = await res.json();
 
-  if (!data?.currentSeason?.id) {
+  if (!data?.currentseason?.id) {
     console.error(
       `Sportmonks returned no currentSeason for league ${PREMIER_LEAGUE_ID}`,
     );
     process.exit(1);
   }
 
-  const newSeasonId = data.currentSeason.id;
+  const newSeasonId = data.currentseason.id;
 
   const existing = JSON.parse(await readFile(seasonsPath, 'utf-8'));
   const oldSeasonId = existing.premierLeague.seasonId;
