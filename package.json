@@ -77,7 +77,7 @@
     "lefthook": "2.1.10",
     "sass": "1.103.1",
     "svg-path-bbox": "2.1.0",
-    "svgo": "4.0.2",
+    "svgo": "4.1.0",
     "svgpath": "2.6.0",
     "typescript": "6.0.3",
     "vercel": "59.1.4",
