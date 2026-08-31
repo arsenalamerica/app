@@ -11,14 +11,15 @@ description: >-
   fixture and season sync scripts.
 
   Trigger phrases include "Sportmonks", "MONK_TOKEN", "fixture", "fixtures", "livescore",
-  "standings", "topscorers", "squad", "lineups", "include", "season id", "team id",
-  "league id", "tv station"
+  "standings", "topscorers", "squad", "lineups", "season id", "team id", "league id",
+  "tv station"
 ---
 
 # Sportmonks Football API v3
 
-Reference verified against `https://docs.sportmonks.com/v3/llms-full.txt`. When something here
-disagrees with the live docs, the live docs win — say so rather than working around it.
+Reference verified against `https://docs.sportmonks.com/v3/llms-full.txt` on **2026-08-30**.
+When something here disagrees with the live docs, the live docs win — say so rather than working
+around it.
 
 ## Base URLs
 
@@ -86,7 +87,8 @@ GET /referees/{id}
 ```
 
 `GET /leagues/{id}?include=currentSeason` is how `scripts/sync-seasons.mjs` resolves the live
-Premier League season ID.
+Premier League season ID. **Watch the casing**: the include is requested as `currentSeason` and
+comes back on the payload as `data.currentseason` — camel in, flat out.
 
 ### Squads
 
@@ -110,6 +112,9 @@ GET /fixtures/upcoming/tv-stations/{tv_station_id}
 GET /fixtures/past/tv-stations/{tv_station_id}
 GET /fixtures/upcoming/markets/{market_id}
 ```
+
+`GET /fixtures/between/{start}/{end}/{team_id}` is what `scripts/sync-fixtures.mjs` calls to
+rebuild the fixture index, and what `smFixtures()` calls for the next-fixture lookup.
 
 ### Livescores
 
@@ -211,50 +216,71 @@ The full state ID list is not in the API reference — use `GET /states`, or
 
 - **`sortBy`** is the parameter name — camelCase. `sort_by` is **not** recognised and is silently
   ignored, leaving default ordering in place. Supported fields today: `starting_at`, `name`.
+  **Known deviation:** `src/lib/data/fixtures.ts` still passes `sort_by`. Tracked in
+  [#349](https://github.com/arsenalamerica/app/issues/349) — do not "fix" it silently as a drive-by.
 - `order` is `asc` or `desc`.
 - `per_page` defaults to `25`, maximum `50`.
 - Offset pagination is capped: a request where `(page - 1) × per_page` exceeds `20,000` is
   rejected with a 4xx. At `per_page=50` that is page 401.
 - **Cursor pagination is the recommended form** (added 2026-06-05). Responses carry
   `pagination.next_cursor`; pass it back as `?cursor=`, repeating while `has_more` is true. The
-  page-number method and `next_page` remain supported for existing integrations.
+  page-number method and `next_page` remain supported for existing integrations. **This repo is
+  still on page numbers**: the `pagination` type has no `next_cursor` and `sync-fixtures.mjs` walks
+  `page` against `has_more`. Tracked in
+  [#350](https://github.com/arsenalamerica/app/issues/350).
 
 ## Known IDs
 
-| Thing | ID | Source |
+Defined in this repo — change these here, not by hand:
+
+| Thing | ID | Defined in |
 | --- | --- | --- |
-| Arsenal team | `19` | `ARSENAL_TEAM_ID`, `src/lib/sportmonks/sportmonks.ts` |
-| USA country | `3483` | `USA_COUNTRY_ID`, `src/lib/data/fixtures.ts` |
-| Premier League | `8` | league |
-| Champions League | `2` | league |
-| La Liga / Bundesliga / Serie A / Ligue 1 | `564` / `82` / `384` / `301` | leagues |
-| Topscorer types | goals `208`, assists `209`, yellow cards `84` | `seasonTopscorerTypes` |
+| Arsenal team | `19` | `ARSENAL_TEAM_ID` in `src/lib/sportmonks/sportmonks.ts`, **and again** in `scripts/sync-fixtures.mjs` |
+| Premier League | `8` | `PREMIER_LEAGUE_ID` in `scripts/sync-seasons.mjs` |
+| USA country | `3483` | `USA_COUNTRY_ID` in `src/lib/data/fixtures.ts` |
+
+From the vendor docs, with no consumer in this repo to keep them honest — re-check before relying
+on one:
+
+| Thing | ID |
+| --- | --- |
+| Champions League | `2` |
+| La Liga / Bundesliga / Serie A / Ligue 1 | `564` / `82` / `384` / `301` |
+| Topscorer types | goals `208`, assists `209`, yellow cards `84` |
 
 **Never hardcode a season ID.** The live Premier League season lives in
 `src/lib/sportmonks/seasons.json` and is refreshed by `scripts/sync-seasons.mjs`.
 
 ## In this repo
 
-- **`sportmonksFetch` in `src/lib/sportmonks/sportmonks.ts` is the only path to the API.** Never
-  call `fetch` against Sportmonks directly. Endpoint wrappers live beside it: `fixtures.ts`,
-  `standings.ts`, `tv-station.ts`.
-- **Every response is enveloped.** The `Sportmonks` type carries `rate_limit`, `pagination`,
-  `subscription`, and `timezone` alongside `data`.
-- **`MONK_TOKEN` comes from varlock's typed `ENV`.** It resolves to an **empty string** under
-  `test` by design, so an unmocked test trips the guard instead of reaching the real API. Mock the
-  calling module — do not set a fake token.
-- **Licensing: this repo is public.** Never commit raw Sportmonks payloads — scores, lineups,
-  events, stats. `fixtures.json` holds `{ id, kickoff }` only, which is the schedule and not
-  licensed match data. Rationale: `docs/adr/005-fixture-index-and-state-aware-caching.md`.
-- **Caching lives in `src/lib/data/`, not in the client.** `getSettledFixtureById` /
-  `getUnsettledFixtureById` use `'use cache'` with `cacheLife('max')` and `cacheLife('minutes')`
-  respectively, keyed on fixture ID alone so the Vercel Data Cache entry is shared across
-  tenants. Adding a parameter to those signatures breaks that sharing. See ADR-005.
-- **`seasons.json` and `fixtures.json` are owned by `scripts/sync-*.mjs`.** Never hand-edit them;
-  the PR-conflict auto-resolver also opts both out of structural merge (`-merge`, written to
-  `.git/info/attributes` at CI runtime by `.github/scripts/pr-conflict-rebase.sh`) because merging
-  two regenerated snapshots produces a list that was never fetched from the API. See `.github/CLAUDE.md` and
-  `docs/adr/008-mergiraf-conflict-auto-resolution.md`.
+The rules for calling this API from this codebase live in **`src/lib/sportmonks/CLAUDE.md`**, which
+loads automatically when you open that directory. Read it before adding or changing a call. In
+brief, and deliberately not repeated in full here:
+
+- `sportmonksFetch` is the only path to the API **from `src/`**. The two sync scripts are the
+  documented exception — see below.
+- Caching lives in `src/lib/data/`, not in the client. → `docs/adr/005-fixture-index-and-state-aware-caching.md`
+- This repo is public: never commit raw Sportmonks payloads. → ADR-005
+- `MONK_TOKEN` is empty under `test` by design. → `.claude/rules/file-env-schema.md`
+
+### The sync scripts are a second, separate client
+
+`scripts/sync-fixtures.mjs` and `scripts/sync-seasons.mjs` call `fetch` against Sportmonks
+directly, and that is intentional — they are standalone Node ESM run by `node` under
+`varlock run --`, read `process.env.MONK_TOKEN` directly, and cannot import a TypeScript module
+that depends on `varlock/env`. See `scripts/CLAUDE.md`.
+
+The cost is real duplication. **A change to the base URL or the auth header has to be made in
+three places:**
+
+```
+src/lib/sportmonks/sportmonks.ts    SPORTMONKS_BASE + the Authorization header
+scripts/sync-fixtures.mjs           SPORTMONKS_BASE + ARSENAL_TEAM_ID + its own header
+scripts/sync-seasons.mjs            SPORTMONKS_BASE + PREMIER_LEAGUE_ID + its own header
+```
+
+The scripts also carry their own pagination loop, `AbortSignal.timeout(30_000)`, and error
+handling. None of that is shared with `sportmonksFetch`.
 
 ## API behavior worth knowing
 
@@ -265,3 +291,6 @@ The full state ID list is not in the API reference — use `GET /states`, or
   will not pick one up; `cacheTag('fixture:${id}')` is the invalidation hook.
 - **Rate limit state rides in every response** under `rate_limit` (`remaining`,
   `resets_in_seconds`, `requested_entity`). It is per requested entity, not global.
+- **An unrecognised query parameter is ignored, not rejected.** There is no error to catch — a
+  typo'd parameter silently produces default behavior. This is how the `sort_by` bug (#349)
+  survived. Check spelling against this reference rather than trusting a 200.
