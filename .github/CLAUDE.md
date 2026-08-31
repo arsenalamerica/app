@@ -25,14 +25,14 @@ Runs on push and pull request to `main`. Jobs:
 
 Concurrency is configured to cancel in-progress runs on PRs when new commits are pushed. Runs on `main` are never cancelled.
 
-A top-level `permissions: contents: read` block restricts all jobs to read-only token access by default. The `build` job overrides this with `contents: read` + `deployments: write` for Vercel deployment.
+A top-level `permissions: contents: read` block restricts all jobs to read-only token access by default. Jobs needing elevated access declare their own `permissions:` block: `build` adds `deployments: write` for Vercel deployment, and `test` adds `code-quality: write` for the coverage upload.
 
 ## Git Hooks (lefthook)
 
 Config: `lefthook.yml`
 
-- **pre-commit** runs scoped checks on staged files only: `biome`, `sort-package-json`, `knip`, and `vitest related` (JS/TS staged files only). Docs-only commits incur near-zero hook cost.
-- **pre-push** runs project-wide `yarn typecheck` and full `yarn test` once before the push, preserving CI parity without per-commit latency.
+- **pre-commit** runs scoped checks on staged files only: `biome`, `sort-package-json`, `knip`, and `vitest related` (JS/TS staged files only, coverage disabled — a related-only run can never meet the global coverage thresholds). Docs-only commits incur near-zero hook cost.
+- **pre-push** runs project-wide `yarn typecheck` and full `yarn test` once before the push, preserving CI parity (including coverage thresholds) without per-commit latency.
 - Never use `--no-verify`. Pre-commit failures must be fixed, not bypassed (root `CLAUDE.md`).
 
 ## Vercel Deployment
