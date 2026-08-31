@@ -45,6 +45,12 @@ export default withVarlock(
 
     project: 'app',
 
+    // Stamps every module the plugin builds with this key, so the client's
+    // `thirdPartyErrorFilterIntegration` can tell our frames from scripts the
+    // mobile in-app browsers inject. Must stay in sync with `filterKeys` in
+    // `src/instrumentation-client.ts`, where the reasoning is written up.
+    applicationKey: 'arsenalamerica-app',
+
     // Auth token for source maps upload. Only set in CI and on Vercel; local
     // builds skip the upload silently without it. varlock materializes unset
     // optional vars as '' on this path, so normalize back to undefined rather
