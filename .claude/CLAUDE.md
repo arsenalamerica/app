@@ -46,3 +46,7 @@ These scenarios are unlikely in this repo today but will cause problems if they 
 ## Investigating production issues
 
 For Vercel runtime logs, deployment state, build failures, and the DNS / domain infrastructure behind the branch sites, use the `production-debugging` skill (`.agents/skills/production-debugging/SKILL.md`).
+
+## Working with the Sportmonks API
+
+For endpoint routes, include and filter syntax, sorting and pagination, known IDs, and this repo's rules for calling the API, use the `sportmonks` skill (`.agents/skills/sportmonks/SKILL.md`).
