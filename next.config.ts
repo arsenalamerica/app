@@ -2,8 +2,6 @@ import { withSentryConfig } from '@sentry/nextjs';
 import { varlockNextConfigPlugin } from '@varlock/nextjs-integration/plugin';
 import type { NextConfig } from 'next';
 
-import { SENTRY_APPLICATION_KEY } from './src/sentry.applicationKey';
-
 const withVarlock = varlockNextConfigPlugin();
 
 const nextConfig: NextConfig = {
@@ -46,17 +44,6 @@ export default withVarlock(
     org: 'arsenal-america',
 
     project: 'app',
-
-    // Stamps first-party modules with this key so the client's
-    // `thirdPartyErrorFilterIntegration` can tell our frames from scripts the
-    // mobile in-app browsers inject. The reasoning is written up in
-    // `src/instrumentation-client.ts`.
-    //
-    // The stamping runs as a Turbopack loader on `*.{ts,tsx,js,jsx,mjs,cjs}`.
-    // Adding a `turbopack.rules` entry for that same matcher above makes the
-    // SDK skip it with only a debug log, which silently drops every stacked
-    // client error — see the failure note in `src/instrumentation-client.ts`.
-    applicationKey: SENTRY_APPLICATION_KEY,
 
     // Auth token for source maps upload. Only set in CI and on Vercel; local
     // builds skip the upload silently without it. varlock materializes unset

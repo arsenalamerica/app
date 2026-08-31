@@ -1,4 +1,4 @@
-# ADR-012: Filter third-party client errors by bundle provenance
+# ADR-012: Filter third-party mobile webview errors with `ignoreErrors` and `denyUrls`
 
 ## Status
 
@@ -9,41 +9,55 @@ Accepted
 Mobile in-app browsers (Instagram, Facebook, LinkedIn) inject their own instrumentation
 scripts into every page they render. When those scripts throw, `@sentry/nextjs` reports the
 error from our client as if it were ours, and the Sentry "Create GH Issue" alert rule opens a
-GitHub bug for it. Five open issues were nothing but this: #193 and #169 (iOS webview bridge,
-frames at `app:///`), #164 and #152 (Android bridge, `app://navigation_performance_logger_android`),
-and #161 (`TypeError: Load failed`, Safari's message for a fetch aborted by navigation, with
-no stack at all).
+GitHub bug for it. Five open issues were nothing but this:
 
-None of these have an application fix. They arrive as long as people open the site from a
-social app, so the stream is unbounded and non-actionable. Issue #255 weighed four options:
-message and URL pattern filters, `thirdPartyErrorFilterIntegration`, Sentry inbound filters
-in project settings, and narrowing the alert rule.
+| Issues | Shape |
+| --- | --- |
+| #193, #169 | iOS webview bridge, every frame at `app:///` |
+| #164, #152 | Android webview bridge, every frame at `app://navigation_performance_logger_android` |
+| #161 | `TypeError: Load failed`, no stack at all — Safari's message for a fetch aborted by navigation |
+
+None have an application fix. They arrive as long as people open the site from a social app,
+so the stream is unbounded and non-actionable. Issue #255 weighed four options: message and
+URL pattern filters; `thirdPartyErrorFilterIntegration`; Sentry inbound filters in project
+settings; and narrowing the alert rule.
+
+`thirdPartyErrorFilterIntegration` looked strongest on paper. It keys on provenance rather
+than message text: the Sentry bundler plugin stamps first-party modules with an
+`applicationKey`, and the integration drops events whose frames carry no matching stamp. That
+removes the class rather than enumerating instances, and needs no maintenance as vendors
+rename their bridges.
 
 ## Decision
 
-Filter on provenance, in the repo, with two narrower filters behind it.
+Ship option 1. `src/instrumentation-client.ts` sets:
 
-1. `next.config.ts` passes `applicationKey` to the Sentry bundler plugin, which stamps
-   first-party modules with that key via a Turbopack loader.
-   `src/instrumentation-client.ts` passes the same key to
-   `Sentry.thirdPartyErrorFilterIntegration` as `filterKeys`. Both read one exported constant,
-   `src/sentry.applicationKey.ts`, because a drift between them silently disables all client
-   error reporting.
+- `ignoreErrors: [/^(TypeError: )?Load failed$/]` for #161. Sentry matches `ignoreErrors`
+  against both the bare exception value and `Type: value`, so one anchored alternation covers
+  both forms.
+- `denyUrls: [/^app:\/\//]` for #193, #169, #164 and #152. Sentry resolves the URL from the
+  last valid frame of the root exception, which for all four is under the `app:` scheme —
+  a scheme nothing we ship uses.
 
-2. The behaviour is `drop-error-if-exclusively-contains-third-party-frames`, not the
-   `contains` variant. `contains` drops an event if *any* frame is unstamped, and unstamped
-   first-party frames are normal: the loader skips `next/dist/build/polyfills`, and generated
-   runtime chunks are not source modules. That would cost us real errors, which #255
-   explicitly requires we keep. The cost of `exclusively` is that an event whose frames are
-   all discarded by the SDK (no filename, or no position information) is dropped vacuously.
+**`thirdPartyErrorFilterIntegration` was implemented, then reverted, because it breaks the
+build.** Setting `applicationKey` makes the SDK register a Turbopack loader on
+`*.{ts,tsx,js,jsx,mjs,cjs}` that injects a module-metadata IIFE into every source module. On
+`src/lib/actions/loadDeferredFixture.ts` that invalidates the `'use server'` module: Next then
+traces the file into the client graph and fails the build on its `next/headers` import
+(`Preview` deploy for commit `196e7e6`). The loader has no path-exclusion option beyond the
+hardcoded `next/dist/build/polyfills`, so there is no way to opt server-action files out.
 
-3. `ignoreErrors: [/^(TypeError: )?Load failed$/]` handles #161. The integration returns early
-   when an event has no frames, so a stackless event is passed through untouched and the
-   provenance filter cannot see it. This case has to be matched by message.
+Two further problems surfaced while evaluating it, and are worth recording in case the
+Sentry-side bug is fixed and someone revisits:
 
-4. `denyUrls: [/^app:\/\//]` is a second, independent filter for the same webview noise. Sentry
-   matches it against the last valid frame of the root exception, so it catches errors thrown
-   wholly inside an injected script and leaves a mixed stack that ends in our code alone.
+- `drop-error-if-contains-third-party-frames` uses `Array.some`, so a single unstamped frame
+  drops the whole event. Unstamped first-party frames are normal (excluded polyfills,
+  generated runtime chunks), so this would have cost real client errors — which #255
+  explicitly requires we keep. `drop-error-if-exclusively-contains-third-party-frames` is the
+  correct variant.
+- The integration returns early when an event has no frames, so a stackless event is passed
+  through untouched. #161 would not have been covered by it either way and always needed the
+  `ignoreErrors` entry.
 
 Sentry inbound filters were rejected because they are neither version-controlled nor visible
 in review. Narrowing the alert rule remains worth doing separately: filtering decides what
@@ -52,15 +66,12 @@ separate controls.
 
 ## Consequences
 
-- The filter needs no maintenance as vendors rename their bridges; it keys on who built the
-  code, not on what the message says.
-- If module stamping ever stops happening — most plausibly by adding a `turbopack.rules` entry
-  for `*.{ts,tsx,js,jsx,mjs,cjs}`, which makes the SDK skip its own loader with only a debug
-  log — no frame is first-party and every stacked client error is dropped silently. The tell
-  is client issue volume in Sentry going to zero. The remedy is
-  `apply-tag-if-exclusively-contains-third-party-frames` plus a `!third_party_code:True`
-  search, not a looser filter.
+- The five issues stop filing bugs, and the build is unaffected.
+- The filters are pattern-based, so they need revisiting if a vendor moves off the `app:`
+  scheme. That is the cost of not using the provenance filter, and is accepted.
 - `Load failed` is Safari's message for any failed fetch, not only an aborted one, so a
-  genuine network failure on a bare fetch is silenced too. Accepted: at the point of
-  filtering the two are indistinguishable.
-- Turbopack's module cache is disabled for stamped modules, so build times may rise.
+  genuine network failure on a bare fetch is silenced too. At the point of filtering the two
+  are indistinguishable.
+- Both filters are enforced by `Sentry.eventFiltersIntegration`, which is a default
+  integration. Passing `integrations` as an array merges with the defaults rather than
+  replacing them; setting `defaultIntegrations: false` would silently disable both.

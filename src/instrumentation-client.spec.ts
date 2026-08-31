@@ -1,17 +1,11 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import * as Sentry from '@sentry/nextjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { SENTRY_APPLICATION_KEY } from './sentry.applicationKey';
-
 const replayIntegrationMarker = Symbol('replay-integration');
-const thirdPartyFilterMarker = Symbol('third-party-error-filter');
 
 vi.mock('@sentry/nextjs', () => ({
   init: vi.fn(),
   replayIntegration: vi.fn(() => replayIntegrationMarker),
-  thirdPartyErrorFilterIntegration: vi.fn(() => thirdPartyFilterMarker),
   captureRouterTransitionStart: vi.fn(),
 }));
 
@@ -35,7 +29,7 @@ describe('instrumentation-client', () => {
     expect(Sentry.init).toHaveBeenCalledWith(
       expect.objectContaining({
         dsn: expect.stringContaining('sentry.io'),
-        integrations: [replayIntegrationMarker, thirdPartyFilterMarker],
+        integrations: [replayIntegrationMarker],
         enabled: false,
         environment: 'test',
         tracesSampleRate: 0.1,
@@ -58,30 +52,6 @@ describe('instrumentation-client', () => {
         enabled: true,
         environment: 'preview',
       }),
-    );
-  });
-
-  it('filters third-party frames by application key, not by message text', async () => {
-    await import('./instrumentation-client');
-
-    expect(Sentry.thirdPartyErrorFilterIntegration).toHaveBeenCalledWith({
-      filterKeys: [SENTRY_APPLICATION_KEY],
-      behaviour: 'drop-error-if-exclusively-contains-third-party-frames',
-    });
-  });
-
-  // If `filterKeys` and the bundler plugin's `applicationKey` ever drift, every
-  // frame reads as third-party and the integration drops every client error
-  // that has a stack, with no runtime signal. Sharing one constant makes the
-  // drift impossible; this guards against someone re-inlining a literal.
-  it('takes its application key from the constant next.config.ts stamps with', () => {
-    const nextConfigSource = readFileSync(
-      resolve(__dirname, '../next.config.ts'),
-      'utf8',
-    );
-
-    expect(nextConfigSource).toContain(
-      'applicationKey: SENTRY_APPLICATION_KEY,',
     );
   });
 
