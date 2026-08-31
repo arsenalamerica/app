@@ -29,6 +29,39 @@ export function seasonWindow(date = new Date()) {
   return { start: `${start}-07-01`, end: `${end}-06-30` };
 }
 
+// Sportmonks marks a fixture as provisional with `placeholder: true` -- e.g. a
+// Champions League league-phase slot assigned before the draw resolves. These
+// ids get deleted and reissued once the real fixture is known, so they must
+// never reach the committed index in the first place.
+export function isPlaceholderFixture(fixture) {
+  return fixture.placeholder === true;
+}
+
+// Confirms a fixture id still resolves on Sportmonks before it's written to the
+// committed index. A dead id returns HTTP 200 with a body that has NO `data`
+// key (only `message`); a collection request with no matches still has
+// `data: []`, so this is a key-presence check, not a truthiness check.
+// `fetchImpl` is injected so tests never touch the network -- production
+// always passes the global `fetch`. A non-ok response throws the same way the
+// pagination fetch does: a transport failure must abort the run, not silently
+// shrink the index.
+export async function fixtureIdResolves(id, token, fetchImpl) {
+  const res = await fetchImpl(`${SPORTMONKS_BASE}/fixtures/${id}`, {
+    headers: { Authorization: token },
+    signal: AbortSignal.timeout(30_000),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(
+      `Sportmonks API error: ${res.status} ${res.statusText}${body ? ` — ${body.slice(0, 500)}` : ''}`,
+    );
+  }
+
+  const body = await res.json();
+  return 'data' in body;
+}
+
 async function main() {
   const token = process.env.MONK_TOKEN;
   if (!token) {
@@ -66,8 +99,12 @@ async function main() {
       }
 
       const { data, pagination } = await res.json();
-      for (const { id, starting_at_timestamp } of data) {
-        byId.set(id, { id, kickoff: starting_at_timestamp });
+      for (const fixture of data) {
+        if (isPlaceholderFixture(fixture)) continue;
+        byId.set(fixture.id, {
+          id: fixture.id,
+          kickoff: fixture.starting_at_timestamp,
+        });
       }
       if (!pagination?.has_more) break;
       page += 1;
@@ -78,7 +115,13 @@ async function main() {
       );
     }
 
-    const fixtures = [...byId.values()].sort((a, b) => a.id - b.id);
+    const verified = [];
+    for (const entry of byId.values()) {
+      if (await fixtureIdResolves(entry.id, token, fetch)) {
+        verified.push(entry);
+      }
+    }
+    const fixtures = verified.sort((a, b) => a.id - b.id);
 
     let existing = '';
     try {

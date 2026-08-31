@@ -49,6 +49,11 @@ jobs:
       - name: Create or update pull request
         if: steps.diff.outputs.changed == 'true'
         env:
+          # Must be the App token, never GITHUB_TOKEN: GitHub raises no
+          # workflow runs from GITHUB_TOKEN-triggered events, so a PR merged
+          # by it would land a commit on main that triggers nothing
+          # downstream -- silently breaking the pr-conflict-rebase.yml chain
+          # that depends on push events to re-baseline the rest of the queue.
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           PR_BODY: |
             ## Summary
@@ -69,8 +74,13 @@ jobs:
           git add src/lib/sportmonks/fixtures.json
           git commit -m "chore(data): sync fixture index from Sportmonks"
           git push --force origin "$BRANCH"
-          if ! gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number' | grep -q .; then
+          PR_NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+          if [ -z "$PR_NUMBER" ]; then
             gh pr create \
               --title "chore(data): sync fixture index" \
               --body "$PR_BODY"
           fi
+          # Enabled on both the freshly created and reused-existing-PR paths,
+          # via the App token above -- gh pr merge --auto is idempotent, and
+          # the repo's required checks still gate the actual merge.
+          gh pr merge --auto --squash "$BRANCH"

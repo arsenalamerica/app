@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { isEmptyOverwrite, seasonWindow, serialize } from './sync-fixtures.mjs';
+import {
+  fixtureIdResolves,
+  isEmptyOverwrite,
+  isPlaceholderFixture,
+  seasonWindow,
+  serialize,
+} from './sync-fixtures.mjs';
 
 describe('serialize', () => {
   it('emits pretty JSON with a trailing newline', () => {
@@ -61,5 +67,57 @@ describe('seasonWindow', () => {
       start: '2025-07-01',
       end: '2026-06-30',
     });
+  });
+});
+
+describe('isPlaceholderFixture', () => {
+  it('flags a fixture marked placeholder: true', () => {
+    expect(isPlaceholderFixture({ id: 1, placeholder: true })).toBe(true);
+  });
+
+  it('does not flag a fixture with placeholder: false', () => {
+    expect(isPlaceholderFixture({ id: 1, placeholder: false })).toBe(false);
+  });
+
+  it('does not flag a fixture missing the placeholder field', () => {
+    expect(isPlaceholderFixture({ id: 1 })).toBe(false);
+  });
+});
+
+describe('fixtureIdResolves', () => {
+  it('is true when the response body has a data key', async () => {
+    const fetchImpl = async () => ({
+      ok: true,
+      json: async () => ({ data: { id: 1 } }),
+    });
+    expect(await fixtureIdResolves(1, 'token', fetchImpl)).toBe(true);
+  });
+
+  it('is true for an empty data array (key-presence, not truthiness)', async () => {
+    const fetchImpl = async () => ({
+      ok: true,
+      json: async () => ({ data: [] }),
+    });
+    expect(await fixtureIdResolves(1, 'token', fetchImpl)).toBe(true);
+  });
+
+  it('is false when the response body has no data key', async () => {
+    const fetchImpl = async () => ({
+      ok: true,
+      json: async () => ({ message: 'Fixture not found' }),
+    });
+    expect(await fixtureIdResolves(1, 'token', fetchImpl)).toBe(false);
+  });
+
+  it('throws on a non-ok response instead of treating the id as dead', async () => {
+    const fetchImpl = async () => ({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+      text: async () => 'boom',
+    });
+    await expect(fixtureIdResolves(1, 'token', fetchImpl)).rejects.toThrow(
+      'Sportmonks API error: 500 Internal Server Error — boom',
+    );
   });
 });
