@@ -25,7 +25,21 @@ export default defineConfig({
     coverage: {
       enabled: true,
       provider: 'v8',
-      exclude: ['node_modules/**', 'e2e/**'],
+      reporter: ['text', 'cobertura'],
+      include: ['src/**', 'data/src/**'],
+      // Excluded beyond non-code assets: pure re-export barrels only.
+      // data/src/branches/index.ts stays in scope; it builds the branch maps.
+      exclude: [
+        'node_modules/**',
+        'e2e/**',
+        '**/*.module.scss',
+        '**/*.json',
+        'src/components/index.ts',
+        'src/lib/sportmonks/index.ts',
+        'src/lib/utils/index.ts',
+        'data/src/index.ts',
+        'data/src/branches/*/index.ts',
+      ],
       thresholds: {
         statements: 0,
         branches: 0,
