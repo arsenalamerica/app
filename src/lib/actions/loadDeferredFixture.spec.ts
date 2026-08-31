@@ -11,7 +11,12 @@ import { loadDeferredFixture } from './loadDeferredFixture';
 
 vi.mock('next/headers');
 
+// The passthrough means "the action does not capture this itself". That a
+// rethrown transient failure still reaches Sentry is the SDK's job:
+// withServerActionInstrumentation captures from its own error branch. Revisit
+// this mock, and the transient-failure test below, on a @sentry/nextjs major.
 vi.mock('@sentry/nextjs', () => ({
+  captureException: vi.fn(),
   withServerActionInstrumentation: vi.fn((_name, _opts, fn) => fn()),
 }));
 
@@ -29,11 +34,17 @@ describe('loadDeferredFixture', () => {
     } as unknown as Awaited<ReturnType<typeof headers>>);
     vi.mocked(getSettledFixtureById).mockReset();
     vi.mocked(getUnsettledFixtureById).mockReset();
+    vi.mocked(Sentry.captureException).mockClear();
   });
 
-  it('throws for an id not present in the static fixture index', async () => {
-    await expect(loadDeferredFixture(999999999, true)).rejects.toThrow(
-      'Unknown fixture id=999999999',
+  it('resolves permanently for an id not present in the static fixture index', async () => {
+    const result = await loadDeferredFixture(999999999, true);
+
+    expect(result).toEqual({ ok: false, reason: 'unknown-id' });
+    expect(getSettledFixtureById).not.toHaveBeenCalled();
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    expect(Sentry.captureException).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Unknown fixture id=999999999' }),
     );
   });
 
@@ -46,7 +57,7 @@ describe('loadDeferredFixture', () => {
 
     expect(getSettledFixtureById).toHaveBeenCalledWith(KNOWN_FIXTURE_ID);
     expect(getUnsettledFixtureById).not.toHaveBeenCalled();
-    expect(result).toEqual({ id: KNOWN_FIXTURE_ID });
+    expect(result).toEqual({ ok: true, fixture: { id: KNOWN_FIXTURE_ID } });
   });
 
   it('loads an unsettled fixture by its trusted, re-derived id', async () => {
@@ -58,7 +69,7 @@ describe('loadDeferredFixture', () => {
 
     expect(getUnsettledFixtureById).toHaveBeenCalledWith(KNOWN_FIXTURE_ID);
     expect(getSettledFixtureById).not.toHaveBeenCalled();
-    expect(result).toEqual({ id: KNOWN_FIXTURE_ID });
+    expect(result).toEqual({ ok: true, fixture: { id: KNOWN_FIXTURE_ID } });
   });
 
   it('wraps the call with Sentry server action instrumentation', async () => {
@@ -70,6 +81,28 @@ describe('loadDeferredFixture', () => {
       'loadDeferredFixture',
       { headers: expect.anything() },
       expect.any(Function),
+    );
+  });
+
+  it('rethrows a fetch failure so the client can offer a retry', async () => {
+    vi.mocked(getSettledFixtureById).mockRejectedValue(
+      new Error('Sportmonks 503: /fixtures'),
+    );
+
+    await expect(loadDeferredFixture(KNOWN_FIXTURE_ID, true)).rejects.toThrow(
+      'Sportmonks 503: /fixtures',
+    );
+    // Reported by the instrumentation, not by the action itself.
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+  });
+
+  it('rethrows an unsettled fetch failure too', async () => {
+    vi.mocked(getUnsettledFixtureById).mockRejectedValue(
+      new Error('Sportmonks 503: /fixtures'),
+    );
+
+    await expect(loadDeferredFixture(KNOWN_FIXTURE_ID, false)).rejects.toThrow(
+      'Sportmonks 503: /fixtures',
     );
   });
 });

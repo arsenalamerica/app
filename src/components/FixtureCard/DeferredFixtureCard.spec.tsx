@@ -1,10 +1,18 @@
+import * as Sentry from '@sentry/nextjs';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import { loadDeferredFixture } from '@/lib/actions/loadDeferredFixture';
+import {
+  type DeferredFixtureResult,
+  loadDeferredFixture,
+} from '@/lib/actions/loadDeferredFixture';
 import type { FixtureEntity } from '@/lib/sportmonks';
 import { DeferredFixtureCard } from './DeferredFixtureCard';
 
 vi.mock('@/lib/actions/loadDeferredFixture');
+
+vi.mock('@sentry/nextjs', () => ({
+  captureException: vi.fn(),
+}));
 
 const fixture: FixtureEntity = {
   id: 42,
@@ -70,6 +78,7 @@ class FakeIntersectionObserver {
 beforeEach(() => {
   FakeIntersectionObserver.instances = [];
   vi.stubGlobal('IntersectionObserver', FakeIntersectionObserver);
+  vi.mocked(Sentry.captureException).mockClear();
 });
 
 describe('DeferredFixtureCard', () => {
@@ -93,7 +102,7 @@ describe('DeferredFixtureCard', () => {
   });
 
   it('loads and renders the fixture once it intersects', async () => {
-    vi.mocked(loadDeferredFixture).mockResolvedValue(fixture);
+    vi.mocked(loadDeferredFixture).mockResolvedValue({ ok: true, fixture });
 
     render(<DeferredFixtureCard fixtureId={42} settled />);
     FakeIntersectionObserver.instances[0].trigger(true);
@@ -104,6 +113,27 @@ describe('DeferredFixtureCard', () => {
     await waitFor(() => {
       expect(screen.getByText('Arsenal')).toBeTruthy();
     });
+  });
+
+  it('renders the fallback without Retry when the failure is permanent', async () => {
+    vi.mocked(loadDeferredFixture).mockResolvedValue({
+      ok: false,
+      reason: 'unknown-id',
+    });
+
+    render(<DeferredFixtureCard fixtureId={42} settled />);
+    FakeIntersectionObserver.instances[0].trigger(true);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Fixture unavailable').length).toBeGreaterThan(
+        0,
+      );
+    });
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
+    // Already captured server-side by the action — see the matching assertion
+    // in loadDeferredFixture.spec.ts ("resolves permanently for an id not
+    // present in the static fixture index").
+    expect(Sentry.captureException).not.toHaveBeenCalled();
   });
 
   it('renders the error fallback and lets retry reset it when loading fails with an Error', async () => {
@@ -121,10 +151,19 @@ describe('DeferredFixtureCard', () => {
       );
     });
     expect(console.error).toHaveBeenCalledWith(
-      'DeferredFixtureCard: fetch failed',
+      'DeferredFixtureCard: fetch failed for fixture 42',
+      expect.objectContaining({ message: 'network down' }),
+    );
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    expect(Sentry.captureException).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'network down' }),
+      {
+        extra: { fixtureId: 42, digest: undefined },
+        tags: { surface: 'DeferredFixtureCard' },
+      },
     );
 
-    vi.mocked(loadDeferredFixture).mockResolvedValue(fixture);
+    vi.mocked(loadDeferredFixture).mockResolvedValue({ ok: true, fixture });
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
 
     expect(
@@ -137,6 +176,29 @@ describe('DeferredFixtureCard', () => {
     await waitFor(() => {
       expect(screen.getByText('Arsenal')).toBeTruthy();
     });
+  });
+
+  it('shows the fallback again when the retry fails too', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(loadDeferredFixture).mockRejectedValue(new Error('still down'));
+
+    render(<DeferredFixtureCard fixtureId={42} settled />);
+    FakeIntersectionObserver.instances[0].trigger(true);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Retry' })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+
+    // The cleanup must reset fetchedRef, or the retry sticks on the skeleton.
+    expect(FakeIntersectionObserver.instances).toHaveLength(2);
+    FakeIntersectionObserver.instances[1].trigger(true);
+
+    await waitFor(() => {
+      expect(Sentry.captureException).toHaveBeenCalledTimes(2);
+    });
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeTruthy();
   });
 
   it('wraps a non-Error rejection in an Error', async () => {
@@ -154,12 +216,21 @@ describe('DeferredFixtureCard', () => {
       );
     });
     expect(console.error).toHaveBeenCalledWith(
-      'DeferredFixtureCard: fetch failed',
+      'DeferredFixtureCard: fetch failed for fixture 42',
+      expect.objectContaining({ message: 'a plain string reason' }),
+    );
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    expect(Sentry.captureException).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'a plain string reason' }),
+      {
+        extra: { fixtureId: 42, digest: undefined },
+        tags: { surface: 'DeferredFixtureCard' },
+      },
     );
   });
 
   it('ignores a resolved fetch after the component has unmounted', async () => {
-    let resolveFetch: (value: FixtureEntity) => void = () => {};
+    let resolveFetch: (value: DeferredFixtureResult) => void = () => {};
     vi.mocked(loadDeferredFixture).mockReturnValue(
       new Promise((resolve) => {
         resolveFetch = resolve;
@@ -170,11 +241,10 @@ describe('DeferredFixtureCard', () => {
     FakeIntersectionObserver.instances[0].trigger(true);
 
     unmount();
-    resolveFetch(fixture);
-
-    // No assertion needed beyond "this doesn't throw" — the cleanup's
-    // `cancelled` flag suppresses the post-unmount setState.
+    resolveFetch({ ok: true, fixture });
     await Promise.resolve();
+
+    expect(screen.queryByText('Arsenal')).toBeNull();
   });
 
   it('ignores a rejected fetch after the component has unmounted', async () => {
@@ -191,10 +261,13 @@ describe('DeferredFixtureCard', () => {
 
     unmount();
     rejectFetch(new Error('too late'));
-
-    // No assertion needed beyond "this doesn't throw" — the cleanup's
-    // `cancelled` flag suppresses the post-unmount setState and the
-    // console.error/setError calls.
     await Promise.resolve().catch(() => {});
+    await Promise.resolve();
+
+    // The cleanup's `cancelled` flag suppresses the setState, the log and the
+    // capture: the action already reported this server-side, and there is no
+    // card left for a client event to point at.
+    expect(console.error).not.toHaveBeenCalled();
+    expect(Sentry.captureException).not.toHaveBeenCalled();
   });
 });

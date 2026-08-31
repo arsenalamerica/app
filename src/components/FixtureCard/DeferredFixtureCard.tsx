@@ -1,10 +1,20 @@
 'use client';
 
+import * as Sentry from '@sentry/nextjs';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { loadDeferredFixture } from '@/lib/actions/loadDeferredFixture';
 import type { FixtureEntity } from '@/lib/sportmonks';
 import { FixtureCard, FixtureCardLoading } from './FixtureCard';
 import { FixtureCardError } from './FixtureCardError';
+
+// One state value rather than a flag per outcome, so combinations like "loaded
+// and unavailable" stay unrepresentable and a retry cannot leave a stale flag
+// behind.
+type CardState =
+  | { status: 'loading' }
+  | { status: 'ready'; fixture: FixtureEntity }
+  | { status: 'error'; error: Error }
+  | { status: 'unavailable' };
 
 export function DeferredFixtureCard({
   fixtureId,
@@ -13,8 +23,7 @@ export function DeferredFixtureCard({
   fixtureId: number;
   settled: boolean;
 }) {
-  const [data, setData] = useState<FixtureEntity | null>(null);
-  const [error, setError] = useState<Error | null>(null);
+  const [state, setState] = useState<CardState>({ status: 'loading' });
   const [retryCount, setRetryCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   // Tracks whether the fetch has fired so the observer isn't recreated on
@@ -22,8 +31,7 @@ export function DeferredFixtureCard({
   const fetchedRef = useRef(false);
 
   const resetError = useCallback(() => {
-    setData(null);
-    setError(null);
+    setState({ status: 'loading' });
     setRetryCount((c) => c + 1);
   }, []);
 
@@ -39,15 +47,40 @@ export function DeferredFixtureCard({
         observer.disconnect();
         fetchedRef.current = true;
         loadDeferredFixture(fixtureId, settled)
-          .then((d) => {
-            if (!cancelled) setData(d);
+          .then((result) => {
+            if (cancelled) return;
+            // A resolved `ok: false` is permanent and was already reported
+            // server-side, so it neither retries nor captures again.
+            setState(
+              result.ok
+                ? { status: 'ready', fixture: result.fixture }
+                : { status: 'unavailable' },
+            );
           })
           .catch((e) => {
-            if (!cancelled) {
-              const err = e instanceof Error ? e : new Error(String(e));
-              console.error('DeferredFixtureCard: fetch failed');
-              setError(err);
-            }
+            // Nothing to report once the card is gone: the failure is already
+            // captured server-side by the action's instrumentation, and this
+            // capture exists only to correlate it with a card the user is
+            // looking at.
+            if (cancelled) return;
+            const err = e instanceof Error ? e : new Error(String(e));
+            // The log alone never reached Sentry, which is what made a failed
+            // deferred card invisible next to the boundary-wrapped ones. A
+            // production server action redacts the message and identifies the
+            // real error by its digest, so that digest is the join key from
+            // this client event back to the server one.
+            console.error(
+              `DeferredFixtureCard: fetch failed for fixture ${fixtureId}`,
+              err,
+            );
+            Sentry.captureException(err, {
+              extra: {
+                fixtureId,
+                digest: (e as { digest?: string } | null)?.digest,
+              },
+              tags: { surface: 'DeferredFixtureCard' },
+            });
+            setState({ status: 'error', error: err });
           });
       },
       { rootMargin: '400px 0px' },
@@ -64,14 +97,23 @@ export function DeferredFixtureCard({
   }, [fixtureId, settled, retryCount]);
 
   function content() {
-    if (error) {
-      return <FixtureCardError error={error} resetErrorBoundary={resetError} />;
+    switch (state.status) {
+      case 'unavailable':
+        return <FixtureCardError canRetry={false} />;
+      case 'error':
+        return (
+          <FixtureCardError
+            error={state.error}
+            resetErrorBoundary={resetError}
+          />
+        );
+      case 'ready': {
+        const { id: _id, ...rest } = state.fixture;
+        return <FixtureCard {...rest} />;
+      }
+      default:
+        return <FixtureCardLoading />;
     }
-    if (data) {
-      const { id: _id, ...rest } = data;
-      return <FixtureCard {...rest} />;
-    }
-    return <FixtureCardLoading />;
   }
 
   return (

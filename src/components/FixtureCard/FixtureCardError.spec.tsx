@@ -30,4 +30,13 @@ describe('FixtureCardError', () => {
 
     expect(resetErrorBoundary).toHaveBeenCalledTimes(1);
   });
+
+  it('hides the Retry button when canRetry is false', () => {
+    render(<FixtureCardError canRetry={false} />);
+
+    expect(screen.getAllByText('Fixture unavailable').length).toBeGreaterThan(
+      0,
+    );
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
+  });
 });
