@@ -39,6 +39,12 @@ export default defineConfig({
         'src/lib/utils/index.ts',
         'data/src/index.ts',
         'data/src/branches/*/index.ts',
+        // Type-only module: no runtime statements for v8 to instrument.
+        'data/src/branches/types.ts',
+        // Route error boundaries are pure `export default RouteError`
+        // re-exports; v8 produces an empty statement map for this shape. If an
+        // error.tsx ever gains real logic, remove this and test it.
+        'src/app/**/error.tsx',
       ],
       thresholds: {
         statements: 0,
