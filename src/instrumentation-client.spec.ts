@@ -1,5 +1,9 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import * as Sentry from '@sentry/nextjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { SENTRY_APPLICATION_KEY } from './sentry.applicationKey';
 
 const replayIntegrationMarker = Symbol('replay-integration');
 const thirdPartyFilterMarker = Symbol('third-party-error-filter');
@@ -61,27 +65,52 @@ describe('instrumentation-client', () => {
     await import('./instrumentation-client');
 
     expect(Sentry.thirdPartyErrorFilterIntegration).toHaveBeenCalledWith({
-      filterKeys: ['arsenalamerica-app'],
-      behaviour: 'drop-error-if-contains-third-party-frames',
+      filterKeys: [SENTRY_APPLICATION_KEY],
+      behaviour: 'drop-error-if-exclusively-contains-third-party-frames',
     });
+  });
+
+  // If `filterKeys` and the bundler plugin's `applicationKey` ever drift, every
+  // frame reads as third-party and the integration drops every client error
+  // that has a stack, with no runtime signal. Sharing one constant makes the
+  // drift impossible; this guards against someone re-inlining a literal.
+  it('takes its application key from the constant next.config.ts stamps with', () => {
+    const nextConfigSource = readFileSync(
+      resolve(__dirname, '../next.config.ts'),
+      'utf8',
+    );
+
+    expect(nextConfigSource).toContain(
+      'applicationKey: SENTRY_APPLICATION_KEY,',
+    );
   });
 
   it('ignores the stackless Safari fetch-abort message and app:// script urls', async () => {
     await import('./instrumentation-client');
 
     const options = vi.mocked(Sentry.init).mock.calls[0]?.[0] ?? {};
-    const [loadFailed] = (options.ignoreErrors ?? []) as [RegExp];
-    const [appScheme] = (options.denyUrls ?? []) as [RegExp];
+
+    expect(options.ignoreErrors).toEqual([expect.any(RegExp)]);
+    expect(options.denyUrls).toEqual([expect.any(RegExp)]);
+
+    const [loadFailed] = options.ignoreErrors as [RegExp];
+    const [appScheme] = options.denyUrls as [RegExp];
 
     expect(loadFailed.test('TypeError: Load failed')).toBe(true);
     expect(loadFailed.test('Load failed')).toBe(true);
+    // Anchored at both ends, so an error that merely mentions loading and a
+    // `Load failed` carrying real detail both still report.
     expect(loadFailed.test('Image load failed for /crest.png')).toBe(false);
+    expect(
+      loadFailed.test('TypeError: Load failed while fetching fixtures'),
+    ).toBe(false);
 
     expect(appScheme.test('app:///')).toBe(true);
     expect(appScheme.test('app://navigation_performance_logger_android')).toBe(
       true,
     );
-    expect(appScheme.test('https://arsenalamerica.us/_next/static/x.js')).toBe(
+    // A host that merely starts with `app` is ours, not a webview bridge.
+    expect(appScheme.test('https://app.arsenalamerica.us/_next/x.js')).toBe(
       false,
     );
   });
