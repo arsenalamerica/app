@@ -51,7 +51,6 @@ function standing(overrides: Partial<StandingEntity> = {}): StandingEntity {
       'away-points': 12,
       'overall-points': 30,
     },
-    details: [],
     ...overrides,
   };
 }
