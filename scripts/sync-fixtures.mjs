@@ -21,6 +21,25 @@ export function isEmptyOverwrite(nextFixtures, existing) {
   return trimmed !== '' && trimmed !== '[]';
 }
 
+// How many ids per-id validation may drop in one run before the run is treated
+// as an upstream anomaly rather than a schedule change.
+//
+// `isEmptyOverwrite` only fires at exactly zero, so it cannot see a partial
+// wipe: 40 of 47 ids failing validation leaves 7, which is non-empty, writes
+// cleanly, and — now that the sync PR auto-merges — lands with nobody looking.
+// A genuinely withdrawn fixture is a rare single event; a batch of failures at
+// once means Sportmonks is misbehaving or the token's scope changed. Fixtures
+// really do get withdrawn one at a time, so the cap is not zero.
+const MAX_VALIDATION_DROPS = 2;
+
+// True when validation removed more ids than a real schedule change plausibly
+// would. Unlike an empty upstream response this does not self-correct on the
+// next cron — an id outside the token's subscription fails validation every
+// run — so the caller must fail loudly rather than skip the write and retry.
+export function isExcessiveDrop(fetchedCount, verifiedCount) {
+  return fetchedCount - verifiedCount > MAX_VALIDATION_DROPS;
+}
+
 export function seasonWindow(date = new Date()) {
   const month = date.getMonth();
   const year = date.getFullYear();
@@ -45,6 +64,11 @@ export function isPlaceholderFixture(fixture) {
 // always passes the global `fetch`. A non-ok response throws the same way the
 // pagination fetch does: a transport failure must abort the run, not silently
 // shrink the index.
+//
+// Note the limit of this check: the same data-less 200 means both "deleted" and
+// "outside your subscription", so a real fixture the token cannot read
+// individually is indistinguishable from a dead one. That is what
+// `isExcessiveDrop` is for -- it stops a scope change quietly gutting the index.
 export async function fixtureIdResolves(id, token, fetchImpl) {
   const res = await fetchImpl(`${SPORTMONKS_BASE}/fixtures/${id}`, {
     headers: { Authorization: token },
@@ -116,10 +140,21 @@ async function main() {
     }
 
     const verified = [];
+    const dropped = [];
     for (const entry of byId.values()) {
       if (await fixtureIdResolves(entry.id, token, fetch)) {
         verified.push(entry);
+      } else {
+        dropped.push(entry.id);
       }
+    }
+    if (isExcessiveDrop(byId.size, verified.length)) {
+      throw new Error(
+        `Validation dropped ${dropped.length} of ${byId.size} fixtures ` +
+          `(${dropped.join(', ')}); aborting without write. More than ` +
+          `${MAX_VALIDATION_DROPS} at once means an upstream or subscription ` +
+          'problem, not a schedule change.',
+      );
     }
     const fixtures = verified.sort((a, b) => a.id - b.id);
 

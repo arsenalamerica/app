@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   fixtureIdResolves,
   isEmptyOverwrite,
+  isExcessiveDrop,
   isPlaceholderFixture,
   seasonWindow,
   serialize,
@@ -119,5 +120,30 @@ describe('fixtureIdResolves', () => {
     await expect(fixtureIdResolves(1, 'token', fetchImpl)).rejects.toThrow(
       'Sportmonks API error: 500 Internal Server Error — boom',
     );
+  });
+});
+
+describe('isExcessiveDrop', () => {
+  it('allows a single withdrawn fixture', () => {
+    expect(isExcessiveDrop(47, 46)).toBe(false);
+  });
+
+  it('allows the cap exactly', () => {
+    expect(isExcessiveDrop(47, 45)).toBe(false);
+  });
+
+  it('flags a drop past the cap', () => {
+    expect(isExcessiveDrop(47, 44)).toBe(true);
+  });
+
+  // The gap isEmptyOverwrite cannot see: a partial wipe is non-empty, so it
+  // would write and — with auto-merge — land unreviewed.
+  it('flags a partial wipe that isEmptyOverwrite would let through', () => {
+    expect(isExcessiveDrop(47, 7)).toBe(true);
+    expect(isEmptyOverwrite(new Array(7).fill({}), '[{"id":1}]')).toBe(false);
+  });
+
+  it('is false when nothing was dropped', () => {
+    expect(isExcessiveDrop(47, 47)).toBe(false);
   });
 });

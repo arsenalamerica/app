@@ -83,4 +83,15 @@ jobs:
           # Enabled on both the freshly created and reused-existing-PR paths,
           # via the App token above -- gh pr merge --auto is idempotent, and
           # the repo's required checks still gate the actual merge.
-          gh pr merge --auto --squash "$BRANCH"
+          #
+          # The fallback is not belt-and-braces. enablePullRequestAutoMerge
+          # rejects a PR GitHub currently reports as CLEAN, and the force-push
+          # above lands seconds earlier, so a stale mergeStateStatus makes the
+          # --auto call exit non-zero. Under the default `bash -eo pipefail`
+          # that reddens the step AND leaves auto-merge unset; if the next
+          # run's content is identical the step is skipped entirely and the PR
+          # sits open forever with nothing watching it. A CLEAN PR is one that
+          # has already passed the required checks, so merging it directly is
+          # the same outcome auto-merge would have reached.
+          gh pr merge --auto --squash "$BRANCH" ||
+            gh pr merge --squash "$BRANCH"

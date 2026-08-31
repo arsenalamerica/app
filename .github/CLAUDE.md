@@ -106,9 +106,9 @@ Config: `.github/workflows/sync-fixtures.yml`
 
 Daily cron (06:00 UTC) + manual `workflow_dispatch`. Runs `scripts/sync-fixtures.mjs` to fetch the Arsenal fixture list for the current season from Sportmonks and update `src/lib/sportmonks/fixtures.json` (IDs + kickoffs only). Opens a PR only when the content actually changes. See `docs/adr/005-fixture-index-and-state-aware-caching.md` for why this file is committed and why daily is the right cadence, and `docs/adr/011-fixture-index-sync-hardening.md` for the placeholder filtering, per-id validation, and auto-merge covered below.
 
-Same App-token pattern, same secret requirements, same idempotence check as `sync-seasons.yml`.
+Same App-token pattern and secret requirements as `sync-seasons.yml`. The idempotence check is equivalent but no longer textually identical — this workflow captures the existing PR number, `sync-seasons.yml` still pipes through `grep -q .`.
 
-**Auto-merges on green CI, via `gh pr merge --auto --squash`, using the App token.** As with `dependabot-auto-merge.yml` and `pr-conflict-rebase.yml` above, this must never become `GITHUB_TOKEN` — the same "GitHub raises no workflow runs from `GITHUB_TOKEN`-triggered events" failure applies, and a `GITHUB_TOKEN`-merged commit on `main` would silently break the `pr-conflict-rebase.yml` chain the same way. The script now filters `placeholder: true` fixtures and validates every surviving id against Sportmonks before writing, which is what makes merging without a human review acceptable (ADR-011).
+**Auto-merges on green CI, via `gh pr merge --auto --squash`, using the App token.** As with `dependabot-auto-merge.yml` and `pr-conflict-rebase.yml` above, this must never become `GITHUB_TOKEN` — the same "GitHub raises no workflow runs from `GITHUB_TOKEN`-triggered events" failure applies, and a `GITHUB_TOKEN`-merged commit on `main` would silently break the `pr-conflict-rebase.yml` chain the same way. What makes merging without a human review acceptable is that the script filters placeholder ids, validates each surviving id, and aborts on an excessive drop — see `docs/adr/011-fixture-index-sync-hardening.md`.
 
 Does **not** use the composite setup action — the script only needs Node.js, not `yarn install`.
 
@@ -119,7 +119,7 @@ Required secrets (in addition to those listed in Vercel Deployment):
 - `APP_ID` — GitHub App ID for automated PR creation
 - `APP_PK` — GitHub App private key
 
-The `gunnersaurus-bot` GitHub App token is used instead of `GITHUB_TOKEN` so the resulting PR triggers CI workflows. See `actions/create-github-app-token@v2`. Commits are attributed to `gunnersaurus-bot[bot]`.
+The `gunnersaurus-bot` GitHub App token is used instead of `GITHUB_TOKEN` so the resulting PR triggers CI workflows. See `actions/create-github-app-token` (pinned to `@v3` in all four workflows). Commits are attributed to `gunnersaurus-bot[bot]`.
 
 ## E2E Coverage Policy
 
