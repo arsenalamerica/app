@@ -61,7 +61,7 @@ $margin: 8vw;
     img {
       width: 25vw;
       height: auto;
-      fill: #fff;
+      fill: currentColor;
     }
   }
 
@@ -93,5 +93,11 @@ $margin: 8vw;
 
   .Background {
     display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  &.Away {
+    color: #edd210;
   }
 }

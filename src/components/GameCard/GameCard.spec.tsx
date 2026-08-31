@@ -121,8 +121,8 @@ describe('GameCard', () => {
       />,
     );
 
-    const backgrounds = Array.from(container.querySelectorAll('svg')).filter(
-      (svg) => svg.getAttribute('viewBox') === '0 0 288 288',
+    const backgrounds = Array.from(container.querySelectorAll('img')).filter(
+      (img) => img.getAttribute('src')?.includes('away2026'),
     );
     expect(backgrounds).toHaveLength(1);
   });
