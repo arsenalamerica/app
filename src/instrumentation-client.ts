@@ -13,7 +13,7 @@ Sentry.init({
   // instrumentation scripts into every page they render. When those throw, the
   // event arrives here looking like ours and the "Create GH Issue" alert rule
   // files a bug nobody can action. Two filters cover the five issues #255
-  // catalogues; see `docs/adr/012-sentry-third-party-error-filtering.md` for
+  // catalogues; see `docs/adr/013-sentry-third-party-error-filtering.md` for
   // why the provenance-based `thirdPartyErrorFilterIntegration` was tried and
   // rejected, so this does not get re-litigated.
   //
