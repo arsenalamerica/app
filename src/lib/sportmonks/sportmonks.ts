@@ -107,7 +107,12 @@ export async function sportmonksFetch<T>(
 
   const maxAttempts = RETRY_DELAYS_MS.length + 1;
 
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+  // No upper bound on `attempt` in the loop condition: every path inside
+  // either `return`s, `throw`s, or `continue`s toward another attempt, so the
+  // loop never completes normally. That lets the compiler see the function
+  // always returns or throws, with no unreachable fallback needed after it —
+  // an `attempt < maxAttempts` condition would leave one.
+  for (let attempt = 0; ; attempt++) {
     const isLastAttempt = attempt === maxAttempts - 1;
 
     let res: Response;
@@ -120,7 +125,16 @@ export async function sportmonksFetch<T>(
       // rather than resolving with a status). Treated the same as a 5xx:
       // retryable, since it is as likely transient.
       if (isLastAttempt) {
-        throw err;
+        // Re-thrown with path context (unlike the bare `err`) so a network
+        // failure is attributable to an endpoint in Sentry, same as the
+        // structured errors below — a bare `TypeError: fetch failed` groups
+        // every endpoint's exhausted-retry failures together.
+        throw new Error(
+          `Sportmonks network error after ${maxAttempts} attempts: ${path}${
+            err instanceof Error ? ` — ${err.message}` : ''
+          }`,
+          { cause: err },
+        );
       }
       await wait(RETRY_DELAYS_MS[attempt]);
       continue;
@@ -169,8 +183,4 @@ export async function sportmonksFetch<T>(
 
     return body;
   }
-
-  // Unreachable: the loop above always either returns or throws on its last
-  // attempt. Satisfies the compiler, which cannot see that.
-  throw new Error(`Sportmonks: exhausted retries for ${path}`);
 }

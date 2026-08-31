@@ -294,10 +294,14 @@ describe('sportmonksFetch retries', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it('throws the network error once retries are exhausted', async () => {
+  it('throws a path-attributed error once network retries are exhausted', async () => {
+    // Regression risk this pins: a bare rethrow of `err` here would carry no
+    // `path`, so every endpoint's exhausted-retry network failures would
+    // group under the same generic "TypeError: fetch failed" in Sentry.
+    const networkError = new TypeError('fetch failed');
     const fetchMock = vi
       .spyOn(globalThis, 'fetch')
-      .mockRejectedValue(new TypeError('fetch failed'));
+      .mockRejectedValue(networkError);
 
     const settled = sportmonksFetch('/foo').then(
       () => ({ rejected: false as const }),
@@ -310,8 +314,11 @@ describe('sportmonksFetch retries', () => {
     if (!result.rejected) {
       throw new Error('expected sportmonksFetch to reject');
     }
-    expect(result.error).toBeInstanceOf(TypeError);
-    expect((result.error as Error).message).toBe('fetch failed');
+    const error = result.error as Error;
+    expect(error.message).toBe(
+      'Sportmonks network error after 3 attempts: /foo — fetch failed',
+    );
+    expect(error.cause).toBe(networkError);
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 });

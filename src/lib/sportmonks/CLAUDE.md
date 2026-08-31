@@ -24,6 +24,11 @@ surface. Neither restates the other.
   `StandingEntity`, and it throws rather than returning a row with a missing `participant`, a
   `details[].type` gap, or an incomplete `stats` map, instead of letting an unguarded read surface
   as a raw `TypeError` downstream. See issue #345.
+- **A non-OK response throws `SportmonksServerError`** (carries `status`, follows the
+  `SportmonksNotFoundError` pattern including `this.name` for Sentry grouping), preserving the
+  `Sportmonks <status>[ <detail>]: <path>` message format. A 5xx or a network error (`fetch`
+  itself rejecting) is retried up to twice with backoff (~250ms, then ~750ms) before either is
+  raised; a 4xx is never retried. See Sentry APP-7 / issue #129.
 - **A new endpoint wrapper must be re-exported from `index.ts`**, and its endpoint type exported
   too. `src/lib/data/` imports from the `@/lib/sportmonks` barrel, so a wrapper that is not
   re-exported is unreachable from the data layer. (`TvStationEndpoint` in `tv-station.ts` is
