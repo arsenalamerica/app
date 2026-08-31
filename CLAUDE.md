@@ -63,6 +63,7 @@ Common types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `ci`
 
 - Keep messages brief and easy to parse — avoid lengthy descriptions
 - Focus on specific, scannable details that help humans quickly identify what a commit contains
+- Resolve Sentry issues with a `Fixes APP-XXX` trailer on the **branch** commits, not the PR body — see `.claude/rules/_sentry-issue-resolution.md`
 
 **Pull request requirements:**
 
