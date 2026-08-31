@@ -3,7 +3,7 @@
 Standalone Node.js scripts for scheduled data syncing. Run via `yarn sync:*` or from GitHub Actions cron workflows.
 
 For the Sportmonks routes, includes, and filters these scripts call, see the `sportmonks` skill
-(`.agents/skills/sportmonks/SKILL.md`).
+(`.claude/skills/sportmonks/SKILL.md`).
 
 Both scripts call `fetch` against Sportmonks directly rather than going through
 `src/lib/sportmonks/sportmonks.ts`. That is deliberate — they are standalone Node ESM and read

@@ -2,7 +2,7 @@
 
 Thin typed wrappers around the Sportmonks Football API v3. For endpoint routes, include and
 filter syntax, sorting, pagination, and known IDs, use the **`sportmonks` skill**
-(`.agents/skills/sportmonks/SKILL.md`). This file holds the repo rules; the skill holds the API
+(`.claude/skills/sportmonks/SKILL.md`). This file holds the repo rules; the skill holds the API
 surface. Neither restates the other.
 
 ## Rules
