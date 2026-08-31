@@ -35,6 +35,13 @@ describe('[domain]/layout', () => {
   });
 
   describe('Layout', () => {
+    it('returns the layout tree for a known domain', async () => {
+      const { default: Layout } = await import('./layout');
+      const element = await Layout(makeProps('tacomagooners.com'));
+      expect(element).toBeTruthy();
+      expect(notFound).not.toHaveBeenCalled();
+    });
+
     it('calls notFound() for an unknown domain', async () => {
       const { default: Layout } = await import('./layout');
       await expect(Layout(makeProps('unknown.example'))).rejects.toThrow(
