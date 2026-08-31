@@ -80,7 +80,7 @@ export async function getNextFixture(): Promise<FixtureEntity[]> {
     ].join(';'),
     // All active or upcoming fixture states: https://docs.sportmonks.com/football/tutorials-and-guides/tutorials/includes/states#state-interactions
     filters: 'fixtureStates:1,2,3,22,4,6,21,7,25,9',
-    sort_by: 'starting_at',
+    sortBy: 'starting_at',
     order: 'asc',
     per_page: '1',
   });

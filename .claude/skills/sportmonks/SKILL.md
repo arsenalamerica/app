@@ -217,8 +217,8 @@ The full state ID list is not in the API reference — use `GET /states`, or
 
 - **`sortBy`** is the parameter name — camelCase. `sort_by` is **not** recognised and is silently
   ignored, leaving default ordering in place. Supported fields today: `starting_at`, `name`.
-  **Known deviation:** `src/lib/data/fixtures.ts` still passes `sort_by`. Tracked in
-  [#349](https://github.com/arsenalamerica/app/issues/349) — do not "fix" it silently as a drive-by.
+  `src/lib/data/fixtures.ts` was fixed to pass `sortBy` in
+  [#349](https://github.com/arsenalamerica/app/issues/349) — no known deviation remains.
 - `order` is `asc` or `desc`.
 - `per_page` defaults to `25`, maximum `50`.
 - Offset pagination is capped: a request where `(page - 1) × per_page` exceeds `20,000` is
@@ -319,5 +319,5 @@ These are the ones that have actually caused incidents here. See
 - **Rate limit state rides in every response** under `rate_limit` (`remaining`,
   `resets_in_seconds`, `requested_entity`). It is per requested entity, not global.
 - **An unrecognised query parameter is ignored, not rejected.** There is no error to catch — a
-  typo'd parameter silently produces default behavior. This is how the `sort_by` bug (#349)
-  survived. Check spelling against this reference rather than trusting a 200.
+  typo'd parameter silently produces default behavior. This is how the `sort_by` bug (fixed in
+  #349) survived undetected. Check spelling against this reference rather than trusting a 200.

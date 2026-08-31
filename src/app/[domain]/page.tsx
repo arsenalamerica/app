@@ -1,7 +1,13 @@
 import { Heading } from '@ariakit/react';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import { Card, FixtureCard, Main, NextGame } from '@/components';
+import {
+  Card,
+  FixtureCard,
+  FixtureCardBoundary,
+  Main,
+  NextGame,
+} from '@/components';
 import { branchData, branchLogo } from '@/data';
 import { getNextFixture } from '@/lib/data/fixtures';
 
@@ -38,9 +44,14 @@ export default async function Home(props: {
     <Main>
       {Logo && <Logo title={branch.name} role='img' />}
       <Heading>Next Match</Heading>
-      <Suspense>
-        <FixtureCard {...nextFixtureProps} />
-      </Suspense>
+      {/* FixtureCard throws on a malformed fixture. The boundary keeps that to
+          the card instead of taking out the whole home page. Boundary outermost,
+          matching /fixtures. */}
+      <FixtureCardBoundary>
+        <Suspense>
+          <FixtureCard {...nextFixtureProps} />
+        </Suspense>
+      </FixtureCardBoundary>
       <NextGame fixture={nextFixture} branch={branch} />
     </Main>
   );

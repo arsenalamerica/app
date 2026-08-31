@@ -53,6 +53,29 @@ describe('getNextFixture', () => {
     expect(next.id).toBe(1);
   });
 
+  it('requests the next fixture sorted via camelCase sortBy, not sort_by', async () => {
+    // Regression: issue #349. Sportmonks v3 only recognises `sortBy`
+    // (camelCase) — `sort_by` is silently ignored, leaving default ordering
+    // in place, so `getNextFixture` could return the wrong fixture as
+    // "next". The API itself does the sorting (there is no client-side sort
+    // here to test against several out-of-order candidates), so what this
+    // pins is the request shape: `sortBy` present with the right value, and
+    // `sort_by` gone for good.
+    vi.mocked(smFixtures).mockResolvedValue({ data: [fixture()] } as never);
+
+    await getNextFixture();
+
+    expect(smFixtures).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sortBy: 'starting_at',
+        order: 'asc',
+        per_page: '1',
+      }),
+    );
+    const [callArgs] = vi.mocked(smFixtures).mock.calls[0];
+    expect(callArgs).not.toHaveProperty('sort_by');
+  });
+
   it('drops tv stations whose lookup fails rather than throwing', async () => {
     vi.mocked(smFixtures).mockResolvedValue({
       data: [

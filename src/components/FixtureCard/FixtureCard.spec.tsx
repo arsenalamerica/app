@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 
 import type { FixtureEntity } from '@/lib/sportmonks';
 import { FixtureCard, FixtureCardLoading } from './FixtureCard';
+import styles from './FixtureCard.module.scss';
 
 type FixtureCardProps = Omit<FixtureEntity, 'id'>;
 
@@ -47,14 +48,21 @@ const baseFixture = (
   ...overrides,
 });
 
-describe('FixtureCard', () => {
-  it('renders a placeholder when there are no participants', () => {
-    const { container } = render(
-      <FixtureCard {...baseFixture({ participants: undefined })} />,
-    );
+function scoreText(container: HTMLElement): string {
+  return container.querySelector(`.${styles.Score}`)?.textContent ?? '';
+}
 
-    expect(screen.getByText('No upcoming fixtures...')).toBeTruthy();
-    expect(container.querySelector('h1, h2, [role="heading"]')).toBeTruthy();
+describe('FixtureCard', () => {
+  it('throws when the participants include is absent', () => {
+    expect(() =>
+      render(<FixtureCard {...baseFixture({ participants: undefined })} />),
+    ).toThrow('Fixture "Arsenal vs Spurs" is missing its participants');
+  });
+
+  it('throws when the participants include is empty', () => {
+    expect(() =>
+      render(<FixtureCard {...baseFixture({ participants: [] })} />),
+    ).toThrow('Fixture "Arsenal vs Spurs" is missing its participants');
   });
 
   it('renders only the home team when the visitor is absent', () => {
@@ -192,12 +200,78 @@ describe('FixtureCard', () => {
     expect(screen.getByText('2-1')).toBeTruthy();
   });
 
-  it('falls back to an empty score when scores is undefined', () => {
-    const fixture = baseFixture({ scores: undefined });
+  it('renders a goalless full-time fixture as 0-0', () => {
+    const fixture = baseFixture({
+      scores: [
+        { description: 'CURRENT', score: { participant: 'home', goals: 0 } },
+        { description: 'CURRENT', score: { participant: 'away', goals: 0 } },
+      ],
+    });
 
-    render(<FixtureCard {...fixture} />);
+    const { container } = render(<FixtureCard {...fixture} />);
 
-    expect(screen.getByText('undefined-undefined')).toBeTruthy();
+    // Also pins the scoreText selector the empty-score cases below rely on.
+    expect(scoreText(container)).toBe('0-0');
+  });
+
+  it('throws when a full-time fixture has no CURRENT scores', () => {
+    expect(() =>
+      render(<FixtureCard {...baseFixture({ scores: undefined })} />),
+    ).toThrow(
+      'Fixture "Arsenal vs Spurs" (state FT) is missing its CURRENT scores',
+    );
+  });
+
+  it('throws when a full-time fixture has only one side of the CURRENT score', () => {
+    const fixture = baseFixture({
+      scores: [
+        { description: 'CURRENT', score: { participant: 'home', goals: 2 } },
+      ],
+    });
+
+    expect(() => render(<FixtureCard {...fixture} />)).toThrow(
+      'Fixture "Arsenal vs Spurs" (state FT) is missing its CURRENT scores',
+    );
+  });
+
+  it.each([
+    ['INPLAY_1ST_HALF', 'in play before its first CURRENT row'],
+    ['INPLAY_ET', 'in extra time, outside the regular-time active states'],
+    ['POSTPONED', 'postponed, so never played'],
+    ['CANCELLED', 'cancelled, so never played'],
+  ])('renders an empty score when a fixture is %s', (state) => {
+    const fixture = baseFixture({
+      scores: [],
+      state: {
+        id: 99,
+        state,
+        name: state,
+        short_name: state,
+        developer_name: state,
+      },
+    });
+
+    const { container } = render(<FixtureCard {...fixture} />);
+
+    expect(scoreText(container)).toBe('');
+  });
+
+  it('renders the kickoff time, not a score, for a future fixture', () => {
+    const fixture = baseFixture({
+      scores: [],
+      state: {
+        id: 1,
+        state: 'NS',
+        name: 'Not Started',
+        short_name: 'NS',
+        developer_name: 'NS',
+      },
+    });
+
+    const { container } = render(<FixtureCard {...fixture} />);
+
+    expect(container.querySelectorAll('time').length).toBe(2);
+    expect(container.querySelector(`.${styles.Score} time`)).toBeTruthy();
   });
 
   it('renders the venue name when present', () => {
