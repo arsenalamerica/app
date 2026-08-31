@@ -10,6 +10,8 @@ export default async function Home(props: {
 }) {
   const params = await props.params;
   const branch = branchData[params.domain];
+  // Layout also guards unknown domains, but layout and page render
+  // concurrently in the App Router, so this page needs its own guard too.
   if (!branch) notFound();
   const Logo = branchLogo[branch.domain];
 

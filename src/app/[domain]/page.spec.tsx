@@ -103,8 +103,8 @@ describe('[domain]/page (Home)', () => {
   });
 
   it('calls notFound() for an unknown domain', async () => {
-    vi.mocked(getNextFixture).mockResolvedValue([]);
-
+    // notFound() throws before getNextFixture() is ever called, so no
+    // fixture mock is needed here.
     await expect(Home(makeProps('unknown.example'))).rejects.toThrow(
       'NEXT_NOT_FOUND',
     );

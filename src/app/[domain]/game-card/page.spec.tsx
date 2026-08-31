@@ -63,8 +63,8 @@ describe('game-card/page', () => {
   });
 
   it('calls notFound() for an unknown domain', async () => {
-    vi.mocked(getNextFixture).mockResolvedValue([{ id: 42 }] as never);
-
+    // notFound() throws before getNextFixture() is ever called, so no
+    // fixture mock is needed here.
     await expect(GameCardPage(makeProps('unknown.example'))).rejects.toThrow(
       'NEXT_NOT_FOUND',
     );
