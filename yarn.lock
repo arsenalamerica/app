@@ -3703,6 +3703,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@vercel/build-utils@npm:^14.7.0":
+  version: 14.7.0
+  resolution: "@vercel/build-utils@npm:14.7.0"
+  dependencies:
+    cjs-module-lexer: "npm:1.2.3"
+    es-module-lexer: "npm:1.5.0"
+  checksum: 10c0/80cc7dbd22f3b4ebc810b22732fa32ad49f8273e181ea15fde731b37cdb5ac3f8f9342077e7ccd7fb746ace65660b705d431b2dc04b61e169000c201bdb74420
+  languageName: node
+  linkType: hard
+
 "@vercel/cervel@npm:0.1.46":
   version: 0.1.46
   resolution: "@vercel/cervel@npm:0.1.46"
