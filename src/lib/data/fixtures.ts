@@ -89,8 +89,12 @@ export async function getNextFixture(): Promise<FixtureEntity[]> {
     return [];
   }
 
+  // The tvStations include comes back absent when Sportmonks lists no
+  // broadcaster. Callers await this at the top of a route body (home and
+  // game-card), not inside a per-card boundary, so a throw here takes out the
+  // whole segment via its error.tsx rather than degrading one card.
   const settled = await Promise.allSettled(
-    data[0].tvstations
+    (data[0].tvstations ?? [])
       .filter(({ country_id }) => country_id === USA_COUNTRY_ID)
       .map(async (tvstation) => {
         const { data: stationData } = await smTvStation(tvstation.tvstation_id);

@@ -54,8 +54,14 @@ export type FixtureEntity = {
     score: { goals: number; participant: string };
     description: string;
   }[];
-  tvstations: { tvstation_id: number; country_id: number }[];
-  venue: EntityBase;
+  // Absent unless the `tvStations` include was requested, which only
+  // getNextFixture does — FIXTURE_INCLUDES omits it, so every fixture from
+  // getSettledFixtureById / getUnsettledFixtureById has this undefined.
+  tvstations?: { tvstation_id: number; country_id: number }[];
+  // Present but `null` when Sportmonks has no venue assigned. Verified across
+  // the current season: the key is always there, and fixtures 19872591 and
+  // 19872640 (Champions League, pre-draw) return null. Nullable, not optional.
+  venue: EntityBase | null;
   has_odds?: boolean;
   has_premium_odds?: boolean;
   placeholder?: boolean;

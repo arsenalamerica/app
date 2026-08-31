@@ -71,17 +71,31 @@ describe('getNextFixture', () => {
     const [next] = await getNextFixture();
 
     expect(next.tvstations).toHaveLength(1);
-    expect(next.tvstations[0].tvstation_id).toBe(10);
+    expect(next.tvstations?.[0].tvstation_id).toBe(10);
   });
 
-  it('applies shite even when a fixture has no venue', async () => {
+  it('handles a fixture whose tvStations include is absent', async () => {
+    // Regression for issue #337.
     vi.mocked(smFixtures).mockResolvedValue({
-      data: [fixture({ venue: undefined })],
+      data: [fixture({ tvstations: undefined })],
     } as never);
 
     const [next] = await getNextFixture();
 
-    expect(next.venue).toBeUndefined();
+    expect(next.tvstations).toEqual([]);
+    expect(smTvStation).not.toHaveBeenCalled();
+  });
+
+  it('applies shite even when a fixture has no venue', async () => {
+    // Sportmonks sends `venue: null`, not an absent key, for a fixture with no
+    // assigned venue — verified against 19872591 and 19872640.
+    vi.mocked(smFixtures).mockResolvedValue({
+      data: [fixture({ venue: null })],
+    } as never);
+
+    const [next] = await getNextFixture();
+
+    expect(next.venue).toBeNull();
   });
 
   it('handles a fixture with no participants', async () => {
@@ -110,7 +124,7 @@ describe('getSettledFixtureById', () => {
     expect(smFixture).toHaveBeenCalledWith(7, { include: expect.any(String) });
     expect(result.id).toBe(7);
     expect(result.participants[0].name).toBe('Totnum Shitspur');
-    expect(result.venue.name).toBe('Emirates Stadium');
+    expect(result.venue?.name).toBe('Emirates Stadium');
   });
 });
 
