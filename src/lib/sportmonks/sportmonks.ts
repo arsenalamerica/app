@@ -28,15 +28,22 @@ export const ARSENAL_TEAM_ID = 19;
 const SPORTMONKS_BASE = 'https://api.sportmonks.com/v3/football';
 
 /**
- * A 200 response that carries no `data` at all. Sportmonks does not 404 a
- * missing or unlicensed single entity — it answers 200 with a body holding only
- * a generic `message`, so this is the only signal that the entity is gone.
+ * A 200 response with no usable `data`: either a body that is not an object, or
+ * one that omits `data` or sets it nullish. Sportmonks does not 404 a missing or
+ * unlicensed single entity — observed on issue #337 for fixture 19873650, it
+ * answers 200 with a body holding only a generic `message`, so this is the only
+ * signal that the entity is gone.
  *
- * Named so it groups in Sentry as its own issue rather than surfacing as a
- * downstream TypeError several frames from the actual cause (issue #337).
+ * Throwing is what stops the failure surfacing as a TypeError several frames
+ * downstream. The distinct class name additionally keeps it grouped on its own
+ * in Sentry; `this.name` is what carries that through a minified build, so it is
+ * asserted in the spec rather than left to look redundant.
  */
 export class SportmonksNotFoundError extends Error {
-  constructor(path: string, detail?: string) {
+  constructor(
+    readonly path: string,
+    readonly detail?: string,
+  ) {
     super(
       `Sportmonks returned no data: ${path}${detail ? ` — ${detail}` : ''}`,
     );
@@ -85,13 +92,25 @@ export async function sportmonksFetch<T>(
   }
   const body = (await res.json()) as T;
 
-  // Key on the `data` key being *present*, never on it being truthy and never
-  // on `message`. A collection endpoint with no matches returns `data: []`
-  // alongside the same generic message — a legitimate empty result the callers
-  // handle (see the off-season path in getNextFixture). A missing single entity
-  // omits `data` entirely, and destructuring it downstream yields undefined and
-  // crashes several frames later.
-  if (typeof body !== 'object' || body === null || !('data' in body)) {
+  // Reject on `data` being absent or nullish, never on `message` and never on
+  // plain truthiness.
+  //
+  // Not `message`: a collection endpoint with no matches returns `data: []`
+  // alongside the very same generic message, and that is a legitimate empty
+  // result callers handle — e.g. no upcoming fixture between seasons.
+  //
+  // Not truthiness: `data: []` is truthy, so the two predicates agree on the
+  // shapes seen so far, but truthiness encodes an assumption about what may sit
+  // in `data` rather than about whether the entity exists. Sportmonks does use
+  // `null` for an absent sub-object (a fixture with no assigned venue), so a
+  // nullish `data` is worth rejecting explicitly rather than letting it
+  // destructure to undefined and crash several frames later.
+  if (
+    typeof body !== 'object' ||
+    body === null ||
+    !('data' in body) ||
+    (body as { data: unknown }).data == null
+  ) {
     const detail = (body as { message?: string } | null)?.message;
     throw new SportmonksNotFoundError(path, detail);
   }

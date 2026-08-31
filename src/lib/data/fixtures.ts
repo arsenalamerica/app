@@ -90,9 +90,9 @@ export async function getNextFixture(): Promise<FixtureEntity[]> {
   }
 
   // The tvStations include comes back absent when Sportmonks lists no
-  // broadcaster for the fixture. This feeds the home page, whose Suspense
-  // boundary has no per-card ErrorBoundary, so a throw here blanks the whole
-  // route segment rather than one card.
+  // broadcaster. Callers await this at the top of a route body (home and
+  // game-card), not inside a per-card boundary, so a throw here takes out the
+  // whole segment via its error.tsx rather than degrading one card.
   const settled = await Promise.allSettled(
     (data[0].tvstations ?? [])
       .filter(({ country_id }) => country_id === USA_COUNTRY_ID)

@@ -52,8 +52,8 @@ describe('sportmonksFetch', () => {
   });
 
   // Sportmonks answers a missing or unlicensed single entity with 200 and no
-  // `data` key. Before issue #337 that body was returned as a success and blew
-  // up several frames downstream as a TypeError.
+  // `data` key. Previously that body was returned as a success and blew up
+  // several frames downstream as a TypeError.
   it('throws when a 200 response carries no data key', async () => {
     mockToken.value = 'test-token';
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
@@ -67,11 +67,38 @@ describe('sportmonksFetch', () => {
       }),
     } as Response);
 
-    await expect(sportmonksFetch('/fixtures/19873650')).rejects.toThrow(
-      SportmonksNotFoundError,
-    );
-    await expect(sportmonksFetch('/fixtures/19873650')).rejects.toThrow(
+    let caught: unknown;
+    try {
+      await sportmonksFetch('/fixtures/19873650');
+    } catch (e) {
+      caught = e;
+    }
+
+    expect(caught).toBeInstanceOf(SportmonksNotFoundError);
+    const error = caught as SportmonksNotFoundError;
+    // `name` is what carries the Sentry grouping through a minified build, so
+    // it is asserted rather than left looking like a redundant assignment.
+    expect(error.name).toBe('SportmonksNotFoundError');
+    expect(error.message).toBe(
       'Sportmonks returned no data: /fixtures/19873650 — No result(s) found matching your request.',
+    );
+    expect(error.path).toBe('/fixtures/19873650');
+    expect(error.detail).toBe('No result(s) found matching your request.');
+  });
+
+  // `data: []` is truthy while `data: null` is not, so these two cases together
+  // are what pin the guard to key-presence-plus-nullish rather than to plain
+  // truthiness. Sportmonks does use null for an absent sub-object.
+  it('throws when a 200 response has a null data value', async () => {
+    mockToken.value = 'test-token';
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: null, message: 'Nothing here' }),
+    } as Response);
+
+    await expect(sportmonksFetch('/fixtures/1')).rejects.toThrow(
+      SportmonksNotFoundError,
     );
   });
 

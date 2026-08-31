@@ -75,8 +75,7 @@ describe('getNextFixture', () => {
   });
 
   it('handles a fixture whose tvStations include is absent', async () => {
-    // Regression for issue #337: this fed the home page, whose Suspense
-    // boundary has no per-card ErrorBoundary, so the throw blanked the segment.
+    // Regression for issue #337.
     vi.mocked(smFixtures).mockResolvedValue({
       data: [fixture({ tvstations: undefined })],
     } as never);
@@ -88,13 +87,15 @@ describe('getNextFixture', () => {
   });
 
   it('applies shite even when a fixture has no venue', async () => {
+    // Sportmonks sends `venue: null`, not an absent key, for a fixture with no
+    // assigned venue — verified against 19872591 and 19872640.
     vi.mocked(smFixtures).mockResolvedValue({
-      data: [fixture({ venue: undefined })],
+      data: [fixture({ venue: null })],
     } as never);
 
     const [next] = await getNextFixture();
 
-    expect(next.venue).toBeUndefined();
+    expect(next.venue).toBeNull();
   });
 
   it('handles a fixture with no participants', async () => {
