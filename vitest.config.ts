@@ -46,11 +46,12 @@ export default defineConfig({
         // error.tsx ever gains real logic, remove this and test it.
         'src/app/**/error.tsx',
       ],
+      // Matches the 95% floor the bje enterprise Code Coverage ruleset enforces.
       thresholds: {
-        statements: 0,
-        branches: 0,
-        functions: 0,
-        lines: 0,
+        statements: 95,
+        branches: 95,
+        functions: 95,
+        lines: 95,
       },
     },
   },

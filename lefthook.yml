@@ -19,7 +19,9 @@ pre-commit:
       run: yarn knip
     test-related:
       glob: "*.{js,jsx,ts,tsx}"
-      run: yarn vitest related --run {staged_files}
+      # Coverage off: a related-only run can never meet the global 95%
+      # thresholds. Full-suite enforcement happens in pre-push and CI.
+      run: yarn vitest related --run --coverage.enabled=false {staged_files}
 
 pre-push:
   commands:
