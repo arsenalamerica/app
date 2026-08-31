@@ -25,7 +25,27 @@ export default defineConfig({
     coverage: {
       enabled: true,
       provider: 'v8',
-      exclude: ['node_modules/**', 'e2e/**'],
+      reporter: ['text', 'cobertura'],
+      include: ['src/**/*.{ts,tsx}', 'data/src/**/*.{ts,tsx}'],
+      // Excluded beyond non-code assets: pure re-export barrels only.
+      // data/src/branches/index.ts stays in scope; it builds the branch maps.
+      exclude: [
+        'node_modules/**',
+        'e2e/**',
+        '**/*.module.scss',
+        '**/*.json',
+        'src/components/index.ts',
+        'src/lib/sportmonks/index.ts',
+        'src/lib/utils/index.ts',
+        'data/src/index.ts',
+        'data/src/branches/*/index.ts',
+        // Type-only module: no runtime statements for v8 to instrument.
+        'data/src/branches/types.ts',
+        // Route error boundaries are pure `export default RouteError`
+        // re-exports; v8 produces an empty statement map for this shape. If an
+        // error.tsx ever gains real logic, remove this and test it.
+        'src/app/**/error.tsx',
+      ],
       thresholds: {
         statements: 0,
         branches: 0,
