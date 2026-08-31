@@ -104,9 +104,11 @@ Monthly cron (1st of the month at noon UTC) + manual `workflow_dispatch`. Runs `
 
 Config: `.github/workflows/sync-fixtures.yml`
 
-Daily cron (06:00 UTC) + manual `workflow_dispatch`. Runs `scripts/sync-fixtures.mjs` to fetch the Arsenal fixture list for the current season from Sportmonks and update `src/lib/sportmonks/fixtures.json` (IDs + kickoffs only). Opens a PR only when the content actually changes. See `docs/adr/005-fixture-index-and-state-aware-caching.md` for why this file is committed and why daily is the right cadence.
+Daily cron (06:00 UTC) + manual `workflow_dispatch`. Runs `scripts/sync-fixtures.mjs` to fetch the Arsenal fixture list for the current season from Sportmonks and update `src/lib/sportmonks/fixtures.json` (IDs + kickoffs only). Opens a PR only when the content actually changes. See `docs/adr/005-fixture-index-and-state-aware-caching.md` for why this file is committed and why daily is the right cadence, and `docs/adr/011-fixture-index-sync-hardening.md` for the placeholder filtering, per-id validation, and auto-merge covered below.
 
 Same App-token pattern, same secret requirements, same idempotence check as `sync-seasons.yml`.
+
+**Auto-merges on green CI, via `gh pr merge --auto --squash`, using the App token.** As with `dependabot-auto-merge.yml` and `pr-conflict-rebase.yml` above, this must never become `GITHUB_TOKEN` — the same "GitHub raises no workflow runs from `GITHUB_TOKEN`-triggered events" failure applies, and a `GITHUB_TOKEN`-merged commit on `main` would silently break the `pr-conflict-rebase.yml` chain the same way. The script now filters `placeholder: true` fixtures and validates every surviving id against Sportmonks before writing, which is what makes merging without a human review acceptable (ADR-011).
 
 Does **not** use the composite setup action — the script only needs Node.js, not `yarn install`.
 
