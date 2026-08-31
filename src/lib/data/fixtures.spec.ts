@@ -1,8 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { smFixtures, smTvStation } from '@/lib/sportmonks';
+import { smFixture, smFixtures, smTvStation } from '@/lib/sportmonks';
 
-import { getNextFixture } from './fixtures';
+import {
+  getNextFixture,
+  getSettledFixtureById,
+  getUnsettledFixtureById,
+} from './fixtures';
 
 // cacheLife/cacheTag are no-ops here; they need the Next `cacheComponents`
 // runtime, which vitest does not provide.
@@ -13,6 +17,7 @@ vi.mock('next/cache', () => ({
 
 vi.mock('@/lib/sportmonks', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/sportmonks')>()),
+  smFixture: vi.fn(),
   smFixtures: vi.fn(),
   smTvStation: vi.fn(),
 }));
@@ -67,5 +72,61 @@ describe('getNextFixture', () => {
 
     expect(next.tvstations).toHaveLength(1);
     expect(next.tvstations[0].tvstation_id).toBe(10);
+  });
+
+  it('applies shite even when a fixture has no venue', async () => {
+    vi.mocked(smFixtures).mockResolvedValue({
+      data: [fixture({ venue: undefined })],
+    } as never);
+
+    const [next] = await getNextFixture();
+
+    expect(next.venue).toBeUndefined();
+  });
+
+  it('handles a fixture with no participants', async () => {
+    vi.mocked(smFixtures).mockResolvedValue({
+      data: [fixture({ participants: undefined })],
+    } as never);
+
+    const [next] = await getNextFixture();
+
+    expect(next.participants).toBeUndefined();
+  });
+});
+
+describe('getSettledFixtureById', () => {
+  beforeEach(() => {
+    vi.mocked(smFixture).mockReset();
+  });
+
+  it('fetches and rewrites a fixture by id', async () => {
+    vi.mocked(smFixture).mockResolvedValue({
+      data: fixture({ id: 7 }),
+    } as never);
+
+    const result = await getSettledFixtureById(7);
+
+    expect(smFixture).toHaveBeenCalledWith(7, { include: expect.any(String) });
+    expect(result.id).toBe(7);
+    expect(result.participants[0].name).toBe('Totnum Shitspur');
+    expect(result.venue.name).toBe('Emirates Stadium');
+  });
+});
+
+describe('getUnsettledFixtureById', () => {
+  beforeEach(() => {
+    vi.mocked(smFixture).mockReset();
+  });
+
+  it('fetches and rewrites a fixture by id', async () => {
+    vi.mocked(smFixture).mockResolvedValue({
+      data: fixture({ id: 9 }),
+    } as never);
+
+    const result = await getUnsettledFixtureById(9);
+
+    expect(smFixture).toHaveBeenCalledWith(9, { include: expect.any(String) });
+    expect(result.id).toBe(9);
   });
 });
