@@ -20,7 +20,7 @@ vi.mock('varlock/env', async (importOriginal) => {
   };
 });
 
-import { sportmonksFetch } from './sportmonks';
+import { SportmonksNotFoundError, sportmonksFetch } from './sportmonks';
 
 describe('sportmonksFetch', () => {
   it('throws when MONK_TOKEN is not set (empty by design in tests)', async () => {
@@ -48,6 +48,76 @@ describe('sportmonksFetch', () => {
     expect(String(url)).toBe('https://api.sportmonks.com/v3/football/foo?a=b');
     expect((init as RequestInit).headers).toEqual({
       Authorization: 'test-token',
+    });
+  });
+
+  // Sportmonks answers a missing or unlicensed single entity with 200 and no
+  // `data` key. Before issue #337 that body was returned as a success and blew
+  // up several frames downstream as a TypeError.
+  it('throws when a 200 response carries no data key', async () => {
+    mockToken.value = 'test-token';
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        message: 'No result(s) found matching your request.',
+        subscription: [],
+        rate_limit: {},
+        timezone: 'UTC',
+      }),
+    } as Response);
+
+    await expect(sportmonksFetch('/fixtures/19873650')).rejects.toThrow(
+      SportmonksNotFoundError,
+    );
+    await expect(sportmonksFetch('/fixtures/19873650')).rejects.toThrow(
+      'Sportmonks returned no data: /fixtures/19873650 — No result(s) found matching your request.',
+    );
+  });
+
+  it('throws without a detail suffix when a data-less 200 has no message', async () => {
+    mockToken.value = 'test-token';
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({}),
+    } as Response);
+
+    await expect(sportmonksFetch('/foo')).rejects.toThrow(
+      'Sportmonks returned no data: /foo',
+    );
+  });
+
+  it('throws when a 200 response body is not an object', async () => {
+    mockToken.value = 'test-token';
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => null,
+    } as Response);
+
+    await expect(sportmonksFetch('/foo')).rejects.toThrow(
+      SportmonksNotFoundError,
+    );
+  });
+
+  // The collection endpoints answer an empty result with `data: []` *and* the
+  // same generic message. Keying the guard on `message` instead of on the
+  // presence of `data` would break the documented off-season path.
+  it('resolves an empty collection that also carries a message', async () => {
+    mockToken.value = 'test-token';
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [],
+        message: 'No result(s) found matching your request.',
+      }),
+    } as Response);
+
+    await expect(sportmonksFetch('/fixtures/between/x/y/19')).resolves.toEqual({
+      data: [],
+      message: 'No result(s) found matching your request.',
     });
   });
 

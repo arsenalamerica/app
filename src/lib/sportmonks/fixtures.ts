@@ -54,8 +54,11 @@ export type FixtureEntity = {
     score: { goals: number; participant: string };
     description: string;
   }[];
-  tvstations: { tvstation_id: number; country_id: number }[];
-  venue: EntityBase;
+  // Both come from optional `include`s and are absent whenever Sportmonks has
+  // nothing to return for them — a fixture with no broadcaster listed, or one
+  // whose venue is not yet assigned (common for a cup tie before the draw).
+  tvstations?: { tvstation_id: number; country_id: number }[];
+  venue?: EntityBase;
   has_odds?: boolean;
   has_premium_odds?: boolean;
   placeholder?: boolean;

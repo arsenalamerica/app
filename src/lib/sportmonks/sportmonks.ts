@@ -27,6 +27,23 @@ export const ARSENAL_TEAM_ID = 19;
 
 const SPORTMONKS_BASE = 'https://api.sportmonks.com/v3/football';
 
+/**
+ * A 200 response that carries no `data` at all. Sportmonks does not 404 a
+ * missing or unlicensed single entity — it answers 200 with a body holding only
+ * a generic `message`, so this is the only signal that the entity is gone.
+ *
+ * Named so it groups in Sentry as its own issue rather than surfacing as a
+ * downstream TypeError several frames from the actual cause (issue #337).
+ */
+export class SportmonksNotFoundError extends Error {
+  constructor(path: string, detail?: string) {
+    super(
+      `Sportmonks returned no data: ${path}${detail ? ` — ${detail}` : ''}`,
+    );
+    this.name = 'SportmonksNotFoundError';
+  }
+}
+
 export async function sportmonksFetch<T>(
   path: string,
   params: Record<string, string> = {},
@@ -66,5 +83,18 @@ export async function sportmonksFetch<T>(
       `Sportmonks ${res.status}${detail ? ` ${detail}` : ''}: ${path}`,
     );
   }
-  return res.json() as Promise<T>;
+  const body = (await res.json()) as T;
+
+  // Key on the `data` key being *present*, never on it being truthy and never
+  // on `message`. A collection endpoint with no matches returns `data: []`
+  // alongside the same generic message — a legitimate empty result the callers
+  // handle (see the off-season path in getNextFixture). A missing single entity
+  // omits `data` entirely, and destructuring it downstream yields undefined and
+  // crashes several frames later.
+  if (typeof body !== 'object' || body === null || !('data' in body)) {
+    const detail = (body as { message?: string } | null)?.message;
+    throw new SportmonksNotFoundError(path, detail);
+  }
+
+  return body;
 }
