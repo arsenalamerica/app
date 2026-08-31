@@ -15,6 +15,15 @@ surface. Neither restates the other.
   does not 404 a missing or unlicensed entity, so that is the only signal it is gone. Do not
   relax the check to truthiness or to the `message` field — an empty collection returns `data: []`
   with the same generic message. See `docs/adr/011-fixture-index-sync-hardening.md`.
+- **`standings.ts` throws `StandingsRowIncludeMissingError` on a row missing a requested include.**
+  `SportmonksNotFoundError` only covers the envelope (`data` present); it says nothing about the
+  shape of individual rows inside `data`. `standings.ts` types the raw row as `StandingRow`
+  (`participant` and `details` nullable — what Sportmonks can actually hand back) and the cleaned
+  output as `StandingEntity` (`participant` required, `stats` instead of `details`).
+  `getStandings()` (`src/lib/data/standings.ts`) is the only place a `StandingRow` becomes a
+  `StandingEntity`, and it throws rather than returning a row with a missing `participant`, a
+  `details[].type` gap, or an incomplete `stats` map, instead of letting an unguarded read surface
+  as a raw `TypeError` downstream. See issue #345.
 - **A new endpoint wrapper must be re-exported from `index.ts`**, and its endpoint type exported
   too. `src/lib/data/` imports from the `@/lib/sportmonks` barrel, so a wrapper that is not
   re-exported is unreachable from the data layer. (`TvStationEndpoint` in `tv-station.ts` is

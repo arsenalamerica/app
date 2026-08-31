@@ -72,6 +72,11 @@ export type StandingStats = {
   'overall-points': number;
 };
 
+export type StandingDetail = {
+  value: number;
+  type: { code: string } | null;
+};
+
 /**
  * Raw shape of a row as Sportmonks returns it for the `participant` and
  * `details.type` includes this app requests — before `getStandings` cleans it
@@ -81,7 +86,7 @@ export type StandingStats = {
  */
 export type StandingRow = StandingBase & {
   participant?: StandingParticipant | null;
-  details?: { value: number; type: { code: string } | null }[] | null;
+  details?: StandingDetail[] | null;
 };
 
 /**
