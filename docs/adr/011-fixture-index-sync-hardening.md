@@ -19,6 +19,12 @@ tracks the remediation; PR #340 (stacked below this one) added a runtime guard i
 layer for the case where a bad id reaches the index anyway; this PR hardens the sync script
 so a dead id does not reach the index in the first place.
 
+## Decision
+
+Filter `placeholder: true` fixtures at fetch time, validate every surviving id against
+`/fixtures/{id}` before writing the index, and let the workflow's own PR auto-merge once the
+required checks pass. The reasoning for each follows.
+
 ### Why a provisional id is a different failure class than a rescheduled fixture
 
 ADR-005's sync cadence was built for the ordinary case: a fixture gets postponed or moved for
@@ -39,22 +45,26 @@ not model. That gap is what per-id validation closes.
 ### Why validation keys on `data` presence, not truthiness or `message`
 
 Sportmonks does not 404 a missing single entity. `/fixtures/{id}` for a dead id answers HTTP
-200 with a body carrying no `data` key at all — only a generic `message`. That rules out two
-tempting checks:
+200 with a body carrying no `data` key at all — only a generic `message`. Two tempting checks
+were rejected:
 
-- **Truthiness of `data`.** A collection endpoint with zero matches (e.g. `/fixtures/between`
-  for a bye week) returns `data: []` — present, empty, and falsy in the same way `undefined`
-  is. Checking `if (data)` would treat a legitimately empty page the same as a missing entity,
-  which is not the distinction being drawn here; `/fixtures/{id}` never has that ambiguity,
-  but the fix needs to generalize to whichever Sportmonks endpoint shape is in play, and a
-  key-presence check is the one predicate that does.
-- **Presence or content of `message`.** Sportmonks sends `message` on success responses too
-  (rate-limit remaining, deprecation notices). Branching on it couples the script to
-  message text Sportmonks does not document as stable.
+- **Presence or content of `message`.** This is the dangerous one. Sportmonks returns the same
+  generic string — "No result(s) found matching your request. Either the query did not return
+  any results or you don't have access to it via your current subscription." — on a *legitimately
+  empty collection* as well. `/fixtures/between` for a window with no matches answers
+  `data: [], message: "No result(s) found…"`. Branching on `message` would therefore treat an
+  ordinary off-season response as a failure, which is exactly the regression ADR-005's
+  `getNextFixture` off-season path (issue #182) exists to prevent. The message also does double
+  duty for "not found" and "not licensed", so it cannot distinguish those either.
+- **Truthiness of `data`.** This happens to work for the two shapes observed today (`undefined`
+  when absent, a truthy `[]` or object when present), but it encodes an assumption about which
+  values Sportmonks may put in `data` rather than about whether the entity exists. A future
+  `data: null` or `data: 0` would silently reclassify a valid response as a dead id.
 
-`fixtureIdResolves` (`scripts/sync-fixtures.mjs`) checks `'data' in body` — the one property
-that is present exactly when the entity exists and absent exactly when it does not, regardless
-of what else the response carries.
+`fixtureIdResolves` (`scripts/sync-fixtures.mjs`) checks `'data' in body` — the one predicate
+that is true exactly when the entity exists and false exactly when it does not, regardless of
+what the key holds or what else the response carries. `sportmonksFetch` in #340 uses the same
+predicate for the same reason.
 
 ### Why `isEmptyOverwrite` matters more now
 
