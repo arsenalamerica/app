@@ -12,6 +12,13 @@ import { FixtureCardTeam } from './FixtureCardTeam';
 
 type FixtureCardProps = Omit<CardProps, 'id'> & Omit<FixtureEntity, 'id'>;
 
+// States that finish a match at a final score. Deliberately narrower than
+// "not upcoming and not in play": postponed, cancelled, abandoned, delayed,
+// suspended, TBA and walkover fixtures legitimately carry no CURRENT row, and
+// breaks and extra time are in play without being regular-time active.
+// https://docs.sportmonks.com/football/tutorials-and-guides/tutorials/includes/states
+const FULL_TIME_STATES = new Set(['FT', 'AET', 'FT_PEN']);
+
 export function FixtureCard({
   name,
   className,
@@ -31,17 +38,12 @@ export function FixtureCard({
   placeholder: _placeholder,
   ...rest
 }: FixtureCardProps) {
-  if (!participants) {
-    return (
-      <Card className={[styles._, className].join(' ')} {...rest}>
-        <HeadingLevel>
-          <VisuallyHidden>
-            <Heading>{name}</Heading>
-          </VisuallyHidden>
-          <div className={styles.Details}>No upcoming fixtures...</div>
-        </HeadingLevel>
-      </Card>
-    );
+  // A card is always rendered for one known fixture id, so an absent
+  // `participants` include is upstream data drift, not "no fixture". Throwing
+  // hands it to FixtureCardBoundary, which reports it and degrades this one
+  // card; the caller that genuinely has no fixture to show says so itself.
+  if (!participants?.length) {
+    throw new Error(`Fixture "${name}" is missing its participants`);
   }
 
   const localTeam = participants.find((team) => team.meta.location === 'home');
@@ -58,6 +60,19 @@ export function FixtureCard({
   const isActive = new Set(REGULAR_TIME_ACTIVE_STATES).has(state.state);
   const ticking = periods.find((period) => period.ticking);
   const isFuture = state.state === 'NS';
+
+  const homeScore = currentScores.get('home');
+  const awayScore = currentScores.get('away');
+  const hasScore = homeScore !== undefined && awayScore !== undefined;
+
+  // A fixture that reached full time has a final score, so a missing CURRENT
+  // row is a defect rather than an absent score. Throwing beats interpolating
+  // the undefined into the literal text "undefined-undefined".
+  if (FULL_TIME_STATES.has(state.state) && !hasScore) {
+    throw new Error(
+      `Fixture "${name}" (state ${state.state}) is missing its CURRENT scores`,
+    );
+  }
 
   return (
     <Card className={[styles._, className].join(' ')} {...rest}>
@@ -113,7 +128,10 @@ export function FixtureCard({
                   options={{ timeStyle: 'short' }}
                 />
               ) : (
-                `${currentScores.get('home')}-${currentScores.get('away')}`
+                // Every state that is not upcoming and not full time lands
+                // here: in play before its first CURRENT row, postponed,
+                // cancelled. Show nothing rather than a placeholder score.
+                hasScore && `${homeScore}-${awayScore}`
               )}
             </div>
           </div>
