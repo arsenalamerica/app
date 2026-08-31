@@ -115,6 +115,7 @@ GET /fixtures/upcoming/markets/{market_id}
 
 `GET /fixtures/between/{start}/{end}/{team_id}` is what `scripts/sync-fixtures.mjs` calls to
 rebuild the fixture index, and what `smFixtures()` calls for the next-fixture lookup.
+`GET /fixtures/{id}` doubles as an existence check — see **Response quirks** below.
 
 ### Livescores
 
@@ -281,6 +282,32 @@ scripts/sync-seasons.mjs            SPORTMONKS_BASE + PREMIER_LEAGUE_ID + its ow
 
 The scripts also carry their own pagination loop, `AbortSignal.timeout(30_000)`, and error
 handling. None of that is shared with `sportmonksFetch`.
+
+## Response quirks that will bite you
+
+These are the ones that have actually caused incidents here. See
+`docs/adr/011-fixture-index-sync-hardening.md`.
+
+- **A missing or unlicensed single entity answers `200`, not `404`.** The body carries no `data`
+  key at all — only a generic `message`. There is no status code to branch on, so
+  **`data`-key presence is the only signal that the entity exists.** `sportmonksFetch` enforces
+  this and throws `SportmonksNotFoundError`.
+- **Do not treat `message` as an error signal.** A legitimately empty collection returns the very
+  same generic string alongside `data: []` — "No result(s) found matching your request. Either the
+  query did not return any results or you don't have access to it via your current subscription."
+  An empty result is not a failure; between seasons, `getNextFixture()` returns `[]` normally.
+- **Do not test `data` for truthiness either.** `data: []` is truthy. Check key presence and
+  nullishness, which is what the client does.
+- **`placeholder: true` marks a provisional fixture.** Sportmonks reserves a slot with a real-looking
+  id before a multi-stage draw resolves, then **deletes and reissues that id** once the pairing is
+  known. Writing one to the fixture index crashed every card that dispatched to it (Sentry APP-M/APP-D,
+  ~300 events). `scripts/sync-fixtures.mjs` filters these at fetch time and then validates every
+  surviving id against `GET /fixtures/{id}`.
+- **An include you did not request is simply absent, not empty.** `tvstations` is undefined on any
+  fixture fetched without the `tvStations` include — which is every fixture from
+  `getSettledFixtureById` / `getUnsettledFixtureById`. Guard with `?? []`.
+- **`venue` is nullable, not optional.** The key is always present; it is `null` when Sportmonks has
+  no venue assigned (verified across the current season on pre-draw Champions League fixtures).
 
 ## API behavior worth knowing
 

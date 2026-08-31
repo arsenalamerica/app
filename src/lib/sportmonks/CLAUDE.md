@@ -11,6 +11,10 @@ surface. Neither restates the other.
   wrappers (`fixtures.ts`, `standings.ts`, `tv-station.ts`) go through it. Never call `fetch`
   against Sportmonks directly from app code. `scripts/sync-*.mjs` are the one exception, for
   reasons documented in `scripts/CLAUDE.md`.
+- **`sportmonksFetch` throws `SportmonksNotFoundError` on a 200 with no `data` key.** Sportmonks
+  does not 404 a missing or unlicensed entity, so that is the only signal it is gone. Do not
+  relax the check to truthiness or to the `message` field — an empty collection returns `data: []`
+  with the same generic message. See `docs/adr/011-fixture-index-sync-hardening.md`.
 - **A new endpoint wrapper must be re-exported from `index.ts`**, and its endpoint type exported
   too. `src/lib/data/` imports from the `@/lib/sportmonks` barrel, so a wrapper that is not
   re-exported is unreachable from the data layer. (`TvStationEndpoint` in `tv-station.ts` is
