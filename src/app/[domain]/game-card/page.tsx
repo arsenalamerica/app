@@ -17,6 +17,7 @@ export default async function GameCardPage(props: {
 }) {
   const params = await props.params;
   const branch = branchData[params.domain];
+  if (!branch) notFound();
 
   const [nextFixture] = await getNextFixture();
 

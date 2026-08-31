@@ -1,4 +1,5 @@
 import { Heading } from '@ariakit/react';
+import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { Card, FixtureCard, Main, NextGame } from '@/components';
 import { branchData, branchLogo } from '@/data';
@@ -9,6 +10,7 @@ export default async function Home(props: {
 }) {
   const params = await props.params;
   const branch = branchData[params.domain];
+  if (!branch) notFound();
   const Logo = branchLogo[branch.domain];
 
   const [nextFixture] = await getNextFixture();
