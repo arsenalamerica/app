@@ -21,12 +21,69 @@ export function isEmptyOverwrite(nextFixtures, existing) {
   return trimmed !== '' && trimmed !== '[]';
 }
 
+// How many ids per-id validation may drop in one run before the run is treated
+// as an upstream anomaly rather than a schedule change.
+//
+// `isEmptyOverwrite` only fires at exactly zero, so it cannot see a partial
+// wipe: 40 of 47 ids failing validation leaves 7, which is non-empty, writes
+// cleanly, and — now that the sync PR auto-merges — lands with nobody looking.
+// A genuinely withdrawn fixture is a rare single event; a batch of failures at
+// once means Sportmonks is misbehaving or the token's scope changed. Fixtures
+// really do get withdrawn one at a time, so the cap is not zero.
+const MAX_VALIDATION_DROPS = 2;
+
+// True when validation removed more ids than a real schedule change plausibly
+// would. Unlike an empty upstream response this does not self-correct on the
+// next cron — an id outside the token's subscription fails validation every
+// run — so the caller must fail loudly rather than skip the write and retry.
+export function isExcessiveDrop(fetchedCount, verifiedCount) {
+  return fetchedCount - verifiedCount > MAX_VALIDATION_DROPS;
+}
+
 export function seasonWindow(date = new Date()) {
   const month = date.getMonth();
   const year = date.getFullYear();
   const start = month > 6 ? year : year - 1;
   const end = start + 1;
   return { start: `${start}-07-01`, end: `${end}-06-30` };
+}
+
+// Sportmonks marks a fixture as provisional with `placeholder: true` -- e.g. a
+// Champions League league-phase slot assigned before the draw resolves. These
+// ids get deleted and reissued once the real fixture is known, so they must
+// never reach the committed index in the first place.
+export function isPlaceholderFixture(fixture) {
+  return fixture.placeholder === true;
+}
+
+// Confirms a fixture id still resolves on Sportmonks before it's written to the
+// committed index. A dead id returns HTTP 200 with a body that has NO `data`
+// key (only `message`); a collection request with no matches still has
+// `data: []`, so this is a key-presence check, not a truthiness check.
+// `fetchImpl` is injected so tests never touch the network -- production
+// always passes the global `fetch`. A non-ok response throws the same way the
+// pagination fetch does: a transport failure must abort the run, not silently
+// shrink the index.
+//
+// Note the limit of this check: the same data-less 200 means both "deleted" and
+// "outside your subscription", so a real fixture the token cannot read
+// individually is indistinguishable from a dead one. That is what
+// `isExcessiveDrop` is for -- it stops a scope change quietly gutting the index.
+export async function fixtureIdResolves(id, token, fetchImpl) {
+  const res = await fetchImpl(`${SPORTMONKS_BASE}/fixtures/${id}`, {
+    headers: { Authorization: token },
+    signal: AbortSignal.timeout(30_000),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(
+      `Sportmonks API error: ${res.status} ${res.statusText}${body ? ` — ${body.slice(0, 500)}` : ''}`,
+    );
+  }
+
+  const body = await res.json();
+  return 'data' in body;
 }
 
 async function main() {
@@ -66,8 +123,12 @@ async function main() {
       }
 
       const { data, pagination } = await res.json();
-      for (const { id, starting_at_timestamp } of data) {
-        byId.set(id, { id, kickoff: starting_at_timestamp });
+      for (const fixture of data) {
+        if (isPlaceholderFixture(fixture)) continue;
+        byId.set(fixture.id, {
+          id: fixture.id,
+          kickoff: fixture.starting_at_timestamp,
+        });
       }
       if (!pagination?.has_more) break;
       page += 1;
@@ -78,7 +139,24 @@ async function main() {
       );
     }
 
-    const fixtures = [...byId.values()].sort((a, b) => a.id - b.id);
+    const verified = [];
+    const dropped = [];
+    for (const entry of byId.values()) {
+      if (await fixtureIdResolves(entry.id, token, fetch)) {
+        verified.push(entry);
+      } else {
+        dropped.push(entry.id);
+      }
+    }
+    if (isExcessiveDrop(byId.size, verified.length)) {
+      throw new Error(
+        `Validation dropped ${dropped.length} of ${byId.size} fixtures ` +
+          `(${dropped.join(', ')}); aborting without write. More than ` +
+          `${MAX_VALIDATION_DROPS} at once means an upstream or subscription ` +
+          'problem, not a schedule change.',
+      );
+    }
+    const fixtures = verified.sort((a, b) => a.id - b.id);
 
     let existing = '';
     try {

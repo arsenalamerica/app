@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted (superseded in part by ADR-011)
 
 ## Context
 
@@ -45,7 +45,9 @@ Before this work, `/fixtures` rendered as streaming SSR with 61 Suspense boundar
 
 Commit a minimal `src/lib/sportmonks/fixtures.json` containing only `{ id, kickoff }` per fixture. IDs and kickoff timestamps are not licensed match data — they are the schedule, which is publicly distributed. Everything licensed (scores, lineups, stats) stays behind the Sportmonks API and is never committed.
 
-The index is maintained by a daily GitHub Actions cron (`.github/workflows/sync-fixtures.yml`) that runs `scripts/sync-fixtures.mjs`. The script fetches the full season from Sportmonks, reduces to `{ id, kickoff }`, sorts by `id`, and compares against the committed file. If the content is unchanged, the script exits without writing and the workflow opens no PR. If the content has changed, the workflow opens a PR for human review. Schedules shift rarely enough that this cadence imposes near-zero ongoing cost.
+The index is maintained by a daily GitHub Actions cron (`.github/workflows/sync-fixtures.yml`) that runs `scripts/sync-fixtures.mjs`. The script fetches the full season from Sportmonks, reduces to `{ id, kickoff }`, sorts by `id`, and compares against the committed file. If the content is unchanged, the script exits without writing and the workflow opens no PR. If the content has changed, the workflow opens a PR. Schedules shift rarely enough that this cadence imposes near-zero ongoing cost.
+
+**Superseded in part by ADR-011.** The PR is now filtered for placeholder ids, per-id validated against Sportmonks, and auto-merged rather than held for human review — see ADR-011 for why. Everything else in this decision (the committed index shape, the daily cadence, the diff-then-write logic) is unchanged.
 
 ### Two cached fetchers, keyed on fixture ID
 
@@ -113,7 +115,7 @@ flowchart TD
 - **Cross-tenant cache sharing comes for free.** All six tenants rendering the same fixture share the same cache entry. No Redis, no tenant-aware keying to reason about.
 - **Per-card isolation.** One fixture's Sportmonks failure renders a single card's error fallback, not a blank page. The rest of the schedule is untouched.
 - **Timing decisions revalidate hourly.** `getFixtureTiming()` uses `cacheLife('hours')`, so when a fixture crosses the 24h-past-kickoff threshold, it can take up to ~1 hour before the page re-dispatches from `UnsettledFixtureCard` to `SettledFixtureCard` and the windowed view shifts to the next match. Acceptable for this use case.
-- **`fixtures.json` is a committed artifact.** The daily cron opens a PR only when the content actually changes. Schedule shifts land as human-reviewed PRs.
+- **`fixtures.json` is a committed artifact.** The daily cron opens a PR only when the content actually changes. As of ADR-011, that PR is filtered for placeholder ids, per-id validated, and auto-merged on green CI rather than held for human review.
 - **A rare retroactive Sportmonks correction to a settled fixture stays cached.** `cacheLife('max')` means a historic stat edit will not surface until the cache entry is manually invalidated or the function signature changes. The `cacheTag('fixture:${id}')` is the escape hatch when that need comes up.
 - **Dependency added:** `react-error-boundary`. Small, stable, widely-used; the equivalent local class component would be strictly more code to maintain.
 - **`getFixtures()` is deleted.** `getNextFixture()` is the only remaining caller of `smFixtures()`; the latter is kept.

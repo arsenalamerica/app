@@ -19,3 +19,4 @@ Fetches the full Arsenal fixture list for the current season from Sportmonks `/f
 - Run locally: `yarn sync:fixtures` (wrapped in `varlock run --`, which injects the token)
 - Automated: `.github/workflows/sync-fixtures.yml` (daily cron)
 - Exits 0 whether or not the file changed; non-zero on API errors; no-op when content matches disk
+- Skips any fixture with `placeholder: true` (`isPlaceholderFixture`) — a provisional id Sportmonks assigns before a competition draw resolves and later deletes and reissues. Then validates every surviving id against `/fixtures/{id}` (`fixtureIdResolves`) before it's written; a dead id answers 200 with no `data` key, so the check is key-presence, not truthiness. See `docs/adr/011-fixture-index-sync-hardening.md`.
