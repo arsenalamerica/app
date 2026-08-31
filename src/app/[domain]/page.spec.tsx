@@ -44,6 +44,9 @@ vi.mock('@/components', () => ({
       fixture-card id={String(id)} kickoff={kickoff}
     </p>
   ),
+  FixtureCardBoundary: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid='fixture-card-boundary'>{children}</div>
+  ),
   Main: ({ children }: { children: React.ReactNode }) => (
     <main>{children}</main>
   ),
@@ -91,8 +94,13 @@ describe('[domain]/page (Home)', () => {
     ] as never);
 
     const ui = await Home(makeProps('tacomagooners.com'));
-    const { getByText } = render(ui);
+    const { getByText, getByTestId } = render(ui);
 
+    // FixtureCard throws on malformed fixture data, so it must render inside
+    // the boundary rather than beside it.
+    expect(getByTestId('fixture-card-boundary')).toContainElement(
+      getByText('fixture-card id=undefined kickoff=123'),
+    );
     // The `id` field is deliberately stripped before spreading fixture props
     // onto FixtureCard (see the `{ id: _id, ...nextFixtureProps }` destructure
     // in page.tsx), so FixtureCard must not receive it.

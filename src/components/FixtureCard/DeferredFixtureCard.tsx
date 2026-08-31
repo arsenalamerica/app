@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { loadDeferredFixture } from '@/lib/actions/loadDeferredFixture';
 import type { FixtureEntity } from '@/lib/sportmonks';
 import { FixtureCard, FixtureCardLoading } from './FixtureCard';
+import { FixtureCardBoundary } from './FixtureCardBoundary';
 import { FixtureCardError } from './FixtureCardError';
 
 // One state value rather than a flag per outcome, so combinations like "loaded
@@ -109,7 +110,14 @@ export function DeferredFixtureCard({
         );
       case 'ready': {
         const { id: _id, ...rest } = state.fixture;
-        return <FixtureCard {...rest} />;
+        // FixtureCard throws on a malformed fixture, and this card is rendered
+        // outside the per-card boundary on /fixtures. Without this the throw
+        // would escape to the route's error.tsx and blank the whole list.
+        return (
+          <FixtureCardBoundary>
+            <FixtureCard {...rest} />
+          </FixtureCardBoundary>
+        );
       }
       default:
         return <FixtureCardLoading />;
