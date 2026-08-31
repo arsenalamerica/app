@@ -26,7 +26,7 @@ export default defineConfig({
       enabled: true,
       provider: 'v8',
       reporter: ['text', 'cobertura'],
-      include: ['src/**', 'data/src/**'],
+      include: ['src/**/*.{ts,tsx}', 'data/src/**/*.{ts,tsx}'],
       // Excluded beyond non-code assets: pure re-export barrels only.
       // data/src/branches/index.ts stays in scope; it builds the branch maps.
       exclude: [
