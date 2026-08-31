@@ -61,4 +61,13 @@ describe('game-card/page', () => {
     );
     expect(notFound).toHaveBeenCalled();
   });
+
+  it('calls notFound() for an unknown domain', async () => {
+    // notFound() throws before getNextFixture() is ever called, so no
+    // fixture mock is needed here.
+    await expect(GameCardPage(makeProps('unknown.example'))).rejects.toThrow(
+      'NEXT_NOT_FOUND',
+    );
+    expect(notFound).toHaveBeenCalled();
+  });
 });

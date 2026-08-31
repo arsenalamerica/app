@@ -1,9 +1,16 @@
 import { render } from '@testing-library/react';
+import { notFound } from 'next/navigation';
 import { describe, expect, it, vi } from 'vitest';
 
 import { getNextFixture } from '@/lib/data/fixtures';
 
 import Home from './page';
+
+vi.mock('next/navigation', () => ({
+  notFound: vi.fn(() => {
+    throw new Error('NEXT_NOT_FOUND');
+  }),
+}));
 
 vi.mock('@/data', () => ({
   branchData: {
@@ -93,5 +100,14 @@ describe('[domain]/page (Home)', () => {
       getByText('fixture-card id=undefined kickoff=123'),
     ).toBeInTheDocument();
     expect(getByText('next-game 7 Tacoma Gooners')).toBeInTheDocument();
+  });
+
+  it('calls notFound() for an unknown domain', async () => {
+    // notFound() throws before getNextFixture() is ever called, so no
+    // fixture mock is needed here.
+    await expect(Home(makeProps('unknown.example'))).rejects.toThrow(
+      'NEXT_NOT_FOUND',
+    );
+    expect(notFound).toHaveBeenCalled();
   });
 });
