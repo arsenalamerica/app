@@ -53,25 +53,18 @@ describe('getNextFixture', () => {
     expect(next.id).toBe(1);
   });
 
-  it('requests the earliest upcoming fixture via camelCase sortBy, and returns it first', async () => {
+  it('requests the next fixture sorted via camelCase sortBy, not sort_by', async () => {
     // Regression: issue #349. Sportmonks v3 only recognises `sortBy`
     // (camelCase) — `sort_by` is silently ignored, leaving default ordering
     // in place, so `getNextFixture` could return the wrong fixture as
-    // "next". This pins both the request shape (so the bug can't silently
-    // come back) and that the earliest of several candidates is what the
-    // caller receives.
-    const earliest = fixture({ id: 2, starting_at: '2026-09-01 15:00:00' });
-    const later = fixture({ id: 3, starting_at: '2026-09-08 15:00:00' });
-    const latest = fixture({ id: 4, starting_at: '2026-09-15 15:00:00' });
-    // The API is the one that sorts (per `sortBy`/`order`), so the mock
-    // returns fixtures already ordered earliest-first, as Sportmonks would.
-    vi.mocked(smFixtures).mockResolvedValue({
-      data: [earliest, later, latest],
-    } as never);
+    // "next". The API itself does the sorting (there is no client-side sort
+    // here to test against several out-of-order candidates), so what this
+    // pins is the request shape: `sortBy` present with the right value, and
+    // `sort_by` gone for good.
+    vi.mocked(smFixtures).mockResolvedValue({ data: [fixture()] } as never);
 
-    const [next] = await getNextFixture();
+    await getNextFixture();
 
-    expect(next.id).toBe(earliest.id);
     expect(smFixtures).toHaveBeenCalledWith(
       expect.objectContaining({
         sortBy: 'starting_at',
