@@ -9,6 +9,31 @@ Sentry.init({
 
   integrations: [Sentry.replayIntegration()],
 
+  // Mobile in-app browsers (Instagram, Facebook, LinkedIn) inject their own
+  // instrumentation scripts into every page they render. When those throw, the
+  // event arrives here looking like ours and the "Create GH Issue" alert rule
+  // files a bug nobody can action. Two filters cover the five issues #255
+  // catalogues; see `docs/adr/013-sentry-third-party-error-filtering.md` for
+  // why the provenance-based `thirdPartyErrorFilterIntegration` was tried and
+  // rejected, so this does not get re-litigated.
+  //
+  // #161 is a bare `TypeError: Load failed` with no stack at all: Safari's
+  // message for a fetch aborted by navigation. Nothing but the message
+  // identifies it. Anchored at both ends so an error that merely mentions
+  // loading, or a `Load failed` carrying real detail, still reports. This is
+  // also Safari's message for any failed fetch, so a genuine network failure on
+  // a bare fetch is silenced too — accepted, because at the point of filtering
+  // the two are indistinguishable.
+  ignoreErrors: [/^(TypeError: )?Load failed$/],
+
+  // #193 and #169 (iOS bridge, frames at `app:///`) and #164 and #152 (Android
+  // bridge, `app://navigation_performance_logger_android`) report every frame
+  // under the `app:` scheme, which nothing we ship uses. Sentry matches this
+  // against the last valid frame of the root exception, so it catches errors
+  // thrown wholly inside an injected script and deliberately leaves a mixed
+  // stack that ends in our own code alone.
+  denyUrls: [/^app:\/\//],
+
   // Off outside a real build — see the comment in `sentry.server.config.ts`.
   // NODE_ENV rather than the NEXT_PUBLIC_VERCEL_ENV used below: Next inlines
   // NODE_ENV into the client bundle unconditionally, so this cannot silently
