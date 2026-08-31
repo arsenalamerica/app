@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // MONK_TOKEN resolves to '' under `test` by design (see the comment in
 // sportmonks.ts), which is what stops a test from ever reaching the real
@@ -20,7 +20,11 @@ vi.mock('varlock/env', async (importOriginal) => {
   };
 });
 
-import { SportmonksNotFoundError, sportmonksFetch } from './sportmonks';
+import {
+  SportmonksNotFoundError,
+  SportmonksServerError,
+  sportmonksFetch,
+} from './sportmonks';
 
 describe('sportmonksFetch', () => {
   it('throws when MONK_TOKEN is not set (empty by design in tests)', async () => {
@@ -162,15 +166,16 @@ describe('sportmonksFetch', () => {
   });
 
   it('throws an error without a detail suffix when the body has no message', async () => {
+    // A 4xx is never retried, so this stays a single attempt.
     mockToken.value = 'test-token';
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
-      status: 500,
+      status: 400,
       json: async () => ({}),
     } as Response);
 
     await expect(sportmonksFetch('/foo')).rejects.toThrow(
-      'Sportmonks 500: /foo',
+      'Sportmonks 400: /foo',
     );
   });
 
@@ -178,14 +183,142 @@ describe('sportmonksFetch', () => {
     mockToken.value = 'test-token';
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: false,
-      status: 503,
+      status: 400,
       json: async () => {
         throw new SyntaxError('Unexpected token');
       },
     } as unknown as Response);
 
     await expect(sportmonksFetch('/foo')).rejects.toThrow(
-      'Sportmonks 503: /foo',
+      'Sportmonks 400: /foo',
     );
+  });
+});
+
+describe('sportmonksFetch retries', () => {
+  // Retries sleep via a real `setTimeout`, so these use fake timers rather
+  // than eating the ~250ms/750ms backoff in real time on every test run.
+  // `vi.advanceTimersByTimeAsync` lets the pending retry's promise chain
+  // actually resolve between advances, which plain `advanceTimersByTime`
+  // (synchronous) does not.
+  beforeEach(() => {
+    mockToken.value = 'test-token';
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('retries a 503 and returns the eventual success', async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => ({ message: 'Service Unavailable' }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: 'recovered' }),
+      } as Response);
+
+    const promise = sportmonksFetch('/foo');
+    await vi.advanceTimersByTimeAsync(250);
+
+    await expect(promise).resolves.toEqual({ data: 'recovered' });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('throws SportmonksServerError once retries are exhausted', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 503,
+      json: async () => ({ message: 'Service Unavailable' }),
+    } as Response);
+
+    // The handler is attached before the timers advance — attaching it only
+    // after the reject has already happened (as a bare `await` following the
+    // advances would) reports as an unhandled rejection even though it is
+    // ultimately caught here.
+    const settled = sportmonksFetch('/fixtures/1').then(
+      () => ({ rejected: false as const }),
+      (e: unknown) => ({ rejected: true as const, error: e }),
+    );
+    // Two retries: 250ms then 750ms, before the third (final) attempt throws.
+    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(750);
+
+    const result = await settled;
+    if (!result.rejected) {
+      throw new Error('expected sportmonksFetch to reject');
+    }
+    const error = result.error as SportmonksServerError;
+    expect(error).toBeInstanceOf(SportmonksServerError);
+    expect(error.name).toBe('SportmonksServerError');
+    expect(error.status).toBe(503);
+    expect(error.message).toBe(
+      'Sportmonks 503 Service Unavailable: /fixtures/1',
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not retry a 4xx response', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 404,
+      json: async () => ({ message: 'Not Found' }),
+    } as Response);
+
+    await expect(sportmonksFetch('/foo')).rejects.toThrow(
+      SportmonksServerError,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries a network error and returns the eventual success', async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockRejectedValueOnce(new TypeError('fetch failed'))
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: 'recovered' }),
+      } as Response);
+
+    const promise = sportmonksFetch('/foo');
+    await vi.advanceTimersByTimeAsync(250);
+
+    await expect(promise).resolves.toEqual({ data: 'recovered' });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('throws a path-attributed error once network retries are exhausted', async () => {
+    // Regression risk this pins: a bare rethrow of `err` here would carry no
+    // `path`, so every endpoint's exhausted-retry network failures would
+    // group under the same generic "TypeError: fetch failed" in Sentry.
+    const networkError = new TypeError('fetch failed');
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockRejectedValue(networkError);
+
+    const settled = sportmonksFetch('/foo').then(
+      () => ({ rejected: false as const }),
+      (e: unknown) => ({ rejected: true as const, error: e }),
+    );
+    await vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(750);
+
+    const result = await settled;
+    if (!result.rejected) {
+      throw new Error('expected sportmonksFetch to reject');
+    }
+    const error = result.error as Error;
+    expect(error.message).toBe(
+      'Sportmonks network error after 3 attempts: /foo — fetch failed',
+    );
+    expect(error.cause).toBe(networkError);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 });

@@ -51,6 +51,37 @@ export class SportmonksNotFoundError extends Error {
   }
 }
 
+/**
+ * A non-OK response `sportmonksFetch` did not (or could not) recover from via
+ * retry: a 4xx (never retried), or a 5xx that was still failing after
+ * `RETRY_DELAYS_MS` was exhausted. `status` lets callers branch on the code;
+ * `this.name` carries the distinct grouping through a minified build, same as
+ * `SportmonksNotFoundError` above. Message format is unchanged from the plain
+ * `Error` this replaces (`Sportmonks <status>[ <detail>]: <path>`) so existing
+ * grouping and any message-matching stay valid.
+ */
+export class SportmonksServerError extends Error {
+  constructor(
+    readonly status: number,
+    readonly path: string,
+    readonly detail?: string,
+  ) {
+    super(`Sportmonks ${status}${detail ? ` ${detail}` : ''}: ${path}`);
+    this.name = 'SportmonksServerError';
+  }
+}
+
+// Sportmonks 503/504s are transient — observed 9 times over 4 months in
+// Sentry (APP-7) — and blanked the whole route segment on a single failed
+// fetch. Two retries with a short backoff absorbs those without masking a
+// genuinely down upstream: 4xx responses are never retried, since retrying a
+// client error (bad params, auth) just repeats the same failure three times.
+const RETRY_DELAYS_MS = [250, 750];
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function sportmonksFetch<T>(
   path: string,
   params: Record<string, string> = {},
@@ -74,46 +105,82 @@ export async function sportmonksFetch<T>(
     url.searchParams.set(k, v);
   }
 
-  const res = await fetch(url, {
-    headers: { Authorization: token },
-  });
+  const maxAttempts = RETRY_DELAYS_MS.length + 1;
 
-  if (!res.ok) {
-    let detail = '';
+  // No upper bound on `attempt` in the loop condition: every path inside
+  // either `return`s, `throw`s, or `continue`s toward another attempt, so the
+  // loop never completes normally. That lets the compiler see the function
+  // always returns or throws, with no unreachable fallback needed after it —
+  // an `attempt < maxAttempts` condition would leave one.
+  for (let attempt = 0; ; attempt++) {
+    const isLastAttempt = attempt === maxAttempts - 1;
+
+    let res: Response;
     try {
-      const body = (await res.json()) as { message?: string };
-      detail = body.message ?? '';
-    } catch {
-      // body was not JSON
+      res = await fetch(url, {
+        headers: { Authorization: token },
+      });
+    } catch (err) {
+      // A network error (DNS, timeout, connection reset — `fetch` rejects
+      // rather than resolving with a status). Treated the same as a 5xx:
+      // retryable, since it is as likely transient.
+      if (isLastAttempt) {
+        // Re-thrown with path context (unlike the bare `err`) so a network
+        // failure is attributable to an endpoint in Sentry, same as the
+        // structured errors below — a bare `TypeError: fetch failed` groups
+        // every endpoint's exhausted-retry failures together.
+        throw new Error(
+          `Sportmonks network error after ${maxAttempts} attempts: ${path}${
+            err instanceof Error ? ` — ${err.message}` : ''
+          }`,
+          { cause: err },
+        );
+      }
+      await wait(RETRY_DELAYS_MS[attempt]);
+      continue;
     }
-    throw new Error(
-      `Sportmonks ${res.status}${detail ? ` ${detail}` : ''}: ${path}`,
-    );
-  }
-  const body = (await res.json()) as T;
 
-  // Reject on `data` being absent or nullish, never on `message` and never on
-  // plain truthiness.
-  //
-  // Not `message`: a collection endpoint with no matches returns `data: []`
-  // alongside the very same generic message, and that is a legitimate empty
-  // result callers handle — e.g. no upcoming fixture between seasons.
-  //
-  // Not truthiness: `data: []` is truthy, so the two predicates agree on the
-  // shapes seen so far, but truthiness encodes an assumption about what may sit
-  // in `data` rather than about whether the entity exists. Sportmonks does use
-  // `null` for an absent sub-object (a fixture with no assigned venue), so a
-  // nullish `data` is worth rejecting explicitly rather than letting it
-  // destructure to undefined and crash several frames later.
-  if (
-    typeof body !== 'object' ||
-    body === null ||
-    !('data' in body) ||
-    (body as { data: unknown }).data == null
-  ) {
-    const detail = (body as { message?: string } | null)?.message;
-    throw new SportmonksNotFoundError(path, detail);
-  }
+    if (!res.ok) {
+      let detail = '';
+      try {
+        const body = (await res.json()) as { message?: string };
+        detail = body.message ?? '';
+      } catch {
+        // body was not JSON
+      }
 
-  return body;
+      if (res.status >= 500 && !isLastAttempt) {
+        await wait(RETRY_DELAYS_MS[attempt]);
+        continue;
+      }
+      throw new SportmonksServerError(res.status, path, detail);
+    }
+
+    const body = (await res.json()) as T;
+
+    // Reject on `data` being absent or nullish, never on `message` and never on
+    // plain truthiness.
+    //
+    // Not `message`: a collection endpoint with no matches returns `data: []`
+    // alongside the very same generic message, and that is a legitimate empty
+    // result callers handle — e.g. no upcoming fixture between seasons.
+    //
+    // Not truthiness: `data: []` is truthy, so the two predicates agree on the
+    // shapes seen so far, but truthiness encodes an assumption about what may sit
+    // in `data` rather than about whether the entity exists. Sportmonks does use
+    // `null` for an absent sub-object (a fixture with no assigned venue), so a
+    // nullish `data` is worth rejecting explicitly rather than letting it
+    // destructure to undefined and crash several frames later.
+    if (
+      typeof body !== 'object' ||
+      body === null ||
+      !('data' in body) ||
+      (body as { data: unknown }).data == null
+    ) {
+      const detail = (body as { message?: string } | null)?.message;
+      throw new SportmonksNotFoundError(path, detail);
+    }
+
+    return body;
+  }
 }
