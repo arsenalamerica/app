@@ -73,7 +73,7 @@
     "@vitejs/plugin-react": "5.1.4",
     "@vitest/coverage-v8": "4.1.0",
     "happy-dom": "20.11.12",
-    "knip": "6.32.2",
+    "knip": "6.33.0",
     "lefthook": "2.1.10",
     "sass": "1.103.1",
     "svg-path-bbox": "2.1.0",
