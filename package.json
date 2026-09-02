@@ -74,7 +74,7 @@
     "@vitest/coverage-v8": "4.1.0",
     "happy-dom": "20.12.0",
     "knip": "6.33.0",
-    "lefthook": "2.1.10",
+    "lefthook": "2.1.12",
     "sass": "1.103.1",
     "svg-path-bbox": "2.1.0",
     "svgo": "4.1.0",
