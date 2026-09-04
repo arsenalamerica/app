@@ -3734,30 +3734,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@varlock/native-helper-darwin@npm:1.17.0":
-  version: 1.17.0
-  resolution: "@varlock/native-helper-darwin@npm:1.17.0"
+"@varlock/native-helper-darwin@npm:1.17.1":
+  version: 1.17.1
+  resolution: "@varlock/native-helper-darwin@npm:1.17.1"
   conditions: os=darwin
   languageName: node
   linkType: hard
 
-"@varlock/native-helper-linux-arm64@npm:1.17.0":
-  version: 1.17.0
-  resolution: "@varlock/native-helper-linux-arm64@npm:1.17.0"
+"@varlock/native-helper-linux-arm64@npm:1.17.1":
+  version: 1.17.1
+  resolution: "@varlock/native-helper-linux-arm64@npm:1.17.1"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
 
-"@varlock/native-helper-linux-x64@npm:1.17.0":
-  version: 1.17.0
-  resolution: "@varlock/native-helper-linux-x64@npm:1.17.0"
+"@varlock/native-helper-linux-x64@npm:1.17.1":
+  version: 1.17.1
+  resolution: "@varlock/native-helper-linux-x64@npm:1.17.1"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"@varlock/native-helper-win32-x64@npm:1.17.0":
-  version: 1.17.0
-  resolution: "@varlock/native-helper-win32-x64@npm:1.17.0"
+"@varlock/native-helper-win32-x64@npm:1.17.1":
+  version: 1.17.1
+  resolution: "@varlock/native-helper-win32-x64@npm:1.17.1"
   conditions: (os=win32 | os=linux)
   languageName: node
   linkType: hard
@@ -4611,7 +4611,7 @@ __metadata:
     svgo: "npm:4.1.0"
     svgpath: "npm:2.6.0"
     typescript: "npm:6.0.3"
-    varlock: "npm:1.17.0"
+    varlock: "npm:1.17.1"
     vercel: "npm:59.10.0"
     vite: "npm:7.3.5"
     vitest: "npm:4.1.0"
@@ -8870,14 +8870,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"varlock@npm:1.17.0":
-  version: 1.17.0
-  resolution: "varlock@npm:1.17.0"
+"varlock@npm:1.17.1":
+  version: 1.17.1
+  resolution: "varlock@npm:1.17.1"
   dependencies:
-    "@varlock/native-helper-darwin": "npm:1.17.0"
-    "@varlock/native-helper-linux-arm64": "npm:1.17.0"
-    "@varlock/native-helper-linux-x64": "npm:1.17.0"
-    "@varlock/native-helper-win32-x64": "npm:1.17.0"
+    "@varlock/native-helper-darwin": "npm:1.17.1"
+    "@varlock/native-helper-linux-arm64": "npm:1.17.1"
+    "@varlock/native-helper-linux-x64": "npm:1.17.1"
+    "@varlock/native-helper-win32-x64": "npm:1.17.1"
   dependenciesMeta:
     "@varlock/native-helper-darwin":
       optional: true
@@ -8889,7 +8889,7 @@ __metadata:
       optional: true
   bin:
     varlock: bin/cli.js
-  checksum: 10c0/f07cc59a744e6cf04663b26bdace09101f8800a4099302954bf77189940b7d1132d3dd10fbc59802b616281b909cf8345b6b71b7c7aca5640283f1bb54054866
+  checksum: 10c0/e113c7457ab0738f0b568678f2b47f5c394a9e4329c68b092310a097ec69ff65548be638a5deb4e85334c685c8cee281884483d1bffec3486e84305486811c77
   languageName: node
   linkType: hard
 
